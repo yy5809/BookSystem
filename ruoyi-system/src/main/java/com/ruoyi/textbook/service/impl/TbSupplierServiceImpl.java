@@ -24,12 +24,12 @@ public class TbSupplierServiceImpl implements ITbSupplierService {
 
     @Override
     public TbSupplier selectTbSupplierById(Long supplierId) {
-        return tbSupplierMapper.selectTbSupplierById(supplierId);
+        return tbSupplierMapper.selectBySupplierId(supplierId);
     }
 
     @Override
     public TbSupplier selectSupplierByUserId(Long userId) {
-        return tbSupplierMapper.selectSupplierByUserId(userId);
+        return tbSupplierMapper.selectByUserId(userId);
     }
 
     @Override
@@ -50,7 +50,11 @@ public class TbSupplierServiceImpl implements ITbSupplierService {
 
     @Override
     public int deleteTbSupplierByIds(Long[] supplierIds) {
-        return tbSupplierMapper.deleteTbSupplierByIds(supplierIds);
+        int count = 0;
+        for (Long supplierId : supplierIds) {
+            count += tbSupplierMapper.deleteTbSupplierById(supplierId);
+        }
+        return count;
     }
 
     @Override

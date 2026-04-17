@@ -9,6 +9,8 @@ public class TbStockLog extends BaseEntity {
 
     private Long logId;
     private Long bookId;
+    private String isbn;
+    private String bookName;
     private String bizType;
     private Integer changeNum;
     private Integer beforeStock;
@@ -22,6 +24,10 @@ public class TbStockLog extends BaseEntity {
     public void setLogId(Long logId) { this.logId = logId; }
     public Long getBookId() { return bookId; }
     public void setBookId(Long bookId) { this.bookId = bookId; }
+    public String getIsbn() { return isbn; }
+    public void setIsbn(String isbn) { this.isbn = isbn; }
+    public String getBookName() { return bookName; }
+    public void setBookName(String bookName) { this.bookName = bookName; }
     public String getBizType() { return bizType; }
     public void setBizType(String bizType) { this.bizType = bizType; }
     public Integer getChangeNum() { return changeNum; }
@@ -42,7 +48,7 @@ public class TbStockLog extends BaseEntity {
     @Override
     public String toString() {
         return new org.apache.commons.lang3.builder.ToStringBuilder(this, org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE)
-            .append("logId", logId).append("bookId", bookId)
+            .append("logId", logId).append("bookId", bookId).append("isbn", isbn)
             .append("bizType", bizType).append("changeNum", changeNum)
             .append("beforeStock", beforeStock).append("afterStock", afterStock)
             .append("refBizType", refBizType).append("refBizId", refBizId)

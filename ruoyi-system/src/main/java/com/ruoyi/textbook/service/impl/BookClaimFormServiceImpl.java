@@ -55,6 +55,7 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertBookClaimForm(BookClaimForm bookClaimForm) {
         String formNo = "CF" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + IdUtils.fastSimpleUUID().substring(0, 6);
         bookClaimForm.setFormNo(formNo);
@@ -81,6 +82,7 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteBookClaimFormByIds(Long[] formIds) {
         for (Long formId : formIds) {
             bookClaimFormDetailMapper.deleteBookClaimFormDetailByFormId(formId);

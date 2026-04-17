@@ -88,8 +88,7 @@ public class DataScopeAspect
      * @param userAlias 用户别名
      * @param permission 权限字符
      */
-    public static void dataScopeFilter(JoinPoint joinPoint, SysUser user, String deptAlias, String userAlias, String permission)
-    {
+    public static void dataScopeFilter(JoinPoint joinPoint, SysUser user, String deptAlias, String userAlias, String permission) {
         StringBuilder sqlString = new StringBuilder();
         List<String> conditions = new ArrayList<String>();
         List<String> scopeCustomIds = new ArrayList<String>();
@@ -100,8 +99,7 @@ public class DataScopeAspect
             }
         });
 
-        for (SysRole role : user.getRoles())
-        {
+        for (SysRole role : user.getRoles()) {
             String dataScope = role.getDataScope();
             if (conditions.contains(dataScope) || StringUtils.equals(role.getStatus(), UserConstants.ROLE_DISABLE))
             {
@@ -141,7 +139,8 @@ public class DataScopeAspect
             {
                 if (StringUtils.isNotBlank(userAlias))
                 {
-                    sqlString.append(StringUtils.format(" OR {}.user_id = {} ", userAlias, user.getUserId()));
+                    // 支持自定义用户字段名，如teacher_id
+                    sqlString.append(StringUtils.format(" OR {} = {} ", userAlias, user.getUserId()));
                 }
                 else
                 {

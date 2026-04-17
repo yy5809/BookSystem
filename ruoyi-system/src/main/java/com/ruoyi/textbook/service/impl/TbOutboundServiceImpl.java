@@ -60,16 +60,57 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertTbOutbound(TbOutbound tbOutbound) {
+        log.info("【出库处理】开始处理教材出库, bookId={}, 数量={}", tbOutbound.getBookId(), tbOutbound.getOutNum());
+        
         tbOutbound.setCreateTime(DateUtils.getNowDate());
         tbOutbound.setUpdateTime(DateUtils.getNowDate());
         if (tbOutbound.getOutboundNo() == null || tbOutbound.getOutboundNo().isEmpty()) {
             tbOutbound.setOutboundNo("OUT" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + IdUtils.fastSimpleUUID().substring(0, 6));
         }
+        
         int result = tbOutboundMapper.insertTbOutbound(tbOutbound);
-        if (result > 0 && tbOutbound.getBookId() != null && tbOutbound.getOutNum() != null) {
-            try { tbInventoryMapper.updateInventoryQuantity(tbOutbound.getBookId(), -tbOutbound.getOutNum()); } catch (Exception ignored) {}
+        if (result <= 0) {
+            throw new ServiceException("创建出库记录失败");
         }
+        
+        if (tbOutbound.getBookId() != null && tbOutbound.getOutNum() != null) {
+            TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(tbOutbound.getBookId());
+            if (inventory == null) {
+                throw new ServiceException("教材库存记录不存在，bookId=" + tbOutbound.getBookId());
+            }
+            
+            Integer beforeStock = inventory.getStockNum();
+            if (beforeStock < tbOutbound.getOutNum()) {
+                throw new ServiceException("库存不足，当前库存：" + beforeStock + "，需求：" + tbOutbound.getOutNum());
+            }
+            
+            int rowsAffected = tbInventoryMapper.updateInventoryQuantityWithCheck(
+                    tbOutbound.getBookId(),
+                    beforeStock,
+                    -tbOutbound.getOutNum()
+            );
+            if (rowsAffected <= 0) {
+                throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
+            }
+            
+            TbStockLog stockLog = new TbStockLog();
+            stockLog.setBookId(tbOutbound.getBookId());
+            stockLog.setBizType("3");
+            stockLog.setChangeNum(-tbOutbound.getOutNum());
+            stockLog.setBeforeStock(beforeStock);
+            stockLog.setAfterStock(beforeStock - tbOutbound.getOutNum());
+            stockLog.setOperatorId(tbOutbound.getOperatorId());
+            stockLog.setOperatorName(tbOutbound.getOperatorName());
+            stockLog.setRefBizType("OUTBOUND");
+            stockLog.setRefBizId(tbOutbound.getOutId());
+            stockLog.setRemark("出库，出库单号：" + tbOutbound.getOutboundNo());
+            stockLogService.insert(stockLog);
+            log.info("【出库处理】已生成库存流水记录");
+        }
+        
+        log.info("【出库处理】完成! 出库单号={}, 教材={}, 数量={}", tbOutbound.getOutboundNo(), tbOutbound.getBookName(), tbOutbound.getOutNum());
         return result;
     }
 
@@ -84,7 +125,12 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
         TbOutbound outbound = tbOutboundMapper.selectTbOutboundById(outboundId);
         int result = tbOutboundMapper.deleteTbOutboundById(outboundId);
         if (result > 0 && outbound != null && outbound.getBookId() != null && outbound.getOutNum() != null) {
-            try { tbInventoryMapper.updateInventoryQuantity(outbound.getBookId(), outbound.getOutNum()); } catch (Exception ignored) {}
+            try {
+                tbInventoryMapper.updateInventoryQuantity(outbound.getBookId(), outbound.getOutNum());
+            } catch (Exception e) {
+                log.error("【出库删除错误】库存恢复失败, bookId={}, outNum={}, error={}", outbound.getBookId(), outbound.getOutNum(), e.getMessage());
+                throw new ServiceException("库存恢复失败，请联系管理员处理");
+            }
         }
         return result;
     }
@@ -123,19 +169,18 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
         int successCount = 0;
         int failCount = 0;
 
+        List<String> failMessages = new ArrayList<>();
+
         for (TbPurchaseDetail detail : details) {
             TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(detail.getBookId());
             if (inventory == null) {
-                log.warn("教材库存不存在: bookId={}, 书名={}", detail.getBookId(), detail.getBookName());
-                failCount++;
+                failMessages.add("教材《" + detail.getBookName() + "》库存记录不存在");
                 continue;
             }
 
             Integer currentStock = inventory.getStockNum();
             if (currentStock < detail.getQuantity()) {
-                log.warn("库存不足: bookId={}, 书名={}, 当前库存={}, 需求={}",
-                        detail.getBookId(), detail.getBookName(), currentStock, detail.getQuantity());
-                failCount++;
+                failMessages.add("教材《" + detail.getBookName() + "》库存不足（当前:" + currentStock + ",需求:" + detail.getQuantity() + "）");
                 continue;
             }
 
@@ -206,7 +251,10 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
 
         if (failCount > 0) {
             log.warn("【出库处理】完成! 成功={}条, 失败={}条(库存不足)", successCount, failCount);
-            throw new ServiceException("部分教材出库失败（库存不足），成功" + successCount + "条，失败" + failCount + "条");
+        }
+
+        if (successCount == 0 && !failMessages.isEmpty()) {
+            throw new ServiceException("所有教材出库失败：" + String.join("；", failMessages));
         }
 
         log.info("【出库处理】全部成功! 共处理{}本教材, 已生成流水和通知", successCount);

@@ -98,4 +98,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
     
+    <!-- 供应商通知相关查询 -->
+    <select id="selectSupplierNotices" parameterType="Long" resultType="java.util.Map">
+        select notice_id as noticeId, notice_title as title, notice_content as content, 
+               create_time as createTime, read_status as status
+        from sys_notice
+        where target_user_id = #{supplierId}
+        order by create_time desc
+    </select>
+    
+    <select id="selectSupplierNoticeDetail" parameterType="java.util.Map" resultType="java.util.Map">
+        select notice_id as noticeId, notice_title as title, notice_content as content, 
+               create_time as createTime, read_status as status
+        from sys_notice
+        where notice_id = #{noticeId} and target_user_id = #{supplierId}
+    </select>
+    
+    <update id="updateNoticeReadStatus" parameterType="java.util.Map">
+        update sys_notice
+        set read_status = '1'
+        where notice_id = #{noticeId} and target_user_id = #{supplierId}
+    </update>
+    
+    <update id="updateAllNoticeReadStatus" parameterType="Long">
+        update sys_notice
+        set read_status = '1'
+        where target_user_id = #{supplierId} and read_status = '0'
+    </update>
+    
+    <select id="countUnreadNoticesBySupplierId" parameterType="Long" resultType="Integer">
+        select count(*) from sys_notice
+        where target_user_id = #{supplierId} and read_status = '0'
+    </select>
+    
 </mapper>

@@ -1,7 +1,7 @@
-package com.ruoyi.textbook.mapper;
+package com.ruoyi.system.textbook.mapper;
 
 import java.util.List;
-import com.ruoyi.textbook.domain.BookPersonalApply;
+import com.ruoyi.system.textbook.domain.BookPersonalApply;
 
 public interface BookPersonalApplyMapper {
     public BookPersonalApply selectBookPersonalApplyById(Long applyId);

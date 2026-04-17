@@ -84,4 +84,20 @@ public interface TbPurchaseMapper
     public List<TbPurchaseDetail> selectTbPurchaseDetailListByPurchaseIds(List<Long> purchaseIds);
 
     public TbPurchase selectByFileHash(String fileHash);
+
+    /**
+     * 查询供应商的采购单列表
+     * 
+     * @param tbPurchase 采购单信息
+     * @return 采购单集合
+     */
+    public List<TbPurchase> selectSupplierPurchases(TbPurchase tbPurchase);
+
+    /**
+     * 统计供应商待确认发货的采购单数
+     * 
+     * @param supplierId 供应商ID
+     * @return 待确认发货的采购单数
+     */
+    public int countPendingShipmentBySupplierId(Long supplierId);
 }

@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.system.domain.SysNotice;
@@ -88,5 +89,35 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     public int deleteNoticeByIds(Long[] noticeIds)
     {
         return noticeMapper.deleteNoticeByIds(noticeIds);
+    }
+
+    @Override
+    public List<Map<String, Object>> selectSupplierNotices(Long supplierId)
+    {
+        return noticeMapper.selectSupplierNotices(supplierId);
+    }
+
+    @Override
+    public Map<String, Object> selectSupplierNoticeDetail(Long noticeId, Long supplierId)
+    {
+        return noticeMapper.selectSupplierNoticeDetail(noticeId, supplierId);
+    }
+
+    @Override
+    public int updateNoticeReadStatus(Long noticeId, Long supplierId)
+    {
+        return noticeMapper.updateNoticeReadStatus(noticeId, supplierId);
+    }
+
+    @Override
+    public int updateAllNoticeReadStatus(Long supplierId)
+    {
+        return noticeMapper.updateAllNoticeReadStatus(supplierId);
+    }
+
+    @Override
+    public int countUnreadNoticesBySupplierId(Long supplierId)
+    {
+        return noticeMapper.countUnreadNoticesBySupplierId(supplierId);
     }
 }

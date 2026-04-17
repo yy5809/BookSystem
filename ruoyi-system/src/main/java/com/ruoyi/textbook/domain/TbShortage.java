@@ -22,7 +22,10 @@ public class TbShortage extends BaseEntity {
     @Excel(name = "登记人ID")
     private Long registerId;
 
-    @Excel(name = "处理状态", readConverterExp = "0=待采购,1=已采购")
+    @Excel(name = "登记人姓名")
+    private String registerName;
+
+    @Excel(name = "处理状态", readConverterExp = "0=未处理,1=已纳入采购,2=已到货,3=已完成")
     private String handleStatus;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -57,6 +60,8 @@ public class TbShortage extends BaseEntity {
     public void setUrgency(String urgency) { this.urgency = urgency; }
     public Long getRegisterId() { return registerId; }
     public void setRegisterId(Long registerId) { this.registerId = registerId; }
+    public String getRegisterName() { return registerName; }
+    public void setRegisterName(String registerName) { this.registerName = registerName; }
     public String getHandleStatus() { return handleStatus; }
     public void setHandleStatus(String handleStatus) { this.handleStatus = handleStatus; }
     public Date getHandleTime() { return handleTime; }

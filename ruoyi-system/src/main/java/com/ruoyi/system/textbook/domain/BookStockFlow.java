@@ -1,4 +1,4 @@
-package com.ruoyi.textbook.domain;
+package com.ruoyi.system.textbook.domain;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -28,6 +28,9 @@ public class BookStockFlow extends BaseEntity {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date operateTime;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
 
     public Long getFlowId() {
         return flowId;
@@ -107,6 +110,14 @@ public class BookStockFlow extends BaseEntity {
 
     public void setOperateTime(Date operateTime) {
         this.operateTime = operateTime;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     @Override

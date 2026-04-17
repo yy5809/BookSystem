@@ -23,6 +23,7 @@ public class TbSupplier extends BaseEntity {
     private String taxNumber;
     private String status;
     private String delFlag;
+    private Long userId;
 
     public Long getSupplierId() { return supplierId; }
     public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
@@ -66,6 +67,9 @@ public class TbSupplier extends BaseEntity {
     public String getDelFlag() { return delFlag; }
     public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
 
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
+
     @Override
     public String toString() {
         return "TbSupplier{" +
@@ -73,6 +77,7 @@ public class TbSupplier extends BaseEntity {
                 ", supplierCode='" + supplierCode + '\'' +
                 ", supplierName='" + supplierName + '\'' +
                 ", contactPerson='" + contactPerson + '\'' +
+                ", userId=" + userId +
                 ", discountRate=" + discountRate +
                 '}';
     }

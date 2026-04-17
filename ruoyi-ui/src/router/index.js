@@ -93,6 +93,193 @@ export const constantRoutes = [
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
   {
+    path: '/textbook/teacher',
+    component: Layout,
+    redirect: '/textbook/teacher/index',
+    meta: {
+      title: '教师管理',
+      icon: 'education',
+      roles: ['teacher']
+    },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/textbook/dashboard/index'),
+        name: 'TeacherHome',
+        meta: {
+          title: '教师首页',
+          icon: 'dashboard',
+          roles: ['teacher']
+        }
+      },
+      {
+        path: 'bookQuery',
+        component: () => import('@/views/textbook/bookQuery/index'),
+        name: 'BookQuery',
+        meta: {
+          title: '教材信息查询',
+          icon: 'search',
+          roles: ['teacher']
+        }
+      },
+      {
+        path: 'personalApply',
+        component: () => import('@/views/textbook/personalApply/index'),
+        name: 'PersonalApply',
+        meta: {
+          title: '个人领书管理',
+          icon: 'document',
+          roles: ['teacher']
+        }
+      },
+      {
+        path: 'registerShortage',
+        component: () => import('@/views/textbook/registerShortage/index'),
+        name: 'RegisterShortage',
+        meta: {
+          title: '缺书登记',
+          icon: 'warning',
+          roles: ['teacher']
+        }
+      },
+      {
+        path: 'notice',
+        component: () => import('@/views/textbook/myNotice/index'),
+        name: 'TeacherNotice',
+        meta: {
+          title: '通知中心',
+          icon: 'message',
+          roles: ['teacher']
+        }
+      }
+    ]
+  },
+  {
+    path: '/textbook/warehouse',
+    component: Layout,
+    redirect: '/textbook/warehouse/index',
+    meta: {
+      title: '库管员管理',
+      icon: 'inventory',
+      roles: ['warehouse']
+    },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/textbook/dashboard/index'),
+        name: 'WarehouseHome',
+        meta: {
+          title: '库管员首页',
+          icon: 'dashboard',
+          roles: ['warehouse']
+        }
+      },
+      {
+        path: 'bookManage',
+        component: () => import('@/views/textbook/bookManage/index'),
+        name: 'BookManage',
+        meta: {
+          title: '教材信息管理',
+          icon: 'book',
+          roles: ['warehouse']
+        }
+      },
+      {
+        path: 'purchase',
+        component: () => import('@/views/textbook/purchase/index'),
+        name: 'PurchaseManage',
+        meta: {
+          title: '采购管理',
+          icon: 'shopping',
+          roles: ['warehouse']
+        }
+      },
+      {
+        path: 'inbound',
+        component: () => import('@/views/textbook/inbound/index'),
+        name: 'InboundManage',
+        meta: {
+          title: '入库管理',
+          icon: 'inbox',
+          roles: ['warehouse']
+        }
+      },
+      {
+        path: 'noticeManage',
+        component: () => import('@/views/textbook/noticeManage/index'),
+        name: 'NoticeManage',
+        meta: {
+          title: '班级领书管理',
+          icon: 'list',
+          roles: ['warehouse']
+        }
+      },
+
+      {
+        path: 'notice',
+        component: () => import('@/views/textbook/warehouseNotice/index'),
+        name: 'WarehouseNotice',
+        meta: {
+          title: '通知中心',
+          icon: 'message',
+          roles: ['warehouse']
+        }
+      }
+    ]
+  },
+  {
+    path: '/textbook/supplier',
+    component: Layout,
+    redirect: '/textbook/supplier/index',
+    meta: {
+      title: '供应商管理',
+      icon: 'shopping',
+      roles: ['supplier']
+    },
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/textbook/supplier/index'),
+        name: 'SupplierHome',
+        meta: {
+          title: '供应商首页',
+          icon: 'dashboard',
+          roles: ['supplier']
+        }
+      },
+      {
+        path: 'purchase',
+        component: () => import('@/views/textbook/supplier/purchase/index'),
+        name: 'SupplierPurchase',
+        meta: {
+          title: '采购单管理',
+          icon: 'list',
+          roles: ['supplier']
+        }
+      },
+      {
+        path: 'purchase/:id',
+        component: () => import('@/views/textbook/supplier/purchase/detail'),
+        name: 'SupplierPurchaseDetail',
+        meta: {
+          title: '采购单详情',
+          hidden: true,
+          roles: ['supplier']
+        }
+      },
+      {
+        path: 'notice',
+        component: () => import('@/views/textbook/supplier/notice/index'),
+        name: 'SupplierNotice',
+        meta: {
+          title: '通知中心',
+          icon: 'message',
+          roles: ['supplier']
+        }
+      }
+    ]
+  },
+  {
     path: '/system/user-auth',
     component: Layout,
     hidden: true,

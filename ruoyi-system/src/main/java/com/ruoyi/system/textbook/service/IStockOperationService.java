@@ -1,4 +1,4 @@
-package com.ruoyi.textbook.service;
+package com.ruoyi.system.textbook.service;
 
 public interface IStockOperationService {
     boolean deductStock(Long bookId, int deductQty, String businessType, String businessNo, String operator);

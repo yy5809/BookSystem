@@ -10,6 +10,7 @@ import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.service.ITbPurchaseService;
+import com.ruoyi.textbook.service.NoticeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,9 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
 
     @Autowired
     private TbShortageMapper tbShortageMapper;
+
+    @Autowired
+    private NoticeService noticeService;
 
     /**
      * 查询购书信息
@@ -70,7 +74,7 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
      * @return 结果
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int insertTbPurchase(TbPurchase tbPurchase, List<TbPurchaseDetail> details)
     {
         String purchaseNo = "CG" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + String.format("%03d", System.currentTimeMillis() % 1000);
@@ -150,7 +154,7 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
      * @return 结果
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int auditTbPurchase(Long purchaseId, String status)
     {
         TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
@@ -162,7 +166,32 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
         purchase.setUpdateTime(DateUtils.getNowDate());
         int result = tbPurchaseMapper.updateTbPurchase(purchase);
 
-        // 审核通过，检查库存
+        if ("1".equals(status) && purchase.getUserId() != null) {
+            List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(purchaseId);
+            StringBuilder bookNames = new StringBuilder();
+            if (details != null) {
+                for (TbPurchaseDetail d : details) {
+                    if (bookNames.length() > 0) bookNames.append("、");
+                    bookNames.append(d.getBookName());
+                }
+            }
+            noticeService.sendOrderApproveNotice(
+                    purchase.getUserId(),
+                    bookNames.toString(),
+                    "1",
+                    "您的购书申请已审核通过",
+                    purchaseId
+            );
+        } else if ("2".equals(status) && purchase.getUserId() != null) {
+            noticeService.sendOrderApproveNotice(
+                    purchase.getUserId(),
+                    purchase.getRejectReason() != null ? purchase.getRejectReason() : "",
+                    "2",
+                    "您的购书申请已被驳回",
+                    purchaseId
+            );
+        }
+
         if (result > 0 && "1".equals(status)) {
             List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(purchaseId);
             for (TbPurchaseDetail detail : details) {

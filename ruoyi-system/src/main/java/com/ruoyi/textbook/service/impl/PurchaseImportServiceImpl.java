@@ -12,6 +12,7 @@ import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.service.IPurchaseImportService;
+import com.ruoyi.textbook.service.NoticeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +35,20 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
     @Autowired
     private TbShortageMapper tbShortageMapper;
 
+    @Autowired
+    private NoticeService noticeService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> importFromExcel(List<TbPurchaseImportDTO> dataList, Long operatorId, String operatorName, String fileHash) {
         log.info("【Excel导入】开始处理, 总行数={}, 操作人={}", dataList.size(), operatorName);
+
+        if (fileHash != null && !fileHash.isEmpty()) {
+            TbPurchase existing = tbPurchaseMapper.selectByFileHash(fileHash);
+            if (existing != null) {
+                throw new ServiceException("该文件已导入过，采购单号：" + existing.getPurchaseNo() + "，请勿重复导入");
+            }
+        }
 
         List<TbPurchaseImportDTO> successList = new ArrayList<>();
         List<TbPurchaseImportDTO> failList = new ArrayList<>();
@@ -113,7 +124,16 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
 
         log.info("【Excel导入】完成! 成功={}, 失败={}, 采购单号={}", successList.size() - failList.size() + getOriginalFailCount(failList, dataList.size()), failList.size(), purchaseNo);
 
-        return buildResult(dataList.size(), successList.size() - countNewFailures(failList, successList.size()), failList, purchaseNo);
+        int actualSuccess = successList.size() - countNewFailures(failList, successList.size());
+        if (actualSuccess > 0) {
+            try {
+                noticeService.sendPurchaseCreateNotice(purchase.getBuyId(), purchaseNo, actualSuccess);
+            } catch (Exception e) {
+                log.warn("【Excel导入】发送采购单创建通知失败: {}", e.getMessage());
+            }
+        }
+
+        return buildResult(dataList.size(), actualSuccess, failList, purchaseNo);
     }
 
     private void validateRow(TbPurchaseImportDTO dto) {

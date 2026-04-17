@@ -36,6 +36,18 @@ public class BookClaimFormDetail extends BaseEntity {
     @Excel(name = "实发数量")
     private Integer issuedQty;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "创建时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
+
+    private Long collegeId;
+
+    private Long majorId;
+
+    private Long classId;
+
+    private String className;
+
     public Long getDetailId() { return detailId; }
     public void setDetailId(Long detailId) { this.detailId = detailId; }
     public Long getFormId() { return formId; }
@@ -56,6 +68,17 @@ public class BookClaimFormDetail extends BaseEntity {
     public void setPlannedQty(Integer plannedQty) { this.plannedQty = plannedQty; }
     public Integer getIssuedQty() { return issuedQty; }
     public void setIssuedQty(Integer issuedQty) { this.issuedQty = issuedQty; }
+    public Date getCreateTime() { return createTime; }
+    public void setCreateTime(Date createTime) { this.createTime = createTime; }
+
+    public Long getCollegeId() { return collegeId; }
+    public void setCollegeId(Long collegeId) { this.collegeId = collegeId; }
+    public Long getMajorId() { return majorId; }
+    public void setMajorId(Long majorId) { this.majorId = majorId; }
+    public Long getClassId() { return classId; }
+    public void setClassId(Long classId) { this.classId = classId; }
+    public String getClassName() { return className; }
+    public void setClassName(String className) { this.className = className; }
 
     @Override
     public String toString() {

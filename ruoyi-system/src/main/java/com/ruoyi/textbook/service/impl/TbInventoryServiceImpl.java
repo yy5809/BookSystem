@@ -59,8 +59,22 @@ public class TbInventoryServiceImpl implements ITbInventoryService
     @Override
     public List<TbInventory> selectWarningList()
     {
-        // 暂时返回空列表，后续可以根据实际需求实现
-        return tbInventoryMapper.selectTbInventoryList(new TbInventory());
+        TbInventory inventory = new TbInventory();
+        inventory.setStockStatus("warning");
+        List<TbInventory> list = tbInventoryMapper.selectTbInventoryList(inventory);
+        // 确保返回的列表包含所有预警和短缺的库存
+        List<TbInventory> allInventory = tbInventoryMapper.selectTbInventoryList(new TbInventory());
+        List<TbInventory> warningList = new java.util.ArrayList<>();
+        for (TbInventory item : allInventory) {
+            if (item.getStockNum() <= 0) {
+                item.setStockStatus("shortage");
+                warningList.add(item);
+            } else if (item.getStockNum() <= item.getWarningNum()) {
+                item.setStockStatus("warning");
+                warningList.add(item);
+            }
+        }
+        return warningList;
     }
 
     /**

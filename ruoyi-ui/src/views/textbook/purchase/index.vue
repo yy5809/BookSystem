@@ -121,9 +121,9 @@
             <el-table-column label="数量" prop="quantity" width="70" align="center"/>
             <el-table-column label="学院" prop="college" width="120" show-overflow-tooltip/>
             <el-table-column label="专业" prop="major" width="120" show-overflow-tooltip/>
-            <el-table-column label="失败原因" prop="errorReason" min-width="220" align="left">
+            <el-table-column label="失败原因" prop="errorMsg" min-width="220" align="left">
               <template slot-scope="scope">
-                <el-tag size="mini" type="danger" effect="plain">{{ scope.row.errorReason }}</el-tag>
+                <el-tag size="mini" type="danger" effect="plain">{{ scope.row.errorMsg }}</el-tag>
               </template>
             </el-table-column>
           </el-table>

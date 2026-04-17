@@ -73,7 +73,7 @@
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog :title="dialogTitle" :visible.sync="open" width="600px" append-to-body :close-on-click-modal="false">
+    <el-dialog :title="dialogTitle" :visible.sync="open" width="800px" append-to-body :close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-row>
           <el-col :span="12">
@@ -102,10 +102,66 @@
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="可选填写"/>
         </el-form-item>
+        
+        <!-- 领书明细 -->
+        <el-form-item label="领书明细">
+          <el-button type="primary" size="small" @click="addDetail" style="margin-bottom: 10px">
+            <i class="el-icon-plus"></i> 添加领书明细
+          </el-button>
+          <el-table v-if="form.details && form.details.length > 0" :data="form.details" border stripe style="margin-bottom: 10px">
+            <el-table-column label="学院" prop="collegeName" width="120"/>
+            <el-table-column label="专业" prop="majorName" width="120"/>
+            <el-table-column label="班级" prop="className" width="120"/>
+            <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip/>
+            <el-table-column label="ISBN" prop="isbn" width="150"/>
+            <el-table-column label="应发数量" prop="plannedQty" width="100"/>
+            <el-table-column label="操作" width="100" align="center">
+              <template slot-scope="scope">
+                <el-button type="danger" size="mini" @click="removeDetail(scope.$index)">
+                  <i class="el-icon-delete"></i> 删除
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-alert v-else type="info" title="请添加领书明细" :closable="false"/>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+    
+    <!-- 添加领书明细弹窗 -->
+    <el-dialog title="添加领书明细" :visible.sync="detailDialogVisible" width="700px" append-to-body>
+      <el-form ref="detailForm" :model="detailForm" :rules="detailRules" label-width="100px">
+        <el-form-item label="学院" prop="collegeId">
+          <el-select v-model="detailForm.collegeId" placeholder="选择学院" style="width: 100%" @change="handleCollegeChange">
+            <el-option v-for="college in colleges" :key="college.id" :label="college.name" :value="college.id"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="专业" prop="majorId">
+          <el-select v-model="detailForm.majorId" placeholder="选择专业" style="width: 100%" :disabled="!detailForm.collegeId" @change="handleMajorChange">
+            <el-option v-for="major in majors" :key="major.id" :label="major.name" :value="major.id"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="班级" prop="classId">
+          <el-select v-model="detailForm.classId" placeholder="选择班级" style="width: 100%" :disabled="!detailForm.majorId">
+            <el-option v-for="cls in classes" :key="cls.id" :label="cls.name" :value="cls.id"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="教材" prop="textbookId">
+          <el-select v-model="detailForm.textbookId" placeholder="选择教材" style="width: 100%" filterable>
+            <el-option v-for="book in books" :key="book.bookId" :label="book.bookName + ' (' + book.isbn + ')'" :value="book.bookId"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="应发数量" prop="plannedQty">
+          <el-input-number v-model="detailForm.plannedQty" :min="1" :max="999" style="width: 100%"/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="confirmAddDetail">确 定</el-button>
+        <el-button @click="detailDialogVisible = false">取 消</el-button>
       </div>
     </el-dialog>
 
@@ -124,9 +180,10 @@
         </el-table-column>
         <el-table-column label="领书人" prop="receiverName" width="80" align="center"/>
         <el-table-column label="出库时间" prop="issueTime" width="160" align="center"/>
-        <el-table-column label="操作" fixed="right" align="center" width="100">
+        <el-table-column label="操作" fixed="right" align="center" width="150">
           <template slot-scope="scope">
             <el-button size="mini" type="text" icon="el-icon-view" @click="handleViewDetail(scope.row)">详情</el-button>
+            <el-button size="mini" type="primary" icon="el-icon-printer" @click="handlePrint(scope.row)">打印</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -135,7 +192,7 @@
 </template>
 
 <script>
-import { listNotice, getNotice, addNotice, updateNotice, publishNotice, delNotice, getClaimForms } from '@/api/textbook/noticeManage'
+import { listNotice, getNotice, addNotice, updateNotice, publishNotice, delNotice, getClaimForms, getBooks, getColleges, getMajors, getClasses } from '@/api/textbook/noticeManage'
 
 export default {
   name: 'BookNotice',
@@ -152,7 +209,9 @@ export default {
       },
       open: false,
       dialogTitle: '',
-      form: {},
+      form: {
+        details: []
+      },
       rules: {
         semester: [{ required: true, message: '学期不能为空', trigger: 'blur' }],
         pickupStart: [{ required: true, message: '开始时间不能为空', trigger: 'change' }],
@@ -161,13 +220,43 @@ export default {
       },
       formsDialogVisible: false,
       claimFormList: [],
-      currentNotice: {}
+      currentNotice: {},
+      detailDialogVisible: false,
+      detailForm: {
+        collegeId: undefined,
+        majorId: undefined,
+        classId: undefined,
+        textbookId: undefined,
+        plannedQty: 1
+      },
+      detailRules: {
+        collegeId: [{ required: true, message: '请选择学院', trigger: 'change' }],
+        majorId: [{ required: true, message: '请选择专业', trigger: 'change' }],
+        classId: [{ required: true, message: '请选择班级', trigger: 'change' }],
+        textbookId: [{ required: true, message: '请选择教材', trigger: 'change' }],
+        plannedQty: [{ required: true, message: '请输入应发数量', trigger: 'blur' }]
+      },
+      books: [],
+      colleges: [],
+      majors: [],
+      classes: []
     }
   },
   created() {
     this.getList()
+    this.initData()
   },
   methods: {
+    initData() {
+      // 加载教材列表
+      getBooks().then(response => {
+        this.books = response.data || []
+      })
+      // 加载学院列表
+      getColleges().then(response => {
+        this.colleges = response.data || []
+      })
+    },
     getList() {
       this.loading = true
       listNotice(this.queryParams).then(response => {
@@ -228,9 +317,83 @@ export default {
         pickupStart: undefined,
         pickupEnd: undefined,
         pickupLocation: undefined,
-        remark: undefined
+        remark: undefined,
+        details: []
       }
       this.resetForm('form')
+    },
+    // 学院变化时加载专业列表
+    handleCollegeChange() {
+      if (this.detailForm.collegeId) {
+        getMajors(this.detailForm.collegeId).then(response => {
+          this.majors = response.data || []
+          this.detailForm.majorId = undefined
+          this.detailForm.classId = undefined
+          this.classes = []
+        })
+      } else {
+        this.majors = []
+        this.detailForm.majorId = undefined
+        this.detailForm.classId = undefined
+        this.classes = []
+      }
+    },
+    // 专业变化时加载班级列表
+    handleMajorChange() {
+      if (this.detailForm.majorId) {
+        getClasses(this.detailForm.majorId).then(response => {
+          this.classes = response.data || []
+          this.detailForm.classId = undefined
+        })
+      } else {
+        this.classes = []
+        this.detailForm.classId = undefined
+      }
+    },
+    // 添加领书明细
+    addDetail() {
+      this.detailForm = {
+        collegeId: undefined,
+        majorId: undefined,
+        classId: undefined,
+        textbookId: undefined,
+        plannedQty: 1
+      }
+      this.detailDialogVisible = true
+    },
+    // 确认添加领书明细
+    confirmAddDetail() {
+      this.$refs['detailForm'].validate(valid => {
+        if (valid) {
+          const college = this.colleges.find(c => c.id === this.detailForm.collegeId)
+          const major = this.majors.find(m => m.id === this.detailForm.majorId)
+          const cls = this.classes.find(c => c.id === this.detailForm.classId)
+          const book = this.books.find(b => b.bookId === this.detailForm.textbookId)
+          
+          if (college && major && cls && book) {
+            const detail = {
+              collegeId: this.detailForm.collegeId,
+              majorId: this.detailForm.majorId,
+              classId: this.detailForm.classId,
+              textbookId: this.detailForm.textbookId,
+              plannedQty: this.detailForm.plannedQty,
+              collegeName: college.name,
+              majorName: major.name,
+              className: cls.name,
+              bookName: book.bookName,
+              isbn: book.isbn
+            }
+            this.form.details.push(detail)
+            this.detailDialogVisible = false
+          } else {
+            this.$modal.msgError('数据加载失败，请重试')
+          }
+        }
+      })
+    },
+    // 删除领书明细
+    removeDetail(index) {
+      this.form.details.splice(index, 1)
     },
     handlePublish(row) {
       this.$confirm('确认发布该领书通知？', '警告', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }).then(() => {
@@ -287,6 +450,17 @@ export default {
       if (progress >= 100) return 'success'
       if (progress > 0) return ''
       return undefined
+    },
+    // 打印领书单
+    handlePrint(row) {
+      this.$confirm('确认打印该领书单？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }).then(() => {
+        // 这里实现打印功能
+        this.$modal.msgSuccess('打印功能已触发，实际项目中可调用打印API')
+      }).catch(() => {})
     }
   }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.ruoyi.common.annotation.DataScope;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -26,6 +27,7 @@ public class TbPurchaseController extends BaseController {
     private ITbBuyService tbBuyService;
 
     @PreAuthorize("@ss.hasPermi('textbook:purchase:list')")
+    @DataScope(userAlias = "user_id")
     @GetMapping("/list")
     public TableDataInfo list(TbPurchase query) {
         startPage();
@@ -90,6 +92,12 @@ public class TbPurchaseController extends BaseController {
     public AjaxResult remove(@PathVariable("id") Long buyId) {
         TbPurchase order = tbBuyService.getById(buyId);
         if (order == null) { return AjaxResult.error("订单不存在"); }
+        if ("3".equals(order.getPurchaseStatus())) {
+            return AjaxResult.error("该采购单已入库，禁止删除。已入库的单据不可删除以保证数据完整性。");
+        }
+        if ("2".equals(order.getPurchaseStatus())) {
+            return AjaxResult.error("该采购单已到货，禁止删除。请先完成入库流程。");
+        }
         if ("1".equals(order.getAuditStatus()) && "1".equals(order.getReceiveStatus())) {
             return AjaxResult.error("该订单已完成领书，禁止删除。已完成领书的单据不可删除以保证数据完整性。");
         }

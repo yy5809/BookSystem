@@ -436,7 +436,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
                     errorInfo.put("quantity", dto.getQuantity());
                     errorInfo.put("college", dto.getCollege());
                     errorInfo.put("major", dto.getMajor());
-                    errorInfo.put("errorReason", rowError.toString().replaceAll("；$", ""));
+                    errorInfo.put("errorMsg", rowError.toString().replaceAll("；$", ""));
                     errorList.add(errorInfo);
                     log.warn("第{}行校验失败: {}", dataRowIndex, rowError);
                 } else {

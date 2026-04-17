@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class NoticeService {
@@ -178,5 +179,47 @@ public class NoticeService {
         notice.setNoticeContent(content);
 
         sysNoticeService.insertNotice(notice);
+    }
+
+    // 发送发货通知给库管员
+    public void sendShipmentNotice(Long purchaseId, String purchaseNo, String logisticsCompany, String logisticsNo) {
+        SysNotice notice = new SysNotice();
+        notice.setNoticeTitle("供应商发货通知");
+        notice.setNoticeType("1");
+        notice.setStatus("0");
+        notice.setBizId(purchaseId);
+        notice.setBizType("9");
+        notice.setReadStatus("0");
+        notice.setUserType("2");
+
+        String content = "【供应商发货】\n采购单号：" + purchaseNo + "\n物流公司：" + logisticsCompany + "\n物流单号：" + logisticsNo + "\n\n请及时确认到货。";
+        notice.setNoticeContent(content);
+
+        sysNoticeService.insertNotice(notice);
+    }
+
+    // 获取供应商通知列表
+    public List<Map<String, Object>> getSupplierNotices(Long supplierId) {
+        return sysNoticeService.selectSupplierNotices(supplierId);
+    }
+
+    // 获取供应商通知详情
+    public Map<String, Object> getSupplierNoticeDetail(Long noticeId, Long supplierId) {
+        return sysNoticeService.selectSupplierNoticeDetail(noticeId, supplierId);
+    }
+
+    // 标记通知为已读
+    public void markNoticeAsRead(Long noticeId, Long supplierId) {
+        sysNoticeService.updateNoticeReadStatus(noticeId, supplierId);
+    }
+
+    // 全部标记为已读
+    public void markAllNoticesAsRead(Long supplierId) {
+        sysNoticeService.updateAllNoticeReadStatus(supplierId);
+    }
+
+    // 统计未读通知数
+    public int countUnreadNoticesBySupplierId(Long supplierId) {
+        return sysNoticeService.countUnreadNoticesBySupplierId(supplierId);
     }
 }

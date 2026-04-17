@@ -1,4 +1,4 @@
-package com.ruoyi.textbook.controller;
+package com.ruoyi.system.textbook.controller;
 
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.textbook.domain.BookStockFlow;
-import com.ruoyi.textbook.service.IBookStockFlowService;
+import com.ruoyi.system.textbook.domain.BookStockFlow;
+import com.ruoyi.system.textbook.service.IBookStockFlowService;
 
 @RestController
 @RequestMapping("/textbook/stockFlow")

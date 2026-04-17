@@ -3,7 +3,6 @@ package com.ruoyi.textbook.controller;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
-import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.textbook.annotation.MaxExportRows;
 import com.ruoyi.textbook.domain.TbInventory;
@@ -43,42 +42,6 @@ public class TbInventoryController extends BaseController
     @GetMapping(value = "/{stockId}")
     public AjaxResult getInfo(@PathVariable("stockId") Long stockId) {
         return AjaxResult.success(tbInventoryService.selectTbInventoryByInventoryId(stockId));
-    }
-
-    @PreAuthorize("@ss.hasPermi('textbook:inventory:add')")
-    @PostMapping
-    public AjaxResult add(@RequestBody TbInventory tbInventory) {
-        if (tbInventory.getStockNum() != null && tbInventory.getStockNum() < 0) {
-            return AjaxResult.error("初始库存不能为负数");
-        }
-        return toAjax(tbInventoryService.insertTbInventory(tbInventory));
-    }
-
-    @PreAuthorize("@ss.hasPermi('textbook:inventory:edit')")
-    @PutMapping
-    public AjaxResult edit(@RequestBody TbInventory tbInventory) {
-        TbInventory existing = tbInventoryService.selectTbInventoryByInventoryId(tbInventory.getStockId());
-        if (existing == null) {
-            return AjaxResult.error("库存记录不存在");
-        }
-        Integer originalStock = existing.getStockNum();
-        Integer newStock = tbInventory.getStockNum();
-        if (newStock != null && !newStock.equals(originalStock)) {
-            throw new ServiceException("安全限制：禁止直接修改库存数量！库存只能通过入库/出库操作变更。当前库存：" + originalStock);
-        }
-        return toAjax(tbInventoryService.updateTbInventory(tbInventory));
-    }
-
-    @PreAuthorize("@ss.hasPermi('textbook:inventory:remove')")
-    @DeleteMapping("/{stockIds}")
-    public AjaxResult remove(@PathVariable Long[] stockIds) {
-        for (Long id : stockIds) {
-            TbInventory inv = tbInventoryService.selectTbInventoryByInventoryId(id);
-            if (inv != null && inv.getStockNum() != null && inv.getStockNum() > 0) {
-                return AjaxResult.error("无法删除：教材《" + inv.getBookName() + "》当前库存为" + inv.getStockNum() + "，请先通过出库操作将库存清零");
-            }
-        }
-        return toAjax(tbInventoryService.deleteTbInventoryByInventoryIds(stockIds));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:inventory:warning')")

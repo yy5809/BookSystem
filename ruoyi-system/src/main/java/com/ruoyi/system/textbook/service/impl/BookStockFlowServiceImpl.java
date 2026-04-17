@@ -1,9 +1,9 @@
-package com.ruoyi.textbook.service.impl;
+package com.ruoyi.system.textbook.service.impl;
 
 import java.util.List;
-import com.ruoyi.textbook.domain.BookStockFlow;
-import com.ruoyi.textbook.mapper.BookStockFlowMapper;
-import com.ruoyi.textbook.service.IBookStockFlowService;
+import com.ruoyi.system.textbook.domain.BookStockFlow;
+import com.ruoyi.system.textbook.mapper.BookStockFlowMapper;
+import com.ruoyi.system.textbook.service.IBookStockFlowService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("/textbook/supplier")
+@RequestMapping("/textbook/tbSupplier")
 public class TbSupplierController extends BaseController {
 
     private static final Logger log = LoggerFactory.getLogger(TbSupplierController.class);
@@ -46,21 +46,21 @@ public class TbSupplierController extends BaseController {
         return AjaxResult.success(tbSupplierService.selectTbSupplierById(supplierId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:supplier:add') and @ss.hasAnyRole('admin','purchaser')")
+    @PreAuthorize("@ss.hasPermi('textbook:supplier:add') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "供应商", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbSupplier tbSupplier) {
         return toAjax(tbSupplierService.insertTbSupplier(tbSupplier));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:supplier:edit') and @ss.hasAnyRole('admin','purchaser')")
+    @PreAuthorize("@ss.hasPermi('textbook:supplier:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "供应商", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbSupplier tbSupplier) {
         return toAjax(tbSupplierService.updateTbSupplier(tbSupplier));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:supplier:remove') and @ss.hasAnyRole('admin','purchaser')")
+    @PreAuthorize("@ss.hasPermi('textbook:supplier:remove') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "供应商", businessType = BusinessType.DELETE)
     @DeleteMapping("/{supplierIds:\\d+}")
     public AjaxResult remove(@PathVariable Long[] supplierIds) {

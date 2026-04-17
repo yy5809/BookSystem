@@ -41,6 +41,11 @@ public class BookClaimForm extends BaseEntity {
     @Excel(name = "出库时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date issueTime;
 
+    @Excel(name = "备注")
+    private String remark;
+
+    private String delFlag;
+
     private List<BookClaimFormDetail> details;
 
     public Long getFormId() { return formId; }
@@ -67,6 +72,10 @@ public class BookClaimForm extends BaseEntity {
     public void setReceiverName(String receiverName) { this.receiverName = receiverName; }
     public Date getIssueTime() { return issueTime; }
     public void setIssueTime(Date issueTime) { this.issueTime = issueTime; }
+    public String getRemark() { return remark; }
+    public void setRemark(String remark) { this.remark = remark; }
+    public String getDelFlag() { return delFlag; }
+    public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
     public List<BookClaimFormDetail> getDetails() { return details; }
     public void setDetails(List<BookClaimFormDetail> details) { this.details = details; }
 

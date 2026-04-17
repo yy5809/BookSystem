@@ -1,11 +1,11 @@
-package com.ruoyi.textbook.service.impl;
+package com.ruoyi.system.textbook.service.impl;
 
 import java.util.Date;
 import com.ruoyi.common.exception.ServiceException;
-import com.ruoyi.textbook.domain.BookStockFlow;
-import com.ruoyi.textbook.mapper.BookStockFlowMapper;
-import com.ruoyi.textbook.mapper.TbStockMapper;
-import com.ruoyi.textbook.service.IStockOperationService;
+import com.ruoyi.system.textbook.domain.BookStockFlow;
+import com.ruoyi.system.textbook.mapper.BookStockFlowMapper;
+import com.ruoyi.system.textbook.mapper.TbStockMapper;
+import com.ruoyi.system.textbook.service.IStockOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

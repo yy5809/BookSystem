@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ruoyi.textbook.mapper.BookPersonalApplyMapper">
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.textbook.mapper.BookPersonalApplyMapper">
 
-    <resultMap type="BookPersonalApply" id="BookPersonalApplyResult">
+    <resultMap type="com.ruoyi.system.textbook.domain.BookPersonalApply" id="BookPersonalApplyResult">
         <result property="applyId"    column="apply_id"    />
         <result property="applyNo"    column="apply_no"    />
         <result property="teacherId"  column="teacher_id"  />
@@ -32,7 +34,7 @@
         from book_personal_apply
     </sql>
 
-    <select id="selectBookPersonalApplyList" parameterType="BookPersonalApply" resultMap="BookPersonalApplyResult">
+    <select id="selectBookPersonalApplyList" parameterType="com.ruoyi.system.textbook.domain.BookPersonalApply" resultMap="BookPersonalApplyResult">
         <include refid="selectBookPersonalApplyVo"/>
         <where>
             del_flag = '0'
@@ -43,11 +45,13 @@
             <if test="status != null and status != ''"> AND status = #{status}</if>
             <if test="params.beginTime != null and params.beginTime != ''"> AND date_format(create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')</if>
             <if test="params.endTime != null and params.endTime != ''"> AND date_format(create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')</if>
+            <!-- 数据权限过滤 -->
+            ${params.dataScope}
         </where>
         order by create_time desc
     </select>
 
-    <select id="selectMyApplyList" parameterType="BookPersonalApply" resultMap="BookPersonalApplyResult">
+    <select id="selectMyApplyList" parameterType="com.ruoyi.system.textbook.domain.BookPersonalApply" resultMap="BookPersonalApplyResult">
         <include refid="selectBookPersonalApplyVo"/>
         <where>
             del_flag = '0' AND teacher_id = #{teacherId}
@@ -63,7 +67,7 @@
         where apply_id = #{applyId} and del_flag = '0'
     </select>
 
-    <insert id="insertBookPersonalApply" parameterType="BookPersonalApply" useGeneratedKeys="true" keyProperty="applyId">
+    <insert id="insertBookPersonalApply" parameterType="com.ruoyi.system.textbook.domain.BookPersonalApply" useGeneratedKeys="true" keyProperty="applyId">
         insert into book_personal_apply (
             <if test="applyNo != null and applyNo != ''">apply_no,</if>
             <if test="teacherId != null">teacher_id,</if>
@@ -91,7 +95,7 @@
         )
     </insert>
 
-    <update id="updateBookPersonalApply" parameterType="BookPersonalApply">
+    <update id="updateBookPersonalApply" parameterType="com.ruoyi.system.textbook.domain.BookPersonalApply">
         update book_personal_apply
         <set>
             <if test="auditOpinion != null">audit_opinion = #{auditOpinion},</if>

@@ -12,6 +12,7 @@ import com.ruoyi.textbook.mapper.TbPendingMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.service.ITbShortageService;
+import com.ruoyi.textbook.service.NoticeService;
 import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import org.slf4j.Logger;
@@ -43,6 +44,8 @@ public class TbShortageServiceImpl implements ITbShortageService
     private TbPurchaseMapper tbPurchaseMapper;
     @Autowired
     private SysUserMapper sysUserMapper;
+    @Autowired
+    private NoticeService noticeService;
 
     /**
      * 查询缺书登记信息
@@ -79,7 +82,31 @@ public class TbShortageServiceImpl implements ITbShortageService
     {
         tbShortage.setCreateTime(DateUtils.getNowDate());
         tbShortage.setUpdateTime(DateUtils.getNowDate());
-        return tbShortageMapper.insertTbShortage(tbShortage);
+        if (tbShortage.getRegisterId() == null) {
+            tbShortage.setRegisterId(SecurityUtils.getUserId());
+        }
+        if (StringUtils.isEmpty(tbShortage.getRegisterName())) {
+            SysUser user = sysUserMapper.selectUserById(tbShortage.getRegisterId());
+            if (user != null) {
+                tbShortage.setRegisterName(user.getNickName());
+            }
+        }
+        int rows = tbShortageMapper.insertTbShortage(tbShortage);
+        if (rows > 0) {
+            try {
+                noticeService.sendLackNotice(
+                        tbShortage.getBookId(),
+                        tbShortage.getBookName(),
+                        tbShortage.getIsbn(),
+                        tbShortage.getLackNum(),
+                        0,
+                        tbShortage.getLackId()
+                );
+            } catch (Exception e) {
+                log.warn("【缺书登记】发送缺书通知失败: {}", e.getMessage());
+            }
+        }
+        return rows;
     }
 
     /**
@@ -139,7 +166,7 @@ public class TbShortageServiceImpl implements ITbShortageService
      * @return 结果
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int processShortage(Long shortageId, String status)
     {
         TbShortage shortage = tbShortageMapper.selectTbShortageById(shortageId);
@@ -266,7 +293,7 @@ public class TbShortageServiceImpl implements ITbShortageService
         }
 
         for (TbShortage shortage : allShortages) {
-            shortage.setHandleStatus("1");
+            shortage.setHandleStatus("1"); // 已纳入采购
             shortage.setPurchaseId(purchase.getBuyId());
             shortage.setUpdateTime(DateUtils.getNowDate());
             tbShortageMapper.updateTbShortage(shortage);

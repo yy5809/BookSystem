@@ -2,7 +2,7 @@ package com.ruoyi.web.service.impl;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.framework.websocket.NoticeWebSocket;
-import com.ruoyi.textbook.service.INoticePushService;
+import com.ruoyi.web.service.INoticePushService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

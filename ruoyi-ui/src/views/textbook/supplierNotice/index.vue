@@ -97,7 +97,7 @@
 </template>
 
 <script>
-import { listNotice, updateNotice } from "@/api/system/notice";
+import { listNotice, markAsRead, markAllAsRead } from "@/api/textbook/notice";
 
 export default {
   name: "SupplierNotice",
@@ -136,13 +136,14 @@ export default {
       const ids = this.noticeList.filter(n => n.readStatus === '0').map(n => n.noticeId);
       if (ids.length === 0) return;
       this.$confirm('确认将所有未读通知标记为已读?', '提示', { confirmButtonText: '确定', cancelButtonText: '取消', type: 'info' }).then(() => {
-        ids.forEach(id => updateNotice({ noticeId: id, readStatus: '1' }));
-        this.$modal.msgSuccess("操作成功");
-        this.getList();
+        markAllAsRead().then(() => {
+          this.$modal.msgSuccess("操作成功");
+          this.getList();
+        });
       });
     },
     handleMarkRead(row) {
-      updateNotice({ noticeId: row.noticeId, readStatus: '1' }).then(() => {
+      markAsRead(row.noticeId).then(() => {
         row.readStatus = '1';
         this.stats.unread--;
       });

@@ -2,14 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.textbook.mapper.TbStockLogMapper">
     <resultMap type="com.ruoyi.textbook.domain.TbStockLog" id="TbStockLogResult">
-        <id property="logId" column="log_id"/>
-        <result property="bookId" column="book_id"/>
-        <result property="bizType" column="biz_type"/>
-        <result property="changeNum" column="change_num"/>
-        <result property="beforeStock" column="before_stock"/>
-        <result property="afterStock" column="after_stock"/>
-        <result property="operatorId" column="operator_id"/>
-        <result property="operatorName" column="operator_name"/>
+        <id property="logId" column="flow_id"/>
+        <result property="bookId" column="textbook_id"/>
+        <result property="isbn" column="isbn"/>
+        <result property="bookName" column="book_name"/>
+        <result property="bizType" column="business_type"/>
+        <result property="changeNum" column="change_qty"/>
+        <result property="beforeStock" column="stock_before"/>
+        <result property="afterStock" column="stock_after"/>
+        <result property="operatorName" column="operator"/>
         <result property="refBizType" column="ref_biz_type"/>
         <result property="refBizId" column="ref_biz_id"/>
         <result property="remark" column="remark"/>
@@ -17,36 +18,39 @@
     </resultMap>
 
     <sql id="selectVo">
-        SELECT l.log_id, l.book_id, i.book_name, i.isbn, l.biz_type, l.change_num,
-               l.before_stock, l.after_stock, l.operator_id, l.operator_name,
-               l.ref_biz_type, l.ref_biz_id, l.remark, l.create_time
-        FROM textbook_stock_log l
-        LEFT JOIN textbook_info i ON l.book_id = i.book_id
+        SELECT f.flow_id, f.textbook_id, f.isbn, i.book_name, f.business_type, f.change_qty,
+               f.stock_before, f.stock_after, f.operator, f.business_no,
+               f.remark, f.operate_time, f.create_time
+        FROM book_stock_flow f
+        LEFT JOIN textbook_info i ON f.textbook_id = i.book_id
     </sql>
 
     <select id="selectList" parameterType="com.ruoyi.textbook.domain.TbStockLog" resultMap="TbStockLogResult">
         <include refid="selectVo"/> WHERE 1=1
-        <if test="bookId != null">AND l.book_id = #{bookId}</if>
-        <if test="bizType != null and bizType != ''">AND l.biz_type = #{bizType}</if>
-        <if test="refBizType != null and refBizType != ''">AND l.ref_biz_type = #{refBizType}</if>
-        ORDER BY l.create_time DESC
+        <if test="bookId != null">AND f.textbook_id = #{bookId}</if>
+        <if test="isbn != null and isbn != ''">AND f.isbn like concat('%', #{isbn}, '%')</if>
+        <if test="bizType != null and bizType != ''">AND f.business_type = #{bizType}</if>
+        <if test="refBizType != null and refBizType != ''">AND f.remark like concat('%', #{refBizType}, '%')</if>
+        <if test="params.beginTime != null and params.beginTime != ''">AND date_format(f.operate_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')</if>
+        <if test="params.endTime != null and params.endTime != ''">AND date_format(f.operate_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')</if>
+        ORDER BY f.operate_time DESC
     </select>
 
     <select id="selectListByBookId" parameterType="Long" resultMap="TbStockLogResult">
-        <include refid="selectVo"/> WHERE l.book_id = #{bookId} ORDER BY l.create_time DESC
+        <include refid="selectVo"/> WHERE f.textbook_id = #{bookId} ORDER BY f.operate_time DESC
     </select>
 
     <insert id="insert" parameterType="com.ruoyi.textbook.domain.TbStockLog" useGeneratedKeys="true" keyProperty="logId">
-        INSERT INTO textbook_stock_log(book_id, biz_type, change_num, before_stock, after_stock, operator_id, operator_name, ref_biz_type, ref_biz_id, remark)
-        VALUES(#{bookId}, #{bizType}, #{changeNum}, #{beforeStock}, #{afterStock}, #{operatorId}, #{operatorName}, #{refBizType}, #{refBizId}, #{remark})
+        INSERT INTO book_stock_flow(textbook_id, isbn, business_type, business_no, change_qty, stock_before, stock_after, operator, operate_time, remark)
+        VALUES(#{bookId}, #{isbn}, #{bizType}, #{refBizId}, #{changeNum}, #{beforeStock}, #{afterStock}, #{operatorName}, NOW(), #{remark})
     </insert>
 
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO textbook_stock_log(book_id, biz_type, change_num, before_stock, after_stock, operator_id, operator_name, ref_biz_type, ref_biz_id, remark, create_time)
+        INSERT INTO book_stock_flow(textbook_id, isbn, business_type, business_no, change_qty, stock_before, stock_after, operator, operate_time, remark, create_time)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.bookId}, #{item.bizType}, #{item.changeNum}, #{item.beforeStock}, #{item.afterStock},
-             #{item.operatorId}, #{item.operatorName}, #{item.refBizType}, #{item.refBizId}, #{item.remark}, NOW())
+            (#{item.bookId}, #{item.isbn}, #{item.bizType}, #{item.refBizId}, #{item.changeNum}, #{item.beforeStock}, #{item.afterStock},
+             #{item.operatorName}, NOW(), #{item.remark}, NOW())
         </foreach>
     </insert>
 </mapper>

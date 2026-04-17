@@ -1,4 +1,4 @@
-package com.ruoyi.textbook.controller;
+package com.ruoyi.system.textbook.controller;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,7 +16,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.textbook.domain.dto.TbPurchaseImportDTO;
 import com.ruoyi.textbook.service.IPurchaseImportService;
-import com.ruoyi.textbook.util.ExcelImportUtil;
+import com.ruoyi.system.textbook.util.ExcelImportUtil;
 
 @RestController
 @RequestMapping("/textbook/purchase/import")

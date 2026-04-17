@@ -27,3 +27,19 @@ export function delNotice(noticeIds) {
 export function getClaimForms(noticeId) {
   return request({ url: '/textbook/notice/claimForms/' + noticeId, method: 'get' })
 }
+
+export function getBooks() {
+  return request({ url: '/textbook/book/list', method: 'get' })
+}
+
+export function getColleges() {
+  return request({ url: '/textbook/notice/college/list', method: 'get' })
+}
+
+export function getMajors(collegeId) {
+  return request({ url: '/textbook/notice/major/list/' + collegeId, method: 'get' })
+}
+
+export function getClasses(majorId) {
+  return request({ url: '/textbook/notice/class/list/' + majorId, method: 'get' })
+}

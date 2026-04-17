@@ -1,6 +1,7 @@
 package com.ruoyi.system.service;
 
 import java.util.List;
+import java.util.Map;
 import com.ruoyi.system.domain.SysNotice;
 
 /**
@@ -57,4 +58,46 @@ public interface ISysNoticeService
      * @return 结果
      */
     public int deleteNoticeByIds(Long[] noticeIds);
+    
+    /**
+     * 查询供应商通知列表
+     * 
+     * @param supplierId 供应商ID
+     * @return 通知集合
+     */
+    public List<Map<String, Object>> selectSupplierNotices(Long supplierId);
+    
+    /**
+     * 查询供应商通知详情
+     * 
+     * @param noticeId 通知ID
+     * @param supplierId 供应商ID
+     * @return 通知详情
+     */
+    public Map<String, Object> selectSupplierNoticeDetail(Long noticeId, Long supplierId);
+    
+    /**
+     * 更新通知阅读状态
+     * 
+     * @param noticeId 通知ID
+     * @param supplierId 供应商ID
+     * @return 结果
+     */
+    public int updateNoticeReadStatus(Long noticeId, Long supplierId);
+    
+    /**
+     * 全部更新通知阅读状态
+     * 
+     * @param supplierId 供应商ID
+     * @return 结果
+     */
+    public int updateAllNoticeReadStatus(Long supplierId);
+    
+    /**
+     * 统计供应商未读通知数
+     * 
+     * @param supplierId 供应商ID
+     * @return 未读通知数
+     */
+    public int countUnreadNoticesBySupplierId(Long supplierId);
 }

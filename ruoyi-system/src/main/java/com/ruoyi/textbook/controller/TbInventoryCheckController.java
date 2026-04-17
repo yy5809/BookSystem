@@ -13,9 +13,6 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.textbook.domain.TbInventoryCheck;
 import com.ruoyi.textbook.service.ITbInventoryCheckService;
 
-/**
- * 库存盘点 Controller
- */
 @RestController
 @RequestMapping("/textbook/inventoryCheck")
 public class TbInventoryCheckController extends BaseController {
@@ -40,7 +37,7 @@ public class TbInventoryCheckController extends BaseController {
         return ajax;
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:inventoryCheck:add') and @ss.hasAnyRole('admin','warehouseman')")
+    @PreAuthorize("@ss.hasPermi('textbook:inventoryCheck:add') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "创建盘点任务", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbInventoryCheck check) {
@@ -49,27 +46,28 @@ public class TbInventoryCheckController extends BaseController {
         return toAjax(inventoryCheckService.createCheckTask(check));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:inventoryCheck:edit') and @ss.hasAnyRole('admin','warehouseman')")
+    @PreAuthorize("@ss.hasPermi('textbook:inventoryCheck:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "开始盘点", businessType = BusinessType.UPDATE)
     @PutMapping("/start/{checkId}")
     public AjaxResult startCheck(@PathVariable Long checkId) {
         return toAjax(inventoryCheckService.startCheck(checkId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:inventoryCheck:edit') and @ss.hasAnyRole('admin','warehouseman')")
+    @PreAuthorize("@ss.hasPermi('textbook:inventoryCheck:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "完成盘点", businessType = BusinessType.UPDATE)
     @PutMapping("/complete/{checkId}")
     public AjaxResult completeCheck(@PathVariable Long checkId) {
         return toAjax(inventoryCheckService.completeCheck(checkId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:inventoryCheck:remove') and @ss.hasAnyRole('admin','warehouseman')")
+    @PreAuthorize("@ss.hasPermi('textbook:inventoryCheck:remove') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "取消盘点", businessType = BusinessType.DELETE)
     @DeleteMapping("/{checkIds:\\d+}")
     public AjaxResult remove(@PathVariable Long[] checkIds) {
         return toAjax(inventoryCheckService.deleteTbInventoryCheckByIds(checkIds));
     }
 
+    @PreAuthorize("@ss.hasPermi('textbook:inventoryCheck:query')")
     @GetMapping("/stats")
     public AjaxResult stats() {
         return AjaxResult.success(inventoryCheckService.getCheckStats());

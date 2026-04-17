@@ -1,24 +1,33 @@
 package com.ruoyi.textbook.mapper;
 
-import java.util.List;
+import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbSupplier;
 
-/**
- * 供应商管理 数据层
- */
+import java.util.List;
+
 public interface TbSupplierMapper {
 
-    public List<TbSupplier> selectTbSupplierList(TbSupplier tbSupplier);
+    // 根据用户ID获取供应商信息
+    TbSupplier selectByUserId(Long userId);
 
-    public TbSupplier selectTbSupplierById(Long supplierId);
+    // 根据供应商ID获取供应商信息
+    TbSupplier selectBySupplierId(Long supplierId);
 
-    public TbSupplier selectSupplierByUserId(Long userId);
+    // 新增供应商
+    int insertTbSupplier(TbSupplier supplier);
 
-    public int insertTbSupplier(TbSupplier tbSupplier);
+    // 更新供应商
+    int updateTbSupplier(TbSupplier supplier);
 
-    public int updateTbSupplier(TbSupplier tbSupplier);
+    // 删除供应商
+    int deleteTbSupplierById(Long supplierId);
 
-    public int deleteTbSupplierByIds(Long[] supplierIds);
+    // 查询供应商列表
+    List<TbSupplier> selectTbSupplierList(TbSupplier supplier);
 
-    public int deleteTbSupplierById(Long supplierId);
+    // 统计供应商待确认发货的采购单数
+    int countPendingShipmentBySupplierId(Long supplierId);
+
+    // 查询供应商的采购单列表
+    List<TbPurchase> selectSupplierPurchases(TbPurchase purchase);
 }

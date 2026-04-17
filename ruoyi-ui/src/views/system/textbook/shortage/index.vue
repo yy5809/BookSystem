@@ -21,8 +21,10 @@
         </el-form-item>
         <el-form-item label="处理状态">
           <el-select v-model="queryParams.handleStatus" placeholder="全部" clearable style="width: 130px">
-            <el-option label="待采购" value="0" />
-            <el-option label="已采购" value="1" />
+            <el-option label="未处理" value="0" />
+            <el-option label="已纳入采购" value="1" />
+            <el-option label="已到货" value="2" />
+            <el-option label="已完成" value="3" />
           </el-select>
         </el-form-item>
         <el-form-item label="紧急程度">
@@ -255,8 +257,8 @@ export default {
     handleCurrentChange(val) { this.queryParams.pageNum = val; this.getList() },
     handleSelectionChange(rows) { this.selectedRows = rows },
 
-    statusText(status) { const map = { '0': '待采购', '1': '已采购' }; return map[status] || '未知' },
-    statusTagType(status) { const map = { '0': 'warning', '1': 'success' }; return map[status] || 'info' },
+    statusText(status) { const map = { '0': '未处理', '1': '已纳入采购', '2': '已到货', '3': '已完成' }; return map[status] || '未知' },
+    statusTagType(status) { const map = { '0': 'danger', '1': 'warning', '2': 'info', '3': 'success' }; return map[status] || 'info' },
 
     handleView(row) { getShortageInfo(row.lackId).then(r => { this.detailData = r.data; this.detailVisible = true }) },
 

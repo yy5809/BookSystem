@@ -1,4 +1,4 @@
-package com.ruoyi.textbook.mapper;
+package com.ruoyi.system.textbook.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

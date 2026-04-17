@@ -79,6 +79,10 @@ public class TbPurchase extends BaseEntity {
 
     private String fileHash;
     private Long supplierId;
+    private String purchaseStatus;
+    private String logisticsNo;
+    private String logisticsCompany;
+    private String invoiceNo;
 
     public Long getBuyId() { return buyId; }
     public void setBuyId(Long buyId) { this.buyId = buyId; }
@@ -125,6 +129,14 @@ public class TbPurchase extends BaseEntity {
     public void setFileHash(String fileHash) { this.fileHash = fileHash; }
     public Long getSupplierId() { return supplierId; }
     public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
+    public String getPurchaseStatus() { return purchaseStatus; }
+    public void setPurchaseStatus(String purchaseStatus) { this.purchaseStatus = purchaseStatus; }
+    public String getLogisticsNo() { return logisticsNo; }
+    public void setLogisticsNo(String logisticsNo) { this.logisticsNo = logisticsNo; }
+    public String getLogisticsCompany() { return logisticsCompany; }
+    public void setLogisticsCompany(String logisticsCompany) { this.logisticsCompany = logisticsCompany; }
+    public String getInvoiceNo() { return invoiceNo; }
+    public void setInvoiceNo(String invoiceNo) { this.invoiceNo = invoiceNo; }
 
     @Override
     public String toString() {

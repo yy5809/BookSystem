@@ -1,5 +1,6 @@
 import request from '@/utils/request'
 
+// 供应商管理相关
 export function listSupplier(query) {
   return request({ url: '/textbook/supplier/list', method: 'get', params: query })
 }
@@ -17,4 +18,34 @@ export function delSupplier(supplierIds) {
 }
 export function listSupplierOptions() {
   return request({ url: '/textbook/supplier/options', method: 'get' })
+}
+
+// 供应商工作台相关
+export function getSupplierDashboard() {
+  return request({ url: '/textbook/supplier/dashboard', method: 'get' })
+}
+
+// 供应商采购单相关
+export function listSupplierPurchases(query) {
+  return request({ url: '/textbook/supplier/purchase/list', method: 'get', params: query })
+}
+export function getSupplierPurchaseDetail(purchaseId) {
+  return request({ url: `/textbook/supplier/purchase/detail/${purchaseId}`, method: 'get' })
+}
+export function confirmShipment(data) {
+  return request({ url: '/textbook/supplier/purchase/shipment', method: 'post', data })
+}
+
+// 供应商通知相关
+export function listSupplierNotices(query) {
+  return request({ url: '/textbook/supplier/notice/list', method: 'get', params: query })
+}
+export function getSupplierNoticeDetail(noticeId) {
+  return request({ url: `/textbook/supplier/notice/detail/${noticeId}`, method: 'get' })
+}
+export function markNoticeAsRead(noticeId) {
+  return request({ url: `/textbook/supplier/notice/read/${noticeId}`, method: 'put' })
+}
+export function markAllNoticesAsRead() {
+  return request({ url: '/textbook/supplier/notice/read/all', method: 'put' })
 }

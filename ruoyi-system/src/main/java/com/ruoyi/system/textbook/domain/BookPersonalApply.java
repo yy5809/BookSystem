@@ -1,4 +1,4 @@
-package com.ruoyi.textbook.domain;
+package com.ruoyi.system.textbook.domain;
 
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -37,6 +37,10 @@ public class BookPersonalApply extends BaseEntity {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date issueTime;
+
+    private String delFlag;
+
+    private String remark;
 
     public Long getApplyId() {
         return applyId;
@@ -148,6 +152,22 @@ public class BookPersonalApply extends BaseEntity {
 
     public void setIssueTime(Date issueTime) {
         this.issueTime = issueTime;
+    }
+
+    public String getDelFlag() {
+        return delFlag;
+    }
+
+    public void setDelFlag(String delFlag) {
+        this.delFlag = delFlag;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     @Override

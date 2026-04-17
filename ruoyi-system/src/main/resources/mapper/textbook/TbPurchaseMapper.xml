@@ -40,7 +40,8 @@
         <if test="userName != null and userName != ''">AND t.user_name LIKE CONCAT('%',#{userName},'%')</if>
         <if test="userType != null and userType != ''">AND t.user_type = #{userType}</if>
         <if test="auditStatus != null and auditStatus != ''">AND t.audit_status = #{auditStatus}</if>
-        <if test="supplierId != null">AND t.supplier_id = #{supplierId}</if>
+        <!-- 数据权限过滤 -->
+        ${params.dataScope}
         ORDER BY t.submit_time DESC
     </select>
 
@@ -144,5 +145,21 @@
 
     <select id="selectByFileHash" parameterType="String" resultMap="TbPurchaseResult">
         <include refid="selectTbPurchaseVo"/> AND t.file_hash = #{fileHash} LIMIT 1
+    </select>
+
+    <!-- 供应商相关查询 -->
+    <select id="selectSupplierPurchases" parameterType="com.ruoyi.textbook.domain.TbPurchase" resultMap="TbPurchaseResult">
+        <include refid="selectTbPurchaseVo"/>
+        <if test="supplierId != null">AND t.supplier_id = #{supplierId}</if>
+        <if test="purchaseNo != null and purchaseNo != ''">AND t.purchase_no LIKE CONCAT('%',#{purchaseNo},'%')</if>
+        <if test="purchaseStatus != null and purchaseStatus != ''">AND t.purchase_status = #{purchaseStatus}</if>
+        ORDER BY t.submit_time DESC
+    </select>
+
+    <select id="countPendingShipmentBySupplierId" parameterType="Long" resultType="Integer">
+        SELECT COUNT(*) FROM textbook_buy 
+        WHERE supplier_id = #{supplierId} 
+        AND purchase_status = '1' 
+        AND del_flag = '0'
     </select>
 </mapper>

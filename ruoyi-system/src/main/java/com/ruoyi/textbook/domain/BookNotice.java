@@ -1,9 +1,11 @@
 package com.ruoyi.textbook.domain;
 
 import java.util.Date;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.core.domain.BaseEntity;
+import com.ruoyi.textbook.domain.BookClaimFormDetail;
 
 public class BookNotice extends BaseEntity {
     private static final long serialVersionUID = 1L;
@@ -36,6 +38,13 @@ public class BookNotice extends BaseEntity {
     @Excel(name = "已出库班级数")
     private Integer issuedClasses;
 
+    @Excel(name = "备注")
+    private String remark;
+
+    private String delFlag;
+
+    private List<BookClaimFormDetail> details;
+
     public Long getNoticeId() { return noticeId; }
     public void setNoticeId(Long noticeId) { this.noticeId = noticeId; }
     public String getNoticeNo() { return noticeNo; }
@@ -54,6 +63,13 @@ public class BookNotice extends BaseEntity {
     public void setTotalClasses(Integer totalClasses) { this.totalClasses = totalClasses; }
     public Integer getIssuedClasses() { return issuedClasses; }
     public void setIssuedClasses(Integer issuedClasses) { this.issuedClasses = issuedClasses; }
+    public String getRemark() { return remark; }
+    public void setRemark(String remark) { this.remark = remark; }
+    public String getDelFlag() { return delFlag; }
+    public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
+
+    public List<BookClaimFormDetail> getDetails() { return details; }
+    public void setDetails(List<BookClaimFormDetail> details) { this.details = details; }
 
     @Override
     public String toString() {

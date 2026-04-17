@@ -1,7 +1,7 @@
-package com.ruoyi.textbook.service;
+package com.ruoyi.system.textbook.service;
 
 import java.util.List;
-import com.ruoyi.textbook.domain.BookPersonalApply;
+import com.ruoyi.system.textbook.domain.BookPersonalApply;
 
 public interface IBookPersonalApplyService {
     public BookPersonalApply selectBookPersonalApplyById(Long applyId);

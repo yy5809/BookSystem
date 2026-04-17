@@ -69,16 +69,62 @@ public class TbInboundServiceImpl implements ITbInboundService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertTbInbound(TbInbound tbInbound) {
+        log.info("【入库处理】开始处理教材入库, bookId={}, 数量={}", tbInbound.getBookId(), tbInbound.getInNum());
+        
         if (tbInbound.getInboundNo() == null || tbInbound.getInboundNo().isEmpty()) {
             tbInbound.setInboundNo("IN" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + IdUtils.fastSimpleUUID().substring(0, 6));
         }
         tbInbound.setCreateTime(DateUtils.getNowDate());
         tbInbound.setUpdateTime(DateUtils.getNowDate());
+        
         int result = tbInboundMapper.insertTbInbound(tbInbound);
-        if (result > 0 && tbInbound.getBookId() != null && tbInbound.getInNum() != null) {
-            try { tbInventoryMapper.updateInventoryQuantity(tbInbound.getBookId(), tbInbound.getInNum()); } catch (Exception ignored) {}
+        if (result <= 0) {
+            throw new ServiceException("创建入库记录失败");
         }
+        
+        if (tbInbound.getBookId() != null && tbInbound.getInNum() != null) {
+            TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(tbInbound.getBookId());
+            Integer beforeStock = (inventory != null) ? inventory.getStockNum() : 0;
+            
+            if (inventory == null) {
+                inventory = new TbInventory();
+                inventory.setBookId(tbInbound.getBookId());
+                inventory.setBookName(tbInbound.getBookName());
+                inventory.setIsbn(tbInbound.getIsbn());
+                inventory.setStockNum(tbInbound.getInNum());
+                inventory.setWarningNum(10);
+                inventory.setCreateTime(DateUtils.getNowDate());
+                tbInventoryMapper.insertTbInventory(inventory);
+                log.info("【入库处理】创建新库存记录, bookId={}, 初始库存={}", tbInbound.getBookId(), tbInbound.getInNum());
+            } else {
+                int rowsAffected = tbInventoryMapper.updateInventoryQuantityWithCheck(
+                        tbInbound.getBookId(),
+                        beforeStock,
+                        tbInbound.getInNum()
+                );
+                if (rowsAffected <= 0) {
+                    throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
+                }
+            }
+            
+            TbStockLog stockLog = new TbStockLog();
+            stockLog.setBookId(tbInbound.getBookId());
+            stockLog.setBizType("1");
+            stockLog.setChangeNum(tbInbound.getInNum());
+            stockLog.setBeforeStock(beforeStock);
+            stockLog.setAfterStock(beforeStock + tbInbound.getInNum());
+            stockLog.setOperatorId(tbInbound.getOperatorId());
+            stockLog.setOperatorName(tbInbound.getOperatorName());
+            stockLog.setRefBizType("INBOUND");
+            stockLog.setRefBizId(tbInbound.getInId());
+            stockLog.setRemark("采购入库，入库单号：" + tbInbound.getInboundNo());
+            stockLogService.insert(stockLog);
+            log.info("【入库处理】已生成库存流水记录");
+        }
+        
+        log.info("【入库处理】完成! 入库单号={}, 教材={}, 数量={}", tbInbound.getInboundNo(), tbInbound.getBookName(), tbInbound.getInNum());
         return result;
     }
 
@@ -93,7 +139,12 @@ public class TbInboundServiceImpl implements ITbInboundService {
         TbInbound inbound = tbInboundMapper.selectTbInboundByInboundId(inboundId);
         int result = tbInboundMapper.deleteTbInboundByInboundId(inboundId);
         if (result > 0 && inbound != null && inbound.getBookId() != null && inbound.getInNum() != null) {
-            try { tbInventoryMapper.updateInventoryQuantity(inbound.getBookId(), -inbound.getInNum()); } catch (Exception ignored) {}
+            try {
+                tbInventoryMapper.updateInventoryQuantity(inbound.getBookId(), -inbound.getInNum());
+            } catch (Exception e) {
+                log.error("【入库删除错误】库存恢复失败, bookId={}, inNum={}, error={}", inbound.getBookId(), inbound.getInNum(), e.getMessage());
+                throw new ServiceException("库存恢复失败，请联系管理员处理");
+            }
         }
         return result;
     }
@@ -171,43 +222,42 @@ public class TbInboundServiceImpl implements ITbInboundService {
 
         List<TbShortage> shortageList = tbShortageMapper.selectTbShortageListByBookId(tbInbound.getBookId());
         for (TbShortage shortage : shortageList) {
-            if ("0".equals(shortage.getHandleStatus())) {
-                int remainingLack = shortage.getLackNum() - tbInbound.getInNum();
+            int remainingLack = shortage.getLackNum() - tbInbound.getInNum();
 
-                if (remainingLack <= 0) {
-                    shortage.setHandleStatus("1");
-                    shortage.setHandleTime(new Date());
-                    shortage.setRemark("已通过入库单" + inboundNo + "补齐");
-                    tbShortageMapper.updateTbShortage(shortage);
-                    log.info("【入库处理】缺书单已完全补齐, lackId={}", shortage.getLackId());
+            if (remainingLack <= 0) {
+                shortage.setHandleStatus("3"); // 已完成
+                shortage.setHandleTime(new Date());
+                shortage.setRemark("已通过入库单" + inboundNo + "补齐");
+                tbShortageMapper.updateTbShortage(shortage);
+                log.info("【入库处理】缺书单已完全补齐, lackId={}", shortage.getLackId());
 
-                    if (shortage.getSourceId() != null && "1".equals(shortage.getSource())) {
-                        try {
-                            TbPurchase relatedPurchase = tbPurchaseMapper.selectTbPurchaseById(shortage.getSourceId());
-                            if (relatedPurchase != null && "2".equals(relatedPurchase.getAuditStatus())) {
-                                relatedPurchase.setAuditStatus("0");
-                                relatedPurchase.setRejectReason(null);
-                                tbPurchaseMapper.updateTbPurchase(relatedPurchase);
+                if (shortage.getSourceId() != null && "1".equals(shortage.getSource())) {
+                    try {
+                        TbPurchase relatedPurchase = tbPurchaseMapper.selectTbPurchaseById(shortage.getSourceId());
+                        if (relatedPurchase != null && "2".equals(relatedPurchase.getAuditStatus())) {
+                            relatedPurchase.setAuditStatus("0");
+                            relatedPurchase.setRejectReason(null);
+                            tbPurchaseMapper.updateTbPurchase(relatedPurchase);
 
-                                noticeService.sendOrderApproveNotice(
-                                        relatedPurchase.getUserId(),
-                                        tbInbound.getBookName(),
-                                        "1",
-                                        "缺书已到货，您的领书单已重新开放，请等待审核",
-                                        shortage.getSourceId()
-                                );
-                                log.info("【入库处理】已重新开放被驳回的领书单并通知申请人, purchaseId={}", shortage.getSourceId());
-                            }
-                        } catch (Exception e) {
-                            log.warn("【入库处理】重新开放领书单时异常: {}", e.getMessage());
+                            noticeService.sendOrderApproveNotice(
+                                    relatedPurchase.getUserId(),
+                                    tbInbound.getBookName(),
+                                    "1",
+                                    "缺书已到货，您的领书单已重新开放，请等待审核",
+                                    shortage.getSourceId()
+                            );
+                            log.info("【入库处理】已重新开放被驳回的领书单并通知申请人, purchaseId={}", shortage.getSourceId());
                         }
+                    } catch (Exception e) {
+                        log.warn("【入库处理】重新开放领书单时异常: {}", e.getMessage());
                     }
-                } else {
-                    shortage.setLackNum(remainingLack);
-                    shortage.setRemark("部分补齐，通过入库单" + inboundNo + "入库" + tbInbound.getInNum() + "本");
-                    tbShortageMapper.updateTbShortage(shortage);
-                    log.info("【入库处理】缺书单部分补齐, 剩余缺{}本", remainingLack);
                 }
+            } else {
+                shortage.setLackNum(remainingLack);
+                shortage.setHandleStatus("2"); // 已到货（部分）
+                shortage.setRemark("部分补齐，通过入库单" + inboundNo + "入库" + tbInbound.getInNum() + "本");
+                tbShortageMapper.updateTbShortage(shortage);
+                log.info("【入库处理】缺书单部分补齐, 剩余缺{}本", remainingLack);
             }
         }
 

@@ -1,7 +1,7 @@
-package com.ruoyi.textbook.service;
+package com.ruoyi.system.textbook.service;
 
 import java.util.List;
-import com.ruoyi.textbook.domain.BookStockFlow;
+import com.ruoyi.system.textbook.domain.BookStockFlow;
 
 public interface IBookStockFlowService {
     public List<BookStockFlow> selectBookStockFlowList(BookStockFlow bookStockFlow);
