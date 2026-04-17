@@ -1,0 +1,82 @@
+# 数据源配置（已优化）
+spring:
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        druid:
+            # 主库数据源
+            master:
+                url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+                username: root
+                password: ${DB_PASSWORD:12345678}
+            # 从库数据源
+            slave:
+                enabled: false
+                url:
+                username:
+                password:
+
+            # ======== 连接池基本配置 ========
+            initialSize: 5
+            minIdle: 5
+            maxActive: 50
+            maxWait: 10000
+
+            # ======== 超时配置 ========
+            connectTimeout: 10000
+            socketTimeout: 30000
+
+            # ======== 连接回收配置 ========
+            timeBetweenEvictionRunsMillis: 60000
+            minEvictableIdleTimeMillis: 300000
+            maxEvictableIdleTimeMillis: 600000
+
+            # ======== 连接有效性检测（已修正为MySQL语法）=====
+            validationQuery: SELECT 1
+            testWhileIdle: true
+            testOnBorrow: true
+            testOnReturn: false
+
+            # ======== 防止连接泄露 ========
+            poolPreparedStatements: true
+            maxPoolPreparedStatementPerConnectionSize: 20
+            defaultAutoCommit: true
+
+            # ======== 监控配置 ========
+            webStatFilter:
+                enabled: true
+                urlPattern: /*
+                exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*/druid/*"
+            statViewServlet:
+                enabled: true
+                url-pattern: /druid/*
+                resetEnable: false
+                login-username: ${DRUID_USERNAME:admin}
+                login-password: ${DRUID_PASSWORD:Admin@2024}
+                allow: 127.0.0.1,localhost
+
+            # ======== 过滤器配置 ========
+            filter:
+                stat:
+                    enabled: true
+                    log-slow-sql: true
+                    slow-sql-millis: 3000
+                    merge-sql: true
+                wall:
+                    enabled: true
+                    config:
+                        multi-statement-allow: true
+                        drop-table-allow: false
+                        create-table-allow: true
+                        alter-table-allow: true
+                        select-into-outfile-allow: false
+                        metadata-allow: true
+                slf4j:
+                    enabled: true
+                    statement-create-after-log-enabled: false
+                    statement-close-after-log-enabled: false
+                    result-set-open-after-log-enabled: false
+                    result-set-close-after-log-enabled: false
+
+            # ======== Spring监控配置 ========
+            aop-patterns: "com.ruoyi.*.service.*,com.ruoyi.*.mapper.*"

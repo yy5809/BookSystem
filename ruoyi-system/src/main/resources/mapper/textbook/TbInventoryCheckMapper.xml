@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.TbInventoryCheckMapper">
+
+    <resultMap type="com.ruoyi.textbook.domain.TbInventoryCheck" id="TbInventoryCheckResult">
+        <id property="checkId" column="check_id"/>
+        <result property="checkNo" column="check_no"/>
+        <result property="checkType" column="check_type"/>
+        <result property="checkStatus" column="check_status"/>
+        <result property="warehousemanId" column="warehouseman_id"/>
+        <result property="warehousemanName" column="warehouseman_name"/>
+        <result property="planStartTime" column="plan_start_time"/>
+        <result property="planEndTime" column="plan_end_time"/>
+        <result property="actualStartTime" column="actual_start_time"/>
+        <result property="actualEndTime" column="actual_end_time"/>
+        <result property="totalItems" column="total_items"/>
+        <result property="checkedItems" column="checked_items"/>
+        <result property="diffItems" column="diff_items"/>
+        <result property="totalDiffAmount" column="total_diff_amount"/>
+        <result property="remark" column="remark"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectTbInventoryCheckVo">
+        SELECT check_id, check_no, check_type, check_status, warehouseman_id, warehouseman_name,
+               plan_start_time, plan_end_time, actual_start_time, actual_end_time,
+               total_items, checked_items, diff_items, total_diff_amount, remark, create_time
+        FROM tb_inventory_check
+    </sql>
+
+    <select id="selectTbInventoryCheckList" parameterType="com.ruoyi.textbook.domain.TbInventoryCheck" resultMap="TbInventoryCheckResult">
+        <include refid="selectTbInventoryCheckVo"/>
+        <where>
+            del_flag = '0'
+            <if test="checkStatus != null and checkStatus != ''">AND check_status = #{checkStatus}</if>
+            <if test="checkType != null and checkType != ''">AND check_type = #{checkType}</if>
+            <if test="warehousemanName != null and warehousemanName != ''">
+                AND warehouseman_name LIKE CONCAT('%', #{warehousemanName}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectTbInventoryCheckById" parameterType="Long" resultMap="TbInventoryCheckResult">
+        <include refid="selectTbInventoryCheckVo"/>
+        WHERE check_id = #{checkId} AND del_flag = '0'
+    </select>
+
+    <insert id="insertTbInventoryCheck" parameterType="com.ruoyi.textbook.domain.TbInventoryCheck" useGeneratedKeys="true" keyProperty="checkId">
+        INSERT INTO tb_inventory_check(
+            check_no, check_type, check_status, warehouseman_id, warehouseman_name,
+            plan_start_time, plan_end_time, remark
+        ) VALUES (
+            #{checkNo}, #{checkType}, #{checkStatus}, #{warehousemanId}, #{warehousemanName},
+            #{planStartTime}, #{planEndTime}, #{remark}
+        )
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE tb_inventory_check SET 
+            check_status = #{param2},
+            actual_end_time = #{param3}
+        WHERE check_id = #{param1}
+    </update>
+
+    <delete id="deleteTbInventoryCheckByIds" parameterType="Long">
+        UPDATE tb_inventory_check SET del_flag='1' WHERE check_id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+
+    <delete id="deleteTbInventoryCheckById" parameterType="Long">
+        UPDATE tb_inventory_check SET del_flag='1' WHERE check_id = #{checkId}
+    </delete>
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.TbShortageMapper">
+    <resultMap type="com.ruoyi.textbook.domain.TbShortage" id="TbShortageResult">
+        <id property="lackId" column="lack_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="bookName" column="book_name"/>
+        <result property="isbn" column="isbn"/>
+        <result property="lackNum" column="lack_num"/>
+        <result property="urgency" column="urgency"/>
+        <result property="registerId" column="register_id"/>
+        <result property="handleStatus" column="handle_status"/>
+        <result property="handleTime" column="handle_time"/>
+        <result property="registerTime" column="register_time"/>
+        <result property="purchaseId" column="purchase_id"/>
+        <result property="source" column="source"/>
+        <result property="sourceId" column="source_id"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="selectTbShortageVo">
+        SELECT t.lack_id, t.book_id, i.book_name, i.isbn, t.lack_num, t.urgency,
+               t.register_id, t.handle_status, t.handle_time, t.register_time, t.purchase_id, t.source, t.source_id, t.del_flag
+        FROM textbook_lack t LEFT JOIN textbook_info i ON t.book_id = i.book_id
+        WHERE t.del_flag = '0'
+    </sql>
+
+    <select id="selectTbShortageById" parameterType="Long" resultMap="TbShortageResult">
+        <include refid="selectTbShortageVo"/> AND t.lack_id = #{lackId}
+    </select>
+    <select id="selectTbShortageList" parameterType="com.ruoyi.textbook.domain.TbShortage" resultMap="TbShortageResult">
+        <include refid="selectTbShortageVo"/>
+        <if test="bookName != null and bookName != ''">AND i.book_name LIKE CONCAT('%',#{bookName},'%')</if>
+        <if test="isbn != null and isbn != ''">AND i.isbn = #{isbn}</if>
+        <if test="handleStatus != null and handleStatus != ''">AND t.handle_status = #{handleStatus}</if>
+        <if test="urgency != null and urgency != ''">AND t.urgency = #{urgency}</if>
+    </select>
+
+    <insert id="insertTbShortage" useGeneratedKeys="true" keyProperty="lackId">
+        INSERT INTO textbook_lack(book_id, lack_num, urgency, register_id, register_time, handle_status, source, source_id, del_flag)
+        VALUES(#{bookId}, #{lackNum}, #{urgency}, #{registerId}, NOW(), '0', #{source}, #{sourceId}, '0')
+    </insert>
+
+    <update id="updateTbShortage" parameterType="com.ruoyi.textbook.domain.TbShortage">
+        UPDATE textbook_lack
+        <set>
+            <if test="lackNum != null">lack_num=#{lackNum},</if>
+            <if test="handleStatus != null">handle_status=#{handleStatus},</if>
+            <if test="handleTime != null">handle_time=#{handleTime},</if>
+            <if test="purchaseId != null">purchase_id=#{purchaseId},</if>
+        </set> WHERE lack_id=#{lackId}
+    </update>
+
+    <delete id="deleteTbShortageById" parameterType="Long">
+        UPDATE textbook_lack SET del_flag='1' WHERE lack_id=#{lackId}
+    </delete>
+    <delete id="deleteTbShortageByIds" parameterType="Long[]">
+        UPDATE textbook_lack SET del_flag='1' WHERE lack_id IN
+        <foreach item="lackId" collection="array" open="(" separator="," close=")">#{lackId}</foreach>
+    </delete>
+
+    <select id="selectTbShortageByBookId" parameterType="Long" resultMap="TbShortageResult">
+        <include refid="selectTbShortageVo"/> AND t.book_id = #{bookId} AND t.handle_status = '0'
+    </select>
+    
+    <select id="selectTbShortageListByBookId" parameterType="Long" resultMap="TbShortageResult">
+        <include refid="selectTbShortageVo"/> AND t.book_id = #{bookId} AND t.handle_status = '0'
+        ORDER BY t.create_time DESC
+    </select>
+
+    <select id="selectTbShortageListByIsbn" parameterType="String" resultMap="TbShortageResult">
+        <include refid="selectTbShortageVo"/> AND i.isbn = #{isbn} AND t.handle_status = '0'
+        ORDER BY t.create_time DESC
+    </select>
+</mapper>

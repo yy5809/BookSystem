@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.TbPurchaseMapper">
+    <resultMap type="com.ruoyi.textbook.domain.TbPurchase" id="TbPurchaseResult">
+        <id property="buyId" column="buy_id"/>
+        <result property="purchaseNo" column="purchase_no"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="userType" column="user_type"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="buyNum" column="buy_num"/>
+        <result property="auditStatus" column="audit_status"/>
+        <result property="auditUserId" column="audit_user_id"/>
+        <result property="auditTime" column="audit_time"/>
+        <result property="rejectReason" column="reject_reason"/>
+        <result property="auditOpinion" column="audit_opinion"/>
+        <result property="receiveStatus" column="receive_status"/>
+        <result property="receiveTime" column="receive_time"/>
+        <result property="submitTime" column="submit_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="fundingSource" column="funding_source"/>
+        <result property="fileHash" column="file_hash"/>
+    </resultMap>
+
+    <sql id="selectTbPurchaseVo">
+        SELECT t.buy_id, t.purchase_no, t.user_id, t.user_name, t.user_type, t.dept_name,
+               t.buy_num, t.audit_status, t.audit_user_id, t.audit_time,
+               t.reject_reason, t.audit_opinion, t.receive_status, t.receive_time,
+               t.submit_time, t.del_flag, t.funding_source, t.file_hash
+        FROM textbook_buy t WHERE t.del_flag = '0'
+    </sql>
+
+    <select id="selectTbPurchaseById" parameterType="Long" resultMap="TbPurchaseResult">
+        <include refid="selectTbPurchaseVo"/> AND t.buy_id = #{buyId}
+    </select>
+    <select id="selectTbPurchaseList" parameterType="com.ruoyi.textbook.domain.TbPurchase" resultMap="TbPurchaseResult">
+        <include refid="selectTbPurchaseVo"/>
+        <if test="purchaseNo != null and purchaseNo != ''">AND t.purchase_no LIKE CONCAT('%',#{purchaseNo},'%')</if>
+        <if test="userId != null">AND t.user_id = #{userId}</if>
+        <if test="userName != null and userName != ''">AND t.user_name LIKE CONCAT('%',#{userName},'%')</if>
+        <if test="userType != null and userType != ''">AND t.user_type = #{userType}</if>
+        <if test="auditStatus != null and auditStatus != ''">AND t.audit_status = #{auditStatus}</if>
+        <if test="supplierId != null">AND t.supplier_id = #{supplierId}</if>
+        ORDER BY t.submit_time DESC
+    </select>
+
+    <insert id="insertTbPurchase" parameterType="com.ruoyi.textbook.domain.TbPurchase" useGeneratedKeys="true" keyProperty="buyId">
+        insert into textbook_buy
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="bookId != null">book_id,</if>
+            <if test="purchaseNo != null and purchaseNo != ''">purchase_no,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userName != null and userName != ''">user_name,</if>
+            <if test="userType != null and userType != ''">user_type,</if>
+            <if test="deptName != null and deptName != ''">dept_name,</if>
+            <if test="buyNum != null">buy_num,</if>
+            <if test="submitTime != null">submit_time,</if>
+            <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
+            <if test="auditUserId != null">audit_user_id,</if>
+            <if test="auditTime != null">audit_time,</if>
+            <if test="rejectReason != null and rejectReason != ''">reject_reason,</if>
+            <if test="receiveStatus != null and receiveStatus != ''">receive_status,</if>
+            <if test="receiveTime != null">receive_time,</if>
+            <if test="fundingSource != null and fundingSource != ''">funding_source,</if>
+            <if test="fileHash != null and fileHash != ''">file_hash,</if>
+         </trim>
+         <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="bookId != null">#{bookId},</if>
+            <if test="purchaseNo != null and purchaseNo != ''">#{purchaseNo},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userName != null and userName != ''">#{userName},</if>
+            <if test="userType != null and userType != ''">#{userType},</if>
+            <if test="deptName != null and deptName != ''">#{deptName},</if>
+            <if test="buyNum != null">#{buyNum},</if>
+            <if test="submitTime != null">#{submitTime},</if>
+            <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
+            <if test="auditUserId != null">#{auditUserId},</if>
+            <if test="auditTime != null">#{auditTime},</if>
+            <if test="rejectReason != null and rejectReason != ''">#{rejectReason},</if>
+            <if test="receiveStatus != null and receiveStatus != ''">#{receiveStatus},</if>
+            <if test="receiveTime != null">#{receiveTime},</if>
+            <if test="fundingSource != null and fundingSource != ''">#{fundingSource},</if>
+            <if test="fileHash != null and fileHash != ''">#{fileHash},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTbPurchase" parameterType="com.ruoyi.textbook.domain.TbPurchase">
+        UPDATE textbook_buy
+        <set>
+            <if test="auditStatus != null">audit_status=#{auditStatus},</if>
+            <if test="auditUserId != null">audit_user_id=#{auditUserId},</if>
+            <if test="auditStatus == '2' and rejectReason != null">reject_reason=#{rejectReason},</if>
+            <if test="auditOpinion != null">audit_opinion=#{auditOpinion},</if>
+            <if test="receiveStatus != null">receive_status=#{receiveStatus},</if>
+            <if test="receiveStatus == '1'">receive_time=NOW(),</if>
+        </set> WHERE buy_id=#{buyId}
+    </update>
+
+    <delete id="deleteTbPurchaseById" parameterType="Long">
+        UPDATE textbook_buy SET del_flag='1' WHERE buy_id=#{buyId}
+    </delete>
+    <delete id="deleteTbPurchaseByIds" parameterType="Long[]">
+        UPDATE textbook_buy SET del_flag='1' WHERE buy_id IN
+        <foreach item="buyId" collection="array" open="(" separator="," close=")">#{buyId}</foreach>
+    </delete>
+
+    <update id="updateTbPurchaseStatus">
+        UPDATE textbook_buy SET audit_status=#{arg1} WHERE buy_id=#{arg0} AND del_flag='0'
+    </update>
+    <select id="selectTbPurchaseListByUserId" parameterType="Long" resultMap="TbPurchaseResult">
+        <include refid="selectTbPurchaseVo"/> AND t.user_id = #{userId} ORDER BY t.submit_time DESC
+    </select>
+
+    <!-- ========== 购书明细 SQL（之前缺失）========== -->
+    <resultMap type="com.ruoyi.textbook.domain.TbPurchaseDetail" id="TbPurchaseDetailResult">
+        <id property="detailId" column="detail_id"/>
+        <result property="purchaseId" column="purchase_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="bookName" column="book_name"/>
+        <result property="isbn" column="isbn"/>
+        <result property="quantity" column="quantity"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="totalPrice" column="total_price"/>
+    </resultMap>
+
+    <insert id="insertTbPurchaseDetail" useGeneratedKeys="true" keyProperty="detailId">
+        INSERT INTO textbook_purchase_detail(purchase_id, book_id, book_name, isbn, quantity, unit_price, total_price)
+        VALUES(#{purchaseId}, #{bookId}, #{bookName}, #{isbn}, #{quantity}, #{unitPrice}, #{totalPrice})
+    </insert>
+
+    <select id="selectTbPurchaseDetailListByPurchaseId" parameterType="Long" resultMap="TbPurchaseDetailResult">
+        SELECT detail_id, purchase_id, book_id, book_name, isbn, quantity, unit_price, total_price
+        FROM textbook_purchase_detail WHERE purchase_id = #{purchaseId}
+    </select>
+
+    <!-- 批量查询购书明细（解决N+1问题） -->
+    <select id="selectTbPurchaseDetailListByPurchaseIds" parameterType="java.util.List" resultMap="TbPurchaseDetailResult">
+        SELECT detail_id, purchase_id, book_id, book_name, isbn, quantity, unit_price, total_price
+        FROM textbook_purchase_detail
+        WHERE purchase_id IN
+        <foreach item="purchaseId" collection="list" open="(" separator="," close=")">#{purchaseId}</foreach>
+        ORDER BY purchase_id, detail_id
+    </select>
+
+    <select id="selectByFileHash" parameterType="String" resultMap="TbPurchaseResult">
+        <include refid="selectTbPurchaseVo"/> AND t.file_hash = #{fileHash} LIMIT 1
+    </select>
+</mapper>

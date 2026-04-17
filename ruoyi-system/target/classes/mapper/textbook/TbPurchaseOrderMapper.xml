@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.TbPurchaseOrderMapper">
+    
+    <resultMap type="com.ruoyi.textbook.domain.TbPurchaseOrder" id="TbPurchaseOrderResult">
+        <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="userId"     column="user_id"     />
+        <result property="userType"   column="user_type"   />
+        <result property="userName"   column="user_name"   />
+        <result property="bookId"     column="book_id"     />
+        <result property="bookName"   column="book_name"   />
+        <result property="quantity"   column="quantity"    />
+        <result property="orderStatus" column="order_status" />
+        <result property="auditUserId" column="audit_user_id" />
+        <result property="auditTime"  column="audit_time"  />
+        <result property="invoiceNo"  column="invoice_no"  />
+        <result property="remark"     column="remark"      />
+        <result property="createBy"   column="create_by"   />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy"   column="update_by"   />
+        <result property="updateTime" column="update_time" />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectTbPurchaseOrderVo">
+        select order_id, order_no, user_id, user_type, user_name, book_id, book_name, quantity, order_status, audit_user_id, audit_time, invoice_no, remark, create_by, create_time, update_by, update_time, del_flag from tb_purchase_order
+    </sql>
+
+    <select id="selectTbPurchaseOrderList" parameterType="com.ruoyi.textbook.domain.TbPurchaseOrder" resultMap="TbPurchaseOrderResult">
+        <include refid="selectTbPurchaseOrderVo"/>
+        <where>  
+            del_flag = '0'
+            <if test="orderNo != null and orderNo != ''">
+                AND order_no = #{orderNo}
+            </if>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="userType != null and userType != ''">
+                AND user_type = #{userType}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND user_name like concat('%', #{userName}, '%')
+            </if>
+            <if test="bookId != null">
+                AND book_id = #{bookId}
+            </if>
+            <if test="bookName != null and bookName != ''">
+                AND book_name like concat('%', #{bookName}, '%')
+            </if>
+            <if test="orderStatus != null and orderStatus != ''">
+                AND order_status = #{orderStatus}
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <select id="selectTbPurchaseOrderByOrderId" parameterType="Long" resultMap="TbPurchaseOrderResult">
+        <include refid="selectTbPurchaseOrderVo"/>
+        where order_id = #{orderId} and del_flag = '0'
+    </select>
+
+    <select id="selectPendingCount" resultType="int">
+        select count(*) from tb_purchase_order where del_flag = '0' and order_status = '0'
+    </select>
+
+    <insert id="insertTbPurchaseOrder" parameterType="com.ruoyi.textbook.domain.TbPurchaseOrder" useGeneratedKeys="true" keyProperty="orderId">
+        insert into tb_purchase_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
+            <if test="userId != null">user_id,</if>
+            <if test="userType != null and userType != ''">user_type,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="bookId != null">book_id,</if>
+            <if test="bookName != null">book_name,</if>
+            <if test="quantity != null">quantity,</if>
+            <if test="orderStatus != null">order_status,</if>
+            <if test="auditUserId != null">audit_user_id,</if>
+            <if test="auditTime != null">audit_time,</if>
+            <if test="invoiceNo != null">invoice_no,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
+            <if test="userId != null">#{userId},</if>
+            <if test="userType != null and userType != ''">#{userType},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="bookId != null">#{bookId},</if>
+            <if test="bookName != null">#{bookName},</if>
+            <if test="quantity != null">#{quantity},</if>
+            <if test="orderStatus != null">#{orderStatus},</if>
+            <if test="auditUserId != null">#{auditUserId},</if>
+            <if test="auditTime != null">#{auditTime},</if>
+            <if test="invoiceNo != null">#{invoiceNo},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            sysdate()
+        </trim>
+    </insert>
+
+    <update id="updateTbPurchaseOrder" parameterType="com.ruoyi.textbook.domain.TbPurchaseOrder">
+        update tb_purchase_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userType != null">user_type = #{userType},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="bookId != null">book_id = #{bookId},</if>
+            <if test="bookName != null">book_name = #{bookName},</if>
+            <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="orderStatus != null">order_status = #{orderStatus},</if>
+            <if test="auditUserId != null">audit_user_id = #{auditUserId},</if>
+            <if test="auditTime != null">audit_time = #{auditTime},</if>
+            <if test="invoiceNo != null">invoice_no = #{invoiceNo},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </trim>
+        where order_id = #{orderId}
+    </update>
+
+    <delete id="deleteTbPurchaseOrderByOrderId" parameterType="Long">
+        update tb_purchase_order set del_flag = '1' where order_id = #{orderId}
+    </delete>
+
+    <delete id="deleteTbPurchaseOrderByOrderIds" parameterType="String">
+        update tb_purchase_order set del_flag = '1' where order_id in 
+        <foreach item="orderId" collection="array" open="(" separator="," close=")">
+            #{orderId}
+        </foreach>
+    </delete>
+</mapper>

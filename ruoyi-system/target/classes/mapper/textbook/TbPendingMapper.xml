@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.TbPendingMapper">
+    <resultMap type="com.ruoyi.textbook.domain.TbPending" id="TbPendingResult">
+        <id property="pendingId" column="pending_id"/>
+        <result property="pendingNo" column="pending_no"/>
+        <result property="lackId" column="lack_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="bookName" column="book_name"/>
+        <result property="isbn" column="isbn"/>
+        <result property="purchaseNum" column="purchase_num"/>
+        <result property="status" column="status"/>
+        <result property="supplier" column="supplier"/>
+        <result property="supplierPhone" column="supplier_phone"/>
+        <result property="expectedDate" column="expected_date"/>
+        <result property="actualDate" column="actual_date"/>
+        <result property="purchaseUserId" column="purchase_user_id"/>
+        <result property="purchaserName" column="purchaser_name"/>
+        <result property="createTime" column="create_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="selectTbPendingVo">
+        SELECT t.pending_id, t.pending_no, t.lack_id, t.book_id, i.book_name, i.isbn,
+               t.purchase_num, t.status, t.supplier, t.supplier_phone,
+               t.expected_date, t.actual_date, t.purchase_user_id, t.purchaser_name,
+               t.create_time, t.remark, t.del_flag
+        FROM textbook_pending t LEFT JOIN textbook_info i ON t.book_id = i.book_id
+        WHERE t.del_flag = '0'
+    </sql>
+
+    <select id="selectTbPendingById" parameterType="Long" resultMap="TbPendingResult">
+        <include refid="selectTbPendingVo"/> AND t.pending_id = #{pendingId}
+    </select>
+    <select id="selectTbPendingList" parameterType="com.ruoyi.textbook.domain.TbPending" resultMap="TbPendingResult">
+        <include refid="selectTbPendingVo"/>
+        <if test="pendingNo != null and pendingNo != ''">AND t.pending_no LIKE CONCAT('%',#{pendingNo},'%')</if>
+        <if test="bookName != null and bookName != ''">AND i.book_name LIKE CONCAT('%',#{bookName},'%')</if>
+        <if test="isbn != null and isbn != ''">AND i.isbn = #{isbn}</if>
+        <if test="supplier != null and supplier != ''">AND t.supplier LIKE CONCAT('%',#{supplier},'%')</if>
+        <if test="status != null and status != ''">AND t.status = #{status}</if>
+    </select>
+
+    <insert id="insertTbPending" useGeneratedKeys="true" keyProperty="pendingId">
+        INSERT INTO textbook_pending(pending_no, lack_id, book_id, purchase_num, status, supplier, supplier_phone, expected_date, purchase_user_id, purchaser_name, remark, del_flag)
+        VALUES(#{pendingNo}, #{lackId}, #{bookId}, #{purchaseNum}, '0', #{supplier}, #{supplierPhone}, #{expectedDate}, #{purchaseUserId}, #{purchaserName}, #{remark}, '0')
+    </insert>
+
+    <update id="updateTbPending" parameterType="com.ruoyi.textbook.domain.TbPending">
+        UPDATE textbook_pending
+        <set>
+            <if test="pendingNo != null">pending_no=#{pendingNo},</if>
+            <if test="purchaseNum != null">purchase_num=#{purchaseNum},</if>
+            <if test="status != null">status=#{status},</if>
+            <if test="supplier != null">supplier=#{supplier},</if>
+            <if test="actualDate != null">actual_date=#{actualDate},</if>
+            <if test="remark != null">remark=#{remark},</if>
+        </set> WHERE pending_id=#{pendingId}
+    </update>
+
+    <delete id="deleteTbPendingById" parameterType="Long">
+        UPDATE textbook_pending SET del_flag='1' WHERE pending_id=#{pendingId}
+    </delete>
+    <delete id="deleteTbPendingByIds" parameterType="Long[]">
+        UPDATE textbook_pending SET del_flag='1' WHERE pending_id IN
+        <foreach item="pendingId" collection="array" open="(" separator="," close=")">#{pendingId}</foreach>
+    </delete>
+
+    <select id="selectTbPendingListByBookId" parameterType="Long" resultMap="TbPendingResult">
+        <include refid="selectTbPendingVo"/> AND t.book_id = #{bookId} AND t.status != '3'
+    </select>
+
+    <update id="updateTbPendingStatus">
+        UPDATE textbook_pending SET status=#{arg1} WHERE pending_id=#{arg0} AND del_flag='0'
+    </update>
+</mapper>

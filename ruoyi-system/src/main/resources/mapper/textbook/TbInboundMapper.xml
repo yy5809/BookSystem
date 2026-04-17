@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.TbInboundMapper">
+    <resultMap type="com.ruoyi.textbook.domain.TbInbound" id="TbInboundResult">
+        <id property="inId" column="in_id"/>
+        <result property="inboundNo" column="inbound_no"/>
+        <result property="pendingId" column="pending_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="bookName" column="book_name"/>
+        <result property="isbn" column="isbn"/>
+        <result property="inNum" column="in_num"/>
+        <result property="inTime" column="in_time"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="inReason" column="in_reason"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="supplier" column="supplier"/>
+        <result property="supplierPhone" column="supplier_phone"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="totalPrice" column="total_price"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="selectTbInboundVo">
+        SELECT t.in_id, t.inbound_no, t.pending_id, t.book_id, i.book_name, i.isbn,
+               t.in_num, t.in_time, t.operator_id, t.in_reason, u.nick_name AS operator_name,
+               t.supplier, t.supplier_phone, t.unit_price, t.total_price,
+               t.remark, t.del_flag
+        FROM textbook_in t
+        LEFT JOIN textbook_info i ON t.book_id = i.book_id
+        LEFT JOIN sys_user u ON t.operator_id = u.user_id
+        WHERE t.del_flag = '0'
+    </sql>
+
+    <select id="selectTbInboundList" parameterType="com.ruoyi.textbook.domain.TbInbound" resultMap="TbInboundResult">
+        <include refid="selectTbInboundVo"/>
+        <if test="inboundNo != null and inboundNo != ''">AND t.inbound_no LIKE CONCAT('%',#{inboundNo},'%')</if>
+        <if test="bookId != null">AND t.book_id = #{bookId}</if>
+        <if test="bookName != null and bookName != ''">AND i.book_name LIKE CONCAT('%',#{bookName},'%')</if>
+        <if test="isbn != null and isbn != ''">AND i.isbn LIKE CONCAT('%',#{isbn},'%')</if>
+        <if test="supplier != null and supplier != ''">AND t.supplier LIKE CONCAT('%',#{supplier},'%')</if>
+        ORDER BY t.in_time DESC
+    </select>
+
+    <select id="selectTbInboundByInboundId" parameterType="Long" resultMap="TbInboundResult">
+        <include refid="selectTbInboundVo"/> AND t.in_id = #{inId}
+    </select>
+
+    <insert id="insertTbInbound" parameterType="com.ruoyi.textbook.domain.TbInbound" useGeneratedKeys="true" keyProperty="inId">
+        INSERT INTO textbook_in(inbound_no, pending_id, book_id, book_name, isbn, in_num, in_time, operator_id, in_reason, supplier, supplier_phone, unit_price, total_price, remark, del_flag)
+        VALUES(#{inboundNo}, #{pendingId}, #{bookId}, #{bookName}, #{isbn}, #{inNum}, NOW(), #{operatorId}, #{inReason}, #{supplier}, #{supplierPhone}, #{unitPrice}, #{totalPrice}, #{remark}, '0')
+    </insert>
+
+    <update id="updateTbInbound" parameterType="com.ruoyi.textbook.domain.TbInbound">
+        UPDATE textbook_in
+        <set>
+            <if test="inboundNo != null">inbound_no=#{inboundNo},</if>
+            <if test="pendingId != null">pending_id=#{pendingId},</if>
+            <if test="bookId != null">book_id=#{bookId},</if>
+            <if test="inNum != null">in_num=#{inNum},</if>
+            <if test="inReason != null">in_reason=#{inReason},</if>
+            <if test="unitPrice != null">unit_price=#{unitPrice},</if>
+            <if test="totalPrice != null">total_price=#{totalPrice},</if>
+            <if test="supplier != null">supplier=#{supplier},</if>
+            <if test="remark != null">remark=#{remark},</if>
+        </set>
+        WHERE in_id=#{inId}
+    </update>
+
+    <delete id="deleteTbInboundByInboundId" parameterType="Long">
+        UPDATE textbook_in SET del_flag='1' WHERE in_id=#{inId}
+    </delete>
+
+    <delete id="deleteTbInboundByInboundIds">
+        UPDATE textbook_in SET del_flag='1' WHERE in_id IN
+        <foreach item="inId" collection="array" open="(" separator="," close=")">#{inId}</foreach>
+    </delete>
+    
+    <select id="selectTbInboundListByPurchaseId" parameterType="Long" resultMap="TbInboundResult">
+        <include refid="selectTbInboundVo"/>
+        AND t.pending_id = #{purchaseId}
+        ORDER BY t.in_time DESC
+    </select>
+</mapper>

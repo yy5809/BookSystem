@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.BookStockFlowMapper">
+
+    <resultMap type="BookStockFlow" id="BookStockFlowResult">
+        <result property="flowId"       column="flow_id"        />
+        <result property="textbookId"   column="textbook_id"    />
+        <result property="isbn"         column="isbn"           />
+        <result property="businessType" column="business_type"  />
+        <result property="businessNo"   column="business_no"    />
+        <result property="changeQty"    column="change_qty"     />
+        <result property="stockBefore"  column="stock_before"   />
+        <result property="stockAfter"   column="stock_after"    />
+        <result property="operator"     column="operator"       />
+        <result property="operateTime"  column="operate_time"   />
+        <result property="createTime"   column="create_time"    />
+    </resultMap>
+
+    <sql id="selectBookStockFlowVo">
+        select flow_id, textbook_id, isbn, business_type, business_no, change_qty,
+               stock_before, stock_after, operator, operate_time, create_time
+        from book_stock_flow
+    </sql>
+
+    <select id="selectBookStockFlowList" parameterType="BookStockFlow" resultMap="BookStockFlowResult">
+        <include refid="selectBookStockFlowVo"/>
+        <where>
+            <if test="isbn != null and isbn != ''"> AND isbn like concat('%', #{isbn}, '%')</if>
+            <if test="businessType != null and businessType != ''"> AND business_type = #{businessType}</if>
+            <if test="businessNo != null and businessNo != ''"> AND business_no like concat('%', #{businessNo}, '%')</if>
+            <if test="params.beginTime != null and params.beginTime != ''"> AND date_format(operate_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')</if>
+            <if test="params.endTime != null and params.endTime != ''"> AND date_format(operate_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')</if>
+        </where>
+        order by operate_time desc
+    </select>
+
+    <select id="selectBookStockFlowById" parameterType="Long" resultMap="BookStockFlowResult">
+        <include refid="selectBookStockFlowVo"/>
+        where flow_id = #{flowId}
+    </select>
+
+    <insert id="insertBookStockFlow" parameterType="BookStockFlow" useGeneratedKeys="true" keyProperty="flowId">
+        insert into book_stock_flow (textbook_id, isbn, business_type, business_no, change_qty, stock_before, stock_after, operator, operate_time, create_time)
+        values (#{textbookId}, #{isbn}, #{businessType}, #{businessNo}, #{changeQty}, #{stockBefore}, #{stockAfter}, #{operator}, #{operateTime}, NOW())
+    </insert>
+
+</mapper>

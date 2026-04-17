@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.BookClaimFormDetailMapper">
+
+    <resultMap type="com.ruoyi.textbook.domain.BookClaimFormDetail" id="BookClaimFormDetailResult">
+        <result property="detailId"    column="detail_id"    />
+        <result property="formId"      column="form_id"      />
+        <result property="textbookId"  column="textbook_id"  />
+        <result property="isbn"        column="isbn"         />
+        <result property="bookName"    column="book_name"    />
+        <result property="author"      column="author"       />
+        <result property="publisher"   column="publisher"    />
+        <result property="price"       column="price"        />
+        <result property="plannedQty"  column="planned_qty"  />
+        <result property="issuedQty"   column="issued_qty"   />
+        <result property="createTime"  column="create_time"  />
+    </resultMap>
+
+    <sql id="selectBookClaimFormDetailVo">
+        select detail_id, form_id, textbook_id, isbn, book_name, author, publisher,
+               price, planned_qty, issued_qty, create_time
+        from book_claim_form_detail
+    </sql>
+
+    <select id="selectBookClaimFormDetailById" parameterType="Long" resultMap="BookClaimFormDetailResult">
+        <include refid="selectBookClaimFormDetailVo"/>
+        where detail_id = #{detailId}
+    </select>
+
+    <select id="selectBookClaimFormDetailListByFormId" parameterType="Long" resultMap="BookClaimFormDetailResult">
+        <include refid="selectBookClaimFormDetailVo"/>
+        where form_id = #{formId}
+        order by detail_id
+    </select>
+
+    <insert id="insertBookClaimFormDetail" parameterType="com.ruoyi.textbook.domain.BookClaimFormDetail" useGeneratedKeys="true" keyProperty="detailId">
+        insert into book_claim_form_detail (
+            form_id, textbook_id, isbn, book_name, author, publisher,
+            price, planned_qty, issued_qty, create_time
+        ) values (
+            #{formId}, #{textbookId}, #{isbn}, #{bookName}, #{author}, #{publisher},
+            #{price}, #{plannedQty}, #{issuedQty}, sysdate()
+        )
+    </insert>
+
+    <update id="updateBookClaimFormDetail" parameterType="com.ruoyi.textbook.domain.BookClaimFormDetail">
+        update book_claim_form_detail
+        <set>
+            <if test="issuedQty != null">issued_qty = #{issuedQty},</if>
+        </set>
+        where detail_id = #{detailId}
+    </update>
+
+    <delete id="deleteBookClaimFormDetailByFormId" parameterType="Long">
+        delete from book_claim_form_detail where form_id = #{formId}
+    </delete>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        insert into book_claim_form_detail (
+            form_id, textbook_id, isbn, book_name, author, publisher,
+            price, planned_qty, issued_qty, create_time
+        ) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.formId}, #{item.textbookId}, #{item.isbn}, #{item.bookName},
+             #{item.author}, #{item.publisher}, #{item.price}, #{item.plannedQty},
+             #{item.issuedQty}, sysdate())
+        </foreach>
+    </insert>
+
+</mapper>

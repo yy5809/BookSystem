@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.TbOutboundMapper">
+    <resultMap type="com.ruoyi.textbook.domain.TbOutbound" id="TbOutboundResult">
+        <id property="outId" column="out_id"/>
+        <result property="outboundNo" column="outbound_no"/>
+        <result property="buyId" column="buy_id"/>
+        <result property="purchaseNo" column="purchase_no"/>
+        <result property="bookId" column="book_id"/>
+        <result property="bookName" column="book_name"/>
+        <result property="isbn" column="isbn"/>
+        <result property="outNum" column="out_num"/>
+        <result property="outTime" column="out_time"/>
+        <result property="receiveId" column="receive_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="outReason" column="out_reason"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="selectTbOutboundVo">
+        SELECT t.out_id, t.outbound_no, t.buy_id, b.purchase_no,
+               t.book_id, i.book_name, i.isbn,
+               t.out_num, t.out_time, t.receive_id,
+               b.user_name, b.dept_name,
+               t.operator_id, t.out_reason, u.nick_name AS operator_name,
+               t.remark, t.del_flag
+        FROM textbook_out t
+        LEFT JOIN textbook_info i ON t.book_id = i.book_id
+        LEFT JOIN textbook_buy b ON t.buy_id = b.buy_id
+        LEFT JOIN sys_user u ON t.operator_id = u.user_id
+        WHERE t.del_flag = '0'
+    </sql>
+
+    <select id="selectTbOutboundById" parameterType="Long" resultMap="TbOutboundResult">
+        <include refid="selectTbOutboundVo"/> AND t.out_id = #{outId}
+    </select>
+
+    <select id="selectTbOutboundList" parameterType="com.ruoyi.textbook.domain.TbOutbound" resultMap="TbOutboundResult">
+        <include refid="selectTbOutboundVo"/>
+        <if test="outboundNo != null and outboundNo != ''">AND t.outbound_no LIKE CONCAT('%',#{outboundNo},'%')</if>
+        <if test="bookName != null and bookName != ''">AND i.book_name LIKE CONCAT('%',#{bookName},'%')</if>
+        <if test="isbn != null and isbn != ''">AND i.isbn LIKE CONCAT('%',#{isbn},'%')</if>
+        <if test="userName != null and userName != ''">AND b.user_name LIKE CONCAT('%',#{userName},'%')</if>
+    </select>
+
+    <insert id="insertTbOutbound" useGeneratedKeys="true" keyProperty="outId">
+        INSERT INTO textbook_out(outbound_no, buy_id, book_id, book_name, isbn, out_num, out_time, receive_id, operator_id, out_reason, remark, del_flag)
+        VALUES(#{outboundNo}, #{buyId}, #{bookId}, #{bookName}, #{isbn}, #{outNum}, NOW(), #{receiveId}, #{operatorId}, #{outReason}, #{remark}, '0')
+    </insert>
+
+    <update id="updateTbOutbound" parameterType="com.ruoyi.textbook.domain.TbOutbound">
+        UPDATE textbook_out
+        <set>
+            <if test="outboundNo != null">outbound_no=#{outboundNo},</if>
+            <if test="buyId != null">buy_id=#{buyId},</if>
+            <if test="outNum != null">out_num=#{outNum},</if>
+            <if test="outReason != null">out_reason=#{outReason},</if>
+            <if test="remark != null">remark=#{remark},</if>
+        </set>
+        WHERE out_id=#{outId}
+    </update>
+
+    <delete id="deleteTbOutboundById" parameterType="Long">
+        UPDATE textbook_out SET del_flag='1' WHERE out_id=#{outId}
+    </delete>
+
+    <delete id="deleteTbOutboundByIds" parameterType="Long[]">
+        UPDATE textbook_out SET del_flag='1' WHERE out_id IN
+        <foreach item="outId" collection="array" open="(" separator="," close=")">#{outId}</foreach>
+    </delete>
+
+    <select id="selectTbOutboundListByPurchaseId" parameterType="Long" resultMap="TbOutboundResult">
+        <include refid="selectTbOutboundVo"/> AND t.buy_id = #{buyId}
+    </select>
+</mapper>

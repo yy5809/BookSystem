@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.textbook.mapper.TbStockMapper">
+
+    <select id="selectStockNumByBookId" resultType="int">
+        SELECT COALESCE(stock_num, 0) FROM textbook_stock WHERE book_id = #{bookId} AND del_flag = '0'
+    </select>
+
+    <select id="selectVersionByBookId" resultType="int">
+        SELECT COALESCE(version, 0) FROM textbook_stock WHERE book_id = #{bookId} AND del_flag = '0'
+    </select>
+
+    <update id="deductStockWithVersion">
+        UPDATE textbook_stock
+        SET stock_num = stock_num - #{qty},
+            version = version + 1,
+            total_issued = total_issued + #{qty},
+            update_time = NOW()
+        WHERE book_id = #{bookId}
+          AND version = #{version}
+          AND del_flag = '0'
+          AND stock_num >= #{qty}
+    </update>
+
+    <update id="addStockWithVersion">
+        UPDATE textbook_stock
+        SET stock_num = stock_num + #{qty},
+            version = version + 1,
+            total_purchase = total_purchase + #{qty},
+            update_time = NOW()
+        WHERE book_id = #{bookId}
+          AND version = #{version}
+          AND del_flag = '0'
+    </update>
+
+</mapper>

@@ -1,0 +1,123 @@
+# 数据源配置（优化版）
+spring:
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        driverClassName: com.mysql.cj.jdbc.Driver
+        druid:
+            # 主库数据源
+            master:
+                url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+                username: root
+                password: ${DB_PASSWORD:12345678}
+            # 从库数据源
+            slave:
+                enabled: false
+                url:
+                username:
+                password:
+
+            # ======== 连接池基本配置 ========
+            # 初始连接数（应用启动时创建的连接数）
+            initialSize: 5
+            # 最小空闲连接数（不应超过initialSize）
+            minIdle: 5
+            # 最大活跃连接数（根据服务器核心数和数据库负载调整）
+            maxActive: 50
+            # 获取连接最大等待时间（毫秒）- 原值60秒过长，建议10-30秒
+            maxWait: 10000
+
+            # ======== 超时配置 ========
+            # 连接建立超时时间（毫秒）
+            connectTimeout: 10000
+            # 网络读写超时时间（毫秒）
+            socketTimeout: 30000
+
+            # ======== 连接回收配置 ========
+            # 检测空闲连接的时间间隔（毫秒）
+            timeBetweenEvictionRunsMillis: 60000
+            # 连接在池中最小空闲时间（毫秒），超过此时间将被回收
+            minEvictableIdleTimeMillis: 300000
+            # 连接在池中最大存活时间（毫秒），超过此时间强制回收
+            maxEvictableIdleTimeMillis: 600000
+
+            # ======== 连接有效性检测 ========
+            # 检测连接是否有效的SQL（已修正为MySQL语法，原DUAL是Oracle语法）
+            validationQuery: SELECT 1
+            # 空闲时检测连接有效性
+            testWhileIdle: true
+            # 借出连接时检测（影响性能，生产环境建议false）
+            testOnBorrow: true
+            # 归还连接时检测（影响性能，建议false）
+            testOnReturn: false
+
+            # ======== 防止连接泄露 ========
+            # 开启PSCache（PreparedStatement缓存）
+            poolPreparedStatements: true
+            # PSCache大小
+            maxPoolPreparedStatementPerConnectionSize: 20
+            # 是否在获得连接后执行setAutoCommit（防止事务未提交导致连接被占用）
+            defaultAutoCommit: true
+
+            # ======== 监控配置 ========
+            webStatFilter:
+                enabled: true
+                urlPattern: /*
+                exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*/druid/*"
+                sessionStatMaxCount: 1000
+                sessionStatEnable: true
+                principalSessionName: session.user_info
+                principalCookieName: user_info
+                profileEnable: true
+            statViewServlet:
+                enabled: true
+                url-pattern: /druid/*
+                resetEnable: false
+                login-username: ${DRUID_USERNAME:admin}
+                login-password: ${DRUID_PASSWORD:Admin@2024}
+                allow: 127.0.0.1,localhost
+                deny:
+
+            # ======== 过滤器配置 ========
+            filter:
+                stat:
+                    enabled: true
+                    log-slow-sql: true
+                    slow-sql-millis: 3000
+                    merge-sql: true
+                wall:
+                    enabled: true
+                    config:
+                        multi-statement-allow: true
+                        none-base-statement-allow: false
+                        # 禁止危险操作
+                        drop-table-allow: false
+                        create-table-allow: true
+                        alter-table-allow: true
+                        # 允许批量操作
+                        select-into-outfile-allow: false
+                        # 其他安全配置
+                        metadata-allow: true
+                slf4j:
+                    enabled: true
+                    statement-create-after-log-enabled: false
+                    statement-close-after-log-enabled: false
+                    result-set-open-after-log-enabled: false
+                    result-set-close-after-log-enabled: false
+
+            # ======== Spring监控配置 ========
+            aop-patterns: "com.ruoyi.*.service.*,com.ruoyi.*.mapper.*"
+
+# ======== 配置说明 ========
+# 优化点：
+# 1. 修正validationQuery为MySQL语法（原DUAL是Oracle专有）
+# 2. 调整minIdle <= initialSize（原10>5不合理）
+# 3. 增大maxActive到50（原20可能不够用）
+# 4. 缩短maxWait到10秒（原60秒会导致用户长时间等待）
+# 5. 缩短socketTimeout到30秒
+# 6. 启用testOnBorrow保证借出的连接一定有效
+# 7. 启用PSCache提升性能
+# 8. 密码改用环境变量（安全性提升）
+# 9. Druid控制台密码加强（原123456太弱）
+# 10. 添加IP白名单限制访问（只允许本地访问）
+# 11. 慢SQL阈值调整为3秒（原1秒可能误报）
+# 12. 添加Spring AOP监控
