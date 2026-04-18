@@ -4,7 +4,7 @@ import java.util.Date;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.textbook.domain.BookStockFlow;
 import com.ruoyi.system.textbook.mapper.BookStockFlowMapper;
-import com.ruoyi.system.textbook.mapper.TbStockMapper;
+import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.system.textbook.service.IStockOperationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +18,7 @@ public class StockOperationServiceImpl implements IStockOperationService {
     private static final Logger log = LoggerFactory.getLogger(StockOperationServiceImpl.class);
 
     @Autowired
-    private TbStockMapper stockMapper;
+    private TbInventoryMapper inventoryMapper;
 
     @Autowired
     private BookStockFlowMapper stockFlowMapper;
@@ -26,13 +26,13 @@ public class StockOperationServiceImpl implements IStockOperationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deductStock(Long bookId, int deductQty, String businessType, String businessNo, String operator) {
-        int currentStock = stockMapper.selectStockNumByBookId(bookId);
+        int currentStock = inventoryMapper.selectStockNumByBookId(bookId);
         if (currentStock < deductQty) {
             throw new ServiceException("库存不足！当前库存: " + currentStock + ", 需要扣减: " + deductQty);
         }
 
-        int currentVersion = stockMapper.selectVersionByBookId(bookId);
-        int affected = stockMapper.deductStockWithVersion(bookId, deductQty, currentVersion);
+        int currentVersion = inventoryMapper.selectVersionByBookId(bookId);
+        int affected = inventoryMapper.deductStockWithVersion(bookId, deductQty, currentVersion);
         if (affected == 0) {
             throw new ServiceException("库存数据已被其他操作修改，请重试（并发冲突）");
         }
@@ -46,10 +46,10 @@ public class StockOperationServiceImpl implements IStockOperationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addStock(Long bookId, int addQty, String businessType, String businessNo, String operator) {
-        int currentStock = stockMapper.selectStockNumByBookId(bookId);
-        int currentVersion = stockMapper.selectVersionByBookId(bookId);
+        int currentStock = inventoryMapper.selectStockNumByBookId(bookId);
+        int currentVersion = inventoryMapper.selectVersionByBookId(bookId);
 
-        int affected = stockMapper.addStockWithVersion(bookId, addQty, currentVersion);
+        int affected = inventoryMapper.addStockWithVersion(bookId, addQty, currentVersion);
         if (affected == 0) {
             throw new ServiceException("库存数据已被其他操作修改，请重试（并发冲突）");
         }
@@ -62,7 +62,7 @@ public class StockOperationServiceImpl implements IStockOperationService {
 
     @Override
     public int getCurrentStock(Long bookId) {
-        return stockMapper.selectStockNumByBookId(bookId);
+        return inventoryMapper.selectStockNumByBookId(bookId);
     }
 
     private void recordFlow(Long bookId, String businessType, String businessNo,

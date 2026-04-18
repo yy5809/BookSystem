@@ -19,6 +19,7 @@ public class TbStockLog extends BaseEntity {
     private String operatorName;
     private String refBizType;
     private Long refBizId;
+    private String remark;
 
     public Long getLogId() { return logId; }
     public void setLogId(Long logId) { this.logId = logId; }
@@ -44,6 +45,8 @@ public class TbStockLog extends BaseEntity {
     public void setRefBizType(String refBizType) { this.refBizType = refBizType; }
     public Long getRefBizId() { return refBizId; }
     public void setRefBizId(Long refBizId) { this.refBizId = refBizId; }
+    public String getRemark() { return remark; }
+    public void setRemark(String remark) { this.remark = remark; }
 
     @Override
     public String toString() {
@@ -52,6 +55,7 @@ public class TbStockLog extends BaseEntity {
             .append("bizType", bizType).append("changeNum", changeNum)
             .append("beforeStock", beforeStock).append("afterStock", afterStock)
             .append("refBizType", refBizType).append("refBizId", refBizId)
+            .append("remark", remark)
             .toString();
     }
 }

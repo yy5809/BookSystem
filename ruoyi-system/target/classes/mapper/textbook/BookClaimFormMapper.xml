@@ -27,7 +27,7 @@
         select form_id, form_no, notice_id, college_id, major_id, class_id, class_name,
                status, planned_qty, issued_qty, receiver_name, issue_time,
                create_by, create_time, update_by, update_time, remark, del_flag
-        from book_claim_form
+        from textbook_claim_form
     </sql>
 
     <select id="selectBookClaimFormById" parameterType="Long" resultMap="BookClaimFormResult">
@@ -54,7 +54,7 @@
     </select>
 
     <insert id="insertBookClaimForm" parameterType="com.ruoyi.textbook.domain.BookClaimForm" useGeneratedKeys="true" keyProperty="formId">
-        insert into book_claim_form (
+        insert into textbook_claim_form (
             <if test="formNo != null and formNo != ''">form_no,</if>
             <if test="noticeId != null">notice_id,</if>
             <if test="collegeId != null">college_id,</if>
@@ -86,7 +86,7 @@
     </insert>
 
     <update id="updateBookClaimForm" parameterType="com.ruoyi.textbook.domain.BookClaimForm">
-        update book_claim_form
+        update textbook_claim_form
         <set>
             <if test="receiverName != null and receiverName != ''">receiver_name = #{receiverName},</if>
             <if test="issueTime != null">issue_time = #{issueTime},</if>
@@ -100,16 +100,16 @@
     </update>
 
     <update id="updateFormStatus">
-        update book_claim_form set status = #{status}, update_time = sysdate()
+        update textbook_claim_form set status = #{status}, update_time = sysdate()
         where form_id = #{formId}
     </update>
 
     <delete id="deleteBookClaimFormById" parameterType="Long">
-        update book_claim_form set del_flag = '2' where form_id = #{formId}
+        update textbook_claim_form set del_flag = '2' where form_id = #{formId}
     </delete>
 
     <delete id="deleteBookClaimFormByIds" parameterType="String">
-        update book_claim_form set del_flag = '2' where form_id in
+        update textbook_claim_form set del_flag = '2' where form_id in
         <foreach item="formId" collection="array" open="(" separator="," close=")">
             #{formId}
         </foreach>

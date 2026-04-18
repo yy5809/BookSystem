@@ -1,0 +1,52 @@
+# Maven
+/target/
+/.mvn/
+/mvnw
+/mvnw.cmd
+
+# IDE
+/.idea/
+/.vscode/
+*.iml
+*.iws
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Trae IDE
+.trae/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build files
+build/
+dist/
+
+# Logs
+logs
+*.log
+
+# Temporary files
+temp/
+tmp/
+
+# Database files
+*.db
+*.sqlite
+
+# Backup files
+*.bak
+*.backup

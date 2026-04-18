@@ -25,7 +25,7 @@
         SELECT check_id, check_no, check_type, check_status, warehouseman_id, warehouseman_name,
                plan_start_time, plan_end_time, actual_start_time, actual_end_time,
                total_items, checked_items, diff_items, total_diff_amount, remark, create_time
-        FROM tb_inventory_check
+        FROM textbook_inventory_check
     </sql>
 
     <select id="selectTbInventoryCheckList" parameterType="com.ruoyi.textbook.domain.TbInventoryCheck" resultMap="TbInventoryCheckResult">
@@ -47,7 +47,7 @@
     </select>
 
     <insert id="insertTbInventoryCheck" parameterType="com.ruoyi.textbook.domain.TbInventoryCheck" useGeneratedKeys="true" keyProperty="checkId">
-        INSERT INTO tb_inventory_check(
+        INSERT INTO textbook_inventory_check(
             check_no, check_type, check_status, warehouseman_id, warehouseman_name,
             plan_start_time, plan_end_time, remark
         ) VALUES (
@@ -57,18 +57,18 @@
     </insert>
 
     <update id="updateStatus">
-        UPDATE tb_inventory_check SET 
+        UPDATE textbook_inventory_check SET 
             check_status = #{param2},
             actual_end_time = #{param3}
         WHERE check_id = #{param1}
     </update>
 
     <delete id="deleteTbInventoryCheckByIds" parameterType="Long">
-        UPDATE tb_inventory_check SET del_flag='1' WHERE check_id IN
+        UPDATE textbook_inventory_check SET del_flag='1' WHERE check_id IN
         <foreach item="id" collection="array" open="(" separator="," close=")">#{id}</foreach>
     </delete>
 
     <delete id="deleteTbInventoryCheckById" parameterType="Long">
-        UPDATE tb_inventory_check SET del_flag='1' WHERE check_id = #{checkId}
+        UPDATE textbook_inventory_check SET del_flag='1' WHERE check_id = #{checkId}
     </delete>
 </mapper>

@@ -99,10 +99,12 @@ public class TbInboundServiceImpl implements ITbInboundService {
                 tbInventoryMapper.insertTbInventory(inventory);
                 log.info("【入库处理】创建新库存记录, bookId={}, 初始库存={}", tbInbound.getBookId(), tbInbound.getInNum());
             } else {
-                int rowsAffected = tbInventoryMapper.updateInventoryQuantityWithCheck(
+                int currentStock = inventory.getStockNum();
+                int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
+                int rowsAffected = tbInventoryMapper.addStockWithVersion(
                         tbInbound.getBookId(),
-                        beforeStock,
-                        tbInbound.getInNum()
+                        tbInbound.getInNum(),
+                        currentVersion
                 );
                 if (rowsAffected <= 0) {
                     throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
@@ -137,16 +139,42 @@ public class TbInboundServiceImpl implements ITbInboundService {
     @Override
     public int deleteTbInboundById(Long inboundId) {
         TbInbound inbound = tbInboundMapper.selectTbInboundByInboundId(inboundId);
-        int result = tbInboundMapper.deleteTbInboundByInboundId(inboundId);
-        if (result > 0 && inbound != null && inbound.getBookId() != null && inbound.getInNum() != null) {
-            try {
-                tbInventoryMapper.updateInventoryQuantity(inbound.getBookId(), -inbound.getInNum());
-            } catch (Exception e) {
-                log.error("【入库删除错误】库存恢复失败, bookId={}, inNum={}, error={}", inbound.getBookId(), inbound.getInNum(), e.getMessage());
-                throw new ServiceException("库存恢复失败，请联系管理员处理");
-            }
+        if (inbound == null) {
+            throw new ServiceException("入库单不存在");
         }
-        return result;
+
+        TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(inbound.getBookId());
+        if (inventory != null && inbound.getBookId() != null && inbound.getInNum() != null) {
+            int currentStock = inventory.getStockNum();
+            int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
+            int rowsAffected = tbInventoryMapper.deductStockWithVersion(
+                    inbound.getBookId(),
+                    inbound.getInNum(),
+                    currentVersion
+            );
+            if (rowsAffected <= 0) {
+                throw new ServiceException("并发冲突：该教材库存已被其他操作修改，删除失败");
+            }
+            
+            // 生成库存流水记录（出库）
+            TbStockLog stockLog = new TbStockLog();
+            stockLog.setBookId(inbound.getBookId());
+            stockLog.setIsbn(inbound.getIsbn());
+            stockLog.setBookName(inbound.getBookName());
+            stockLog.setBizType("3"); // 入库回退
+            stockLog.setChangeNum(-inbound.getInNum());
+            stockLog.setBeforeStock(currentStock);
+            stockLog.setAfterStock(currentStock - inbound.getInNum());
+            stockLog.setOperatorId(inbound.getOperatorId());
+            stockLog.setOperatorName(inbound.getOperatorName());
+            stockLog.setRefBizType("INBOUND_DELETE");
+            stockLog.setRefBizId(inbound.getInId());
+            stockLog.setRemark("删除入库单，回退库存，入库单号：" + inbound.getInboundNo());
+            stockLogService.insert(stockLog);
+            log.info("【入库删除】已生成库存流水记录");
+        }
+
+        return tbInboundMapper.deleteTbInboundByInboundId(inboundId);
     }
 
     @Override
@@ -191,11 +219,12 @@ public class TbInboundServiceImpl implements ITbInboundService {
             tbInventoryMapper.insertTbInventory(inventory);
             log.info("【入库处理】创建新库存记录, bookId={}, 初始库存={}", tbInbound.getBookId(), tbInbound.getInNum());
         } else {
-            Integer currentStock = inventory.getStockNum();
-            int rowsAffected = tbInventoryMapper.updateInventoryQuantityWithCheck(
+            int currentStock = inventory.getStockNum();
+            int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
+            int rowsAffected = tbInventoryMapper.addStockWithVersion(
                     tbInbound.getBookId(),
-                    currentStock,
-                    tbInbound.getInNum()
+                    tbInbound.getInNum(),
+                    currentVersion
             );
             if (rowsAffected <= 0) {
                 throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");

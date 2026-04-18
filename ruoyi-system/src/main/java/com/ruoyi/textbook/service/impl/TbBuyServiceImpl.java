@@ -121,6 +121,19 @@ public class TbBuyServiceImpl implements ITbBuyService {
         List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
 
         if (AuditStatusEnum.APPROVED.getCode().equals(status)) {
+            // 只有待审核的订单才创建缺书单
+            if (!AuditStatusEnum.PENDING.getCode().equals(buy.getAuditStatus())) {
+                // 已审核的订单不重复创建缺书单
+                noticeService.sendOrderApproveNotice(
+                    buy.getUserId(),
+                    details.stream().map(TbPurchaseDetail::getBookName).collect(Collectors.joining("、")),
+                    "1",
+                    "审核通过，请前往书库领取",
+                    buyId
+                );
+                return tbPurchaseMapper.updateTbPurchase(buy);
+            }
+            
             StringBuilder shortageInfo = new StringBuilder();
             boolean hasShortage = false;
 
@@ -194,7 +207,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
 
         int result = tbPurchaseMapper.updateTbPurchase(buy);
 
-        if (AuditStatusEnum.APPROVED.getCode().equals(status)) {
+        if (AuditStatusEnum.APPROVED.getCode().equals(status) && AuditStatusEnum.PENDING.getCode().equals(buy.getAuditStatus())) {
             List<TbPurchaseDetail> approveDetails = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
             noticeService.sendOrderApproveNotice(
                 buy.getUserId(),
@@ -209,7 +222,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int confirmReceive(Long buyId) {
         TbPurchase buy = tbPurchaseMapper.selectTbPurchaseById(buyId);
         if (buy == null) throw new ServiceException("购书单不存在");
@@ -222,8 +235,15 @@ public class TbBuyServiceImpl implements ITbBuyService {
             if (stock == null || stock.getStockNum() < detail.getQuantity()) {
                 throw new ServiceException("教材「" + detail.getBookName() + "」库存不足，无法出库");
             }
-            int rows = tbInventoryMapper.updateInventoryQuantity(detail.getBookId(), -detail.getQuantity());
-            if (rows == 0) throw new ServiceException("库存扣减失败");
+            int currentVersion = stock.getVersion() != null ? stock.getVersion() : 0;
+            int rowsAffected = tbInventoryMapper.deductStockWithVersion(
+                    detail.getBookId(),
+                    detail.getQuantity(),
+                    currentVersion
+            );
+            if (rowsAffected <= 0) {
+                throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
+            }
 
             TbOutbound out = new TbOutbound();
             out.setBuyId(buyId);

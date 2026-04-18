@@ -1,14 +1,19 @@
 package com.ruoyi.textbook.service.impl;
 
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.uuid.IdUtils;
+import com.ruoyi.common.utils.IdUtils;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.textbook.domain.TbInbound;
 import com.ruoyi.textbook.domain.TbInventory;
 import com.ruoyi.textbook.domain.TbPending;
+import com.ruoyi.textbook.domain.TbStockLog;
 import com.ruoyi.textbook.mapper.TbInboundMapper;
 import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.textbook.mapper.TbPendingMapper;
+import com.ruoyi.textbook.service.ITbInboundService;
 import com.ruoyi.textbook.service.ITbPendingService;
+import com.ruoyi.textbook.service.ITbStockLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +35,8 @@ public class TbPendingServiceImpl implements ITbPendingService
     private TbInventoryMapper tbInventoryMapper;
     @Autowired
     private TbInboundMapper tbInboundMapper;
+    @Autowired
+    private ITbStockLogService stockLogService;
 
     /**
      * 查询待购教材信息
@@ -143,9 +150,9 @@ public class TbPendingServiceImpl implements ITbPendingService
     }
 
     @Override
-    @Transactional
-    public int confirmInbound(Long pendingId) {
-        TbPending pending = tbPendingMapper.selectTbPendingById(pendingId);
+    @Transactional(rollbackFor = Exception.class)
+    public int confirmInbound(Long id) {
+        TbPending pending = tbPendingMapper.selectTbPendingById(id);
         if (pending == null) return 0;
         if ("3".equals(pending.getStatus())) {
             throw new RuntimeException("该待购单已入库，不可重复操作");
@@ -155,11 +162,22 @@ public class TbPendingServiceImpl implements ITbPendingService
         }
 
         TbInventory stock = tbInventoryMapper.selectTbInventoryByBookId(pending.getBookId());
-        int newStockNum = pending.getPurchaseNum();
+        int beforeStock = 0;
+        int afterStock = pending.getPurchaseNum();
+
         if (stock != null) {
-            newStockNum += stock.getStockNum();
-            stock.setStockNum(newStockNum);
-            tbInventoryMapper.updateTbInventory(stock);
+            beforeStock = stock.getStockNum();
+            afterStock = beforeStock + pending.getPurchaseNum();
+
+            int currentVersion = stock.getVersion() != null ? stock.getVersion() : 0;
+            int rowsAffected = tbInventoryMapper.addStockWithVersion(
+                    pending.getBookId(),
+                    pending.getPurchaseNum(),
+                    currentVersion
+            );
+            if (rowsAffected <= 0) {
+                throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
+            }
         } else {
             TbInventory newStock = new TbInventory();
             newStock.setBookId(pending.getBookId());
@@ -168,11 +186,28 @@ public class TbPendingServiceImpl implements ITbPendingService
             tbInventoryMapper.insertTbInventory(newStock);
         }
 
+        // 生成库存流水记录
+        TbStockLog stockLog = new TbStockLog();
+        stockLog.setBookId(pending.getBookId());
+        stockLog.setIsbn(pending.getIsbn());
+        stockLog.setBookName(pending.getBookName());
+        stockLog.setBizType("1");
+        stockLog.setChangeNum(pending.getPurchaseNum());
+        stockLog.setBeforeStock(beforeStock);
+        stockLog.setAfterStock(afterStock);
+        stockLog.setOperatorId(SecurityUtils.getUserId());
+        stockLog.setOperatorName(SecurityUtils.getUsername());
+        stockLog.setRefBizType("PENDING_INBOUND");
+        stockLog.setRefBizId(id);
+        stockLog.setRemark("待购入库，待购单号：" + pending.getPendingNo());
+        stockLogService.insert(stockLog);
+
         TbInbound inbound = new TbInbound();
         inbound.setBookId(pending.getBookId());
         inbound.setInboundNo("IN" + DateUtils.dateTimeNow("yyyyMMddHHmmss"));
         inbound.setInNum(pending.getPurchaseNum());
         inbound.setOperatorId(SecurityUtils.getUserId());
+        inbound.setOperatorName(SecurityUtils.getUsername());
         tbInboundMapper.insertTbInbound(inbound);
 
         pending.setStatus("3");

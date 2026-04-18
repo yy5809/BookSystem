@@ -24,7 +24,7 @@
         select notice_id, notice_no, semester, pickup_start, pickup_end, pickup_location,
                status, total_classes, issued_classes, create_by, create_time, update_by, update_time,
                remark, del_flag
-        from book_notice
+        from textbook_notice
     </sql>
 
     <select id="selectBookNoticeById" parameterType="Long" resultMap="BookNoticeResult">
@@ -45,7 +45,7 @@
     </select>
 
     <insert id="insertBookNotice" parameterType="com.ruoyi.textbook.domain.BookNotice" useGeneratedKeys="true" keyProperty="noticeId">
-        insert into book_notice (
+        insert into textbook_notice (
             <if test="noticeNo != null and noticeNo != ''">notice_no,</if>
             <if test="semester != null and semester != ''">semester,</if>
             <if test="pickupStart != null">pickup_start,</if>
@@ -75,7 +75,7 @@
     </insert>
 
     <update id="updateBookNotice" parameterType="com.ruoyi.textbook.domain.BookNotice">
-        update book_notice
+        update textbook_notice
         <set>
             <if test="noticeNo != null and noticeNo != ''">notice_no = #{noticeNo},</if>
             <if test="semester != null and semester != ''">semester = #{semester},</if>
@@ -93,12 +93,12 @@
     </update>
 
     <update id="updateNoticeStatus">
-        update book_notice set status = #{status}, update_time = sysdate()
+        update textbook_notice set status = #{status}, update_time = sysdate()
         where notice_id = #{noticeId}
     </update>
 
     <update id="updateIssuedClasses">
-        update book_notice set issued_classes = #{issuedClasses},
+        update textbook_notice set issued_classes = #{issuedClasses},
             <choose>
                 <when test="issuedClasses > 0 and issuedClasses &lt; total_classes">status = '2'</when>
                 <otherwise>status = '3'</otherwise>
@@ -108,11 +108,11 @@
     </update>
 
     <delete id="deleteBookNoticeById" parameterType="Long">
-        update book_notice set del_flag = '2' where notice_id = #{noticeId}
+        update textbook_notice set del_flag = '2' where notice_id = #{noticeId}
     </delete>
 
     <delete id="deleteBookNoticeByIds" parameterType="String">
-        update book_notice set del_flag = '2' where notice_id in
+        update textbook_notice set del_flag = '2' where notice_id in
         <foreach item="noticeId" collection="array" open="(" separator="," close=")">
             #{noticeId}
         </foreach>

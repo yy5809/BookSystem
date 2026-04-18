@@ -19,7 +19,7 @@
     <sql id="selectBookStockFlowVo">
         select flow_id, textbook_id, isbn, business_type, business_no, change_qty,
                stock_before, stock_after, operator, operate_time, create_time
-        from book_stock_flow
+        from textbook_stock_flow
     </sql>
 
     <select id="selectBookStockFlowList" parameterType="BookStockFlow" resultMap="BookStockFlowResult">
@@ -40,7 +40,7 @@
     </select>
 
     <insert id="insertBookStockFlow" parameterType="BookStockFlow" useGeneratedKeys="true" keyProperty="flowId">
-        insert into book_stock_flow (textbook_id, isbn, business_type, business_no, change_qty, stock_before, stock_after, operator, operate_time, create_time)
+        insert into textbook_stock_flow (textbook_id, isbn, business_type, business_no, change_qty, stock_before, stock_after, operator, operate_time, create_time)
         values (#{textbookId}, #{isbn}, #{businessType}, #{businessNo}, #{changeQty}, #{stockBefore}, #{stockAfter}, #{operator}, #{operateTime}, NOW())
     </insert>
 

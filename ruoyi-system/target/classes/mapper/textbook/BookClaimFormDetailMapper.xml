@@ -19,7 +19,7 @@
     <sql id="selectBookClaimFormDetailVo">
         select detail_id, form_id, textbook_id, isbn, book_name, author, publisher,
                price, planned_qty, issued_qty, create_time
-        from book_claim_form_detail
+        from textbook_claim_form_detail
     </sql>
 
     <select id="selectBookClaimFormDetailById" parameterType="Long" resultMap="BookClaimFormDetailResult">
@@ -34,7 +34,7 @@
     </select>
 
     <insert id="insertBookClaimFormDetail" parameterType="com.ruoyi.textbook.domain.BookClaimFormDetail" useGeneratedKeys="true" keyProperty="detailId">
-        insert into book_claim_form_detail (
+        insert into textbook_claim_form_detail (
             form_id, textbook_id, isbn, book_name, author, publisher,
             price, planned_qty, issued_qty, create_time
         ) values (
@@ -44,7 +44,7 @@
     </insert>
 
     <update id="updateBookClaimFormDetail" parameterType="com.ruoyi.textbook.domain.BookClaimFormDetail">
-        update book_claim_form_detail
+        update textbook_claim_form_detail
         <set>
             <if test="issuedQty != null">issued_qty = #{issuedQty},</if>
         </set>
@@ -52,11 +52,11 @@
     </update>
 
     <delete id="deleteBookClaimFormDetailByFormId" parameterType="Long">
-        delete from book_claim_form_detail where form_id = #{formId}
+        delete from textbook_claim_form_detail where form_id = #{formId}
     </delete>
 
     <insert id="batchInsert" parameterType="java.util.List">
-        insert into book_claim_form_detail (
+        insert into textbook_claim_form_detail (
             form_id, textbook_id, isbn, book_name, author, publisher,
             price, planned_qty, issued_qty, create_time
         ) values

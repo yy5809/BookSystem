@@ -106,29 +106,56 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
             throw new ServiceException("领书单没有明细信息");
         }
 
-        for (BookClaimFormDetail detail : details) {
+        int totalPlannedQty = details.stream().mapToInt(BookClaimFormDetail::getPlannedQty).sum();
+        int totalIssuedQtyParam = (issuedQty != null ? issuedQty : totalPlannedQty);
+
+        if (totalIssuedQtyParam > totalPlannedQty) {
+            throw new ServiceException("实发数量不能超过应发总数，当前应发总数：" + totalPlannedQty);
+        }
+
+        int remainingToIssue = totalIssuedQtyParam;
+
+        for (int i = 0; i < details.size(); i++) {
+            BookClaimFormDetail detail = details.get(i);
             TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(detail.getTextbookId());
             if (inventory == null) {
                 throw new ServiceException("教材《" + detail.getBookName() + "》库存记录不存在");
             }
 
-            Integer currentStock = inventory.getStockNum();
-            Integer actualIssueQty = Math.min(detail.getPlannedQty(), issuedQty != null ? issuedQty : detail.getPlannedQty());
+            int remainingForThisDetail = detail.getPlannedQty() - detail.getIssuedQty();
+            if (remainingForThisDetail <= 0) {
+                continue;
+            }
 
+            int actualIssueQty;
+            if (i == details.size() - 1) {
+                actualIssueQty = remainingToIssue;
+            } else {
+                double proportion = (double) detail.getPlannedQty() / totalPlannedQty;
+                actualIssueQty = (int) Math.round(totalIssuedQtyParam * proportion);
+                actualIssueQty = Math.min(actualIssueQty, remainingForThisDetail);
+            }
+
+            if (actualIssueQty <= 0) {
+                continue;
+            }
+
+            int currentStock = inventory.getStockNum();
             if (currentStock < actualIssueQty) {
                 throw new ServiceException("教材《" + detail.getBookName() + "》库存不足，当前库存：" + currentStock + "，需求：" + actualIssueQty);
             }
 
-            int rowsAffected = tbInventoryMapper.updateInventoryQuantityWithCheck(
+            int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
+            int rowsAffected = tbInventoryMapper.deductStockWithVersion(
                     detail.getTextbookId(),
-                    currentStock,
-                    -actualIssueQty
+                    actualIssueQty,
+                    currentVersion
             );
             if (rowsAffected <= 0) {
                 throw new ServiceException("并发冲突：教材《" + detail.getBookName() + "》库存已被其他操作修改，请刷新后重试");
             }
 
-            detail.setIssuedQty(actualIssueQty);
+            detail.setIssuedQty(detail.getIssuedQty() + actualIssueQty);
             bookClaimFormDetailMapper.updateBookClaimFormDetail(detail);
 
             TbStockLog stockLog = new TbStockLog();
@@ -143,17 +170,19 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
             stockLog.setRefBizId(formId);
             stockLog.setRemark("班级领书出库，领书单号：" + form.getFormNo() + "，班级：" + form.getClassName());
             stockLogService.insert(stockLog);
+
+            remainingToIssue -= actualIssueQty;
         }
 
-        Integer totalIssued = form.getIssuedQty() + (issuedQty != null ? issuedQty : 0);
+        int newTotalIssued = form.getIssuedQty() + totalIssuedQtyParam;
         String newStatus;
-        if (totalIssued >= form.getPlannedQty()) {
+        if (newTotalIssued >= form.getPlannedQty()) {
             newStatus = "2";
         } else {
             newStatus = "1";
         }
 
-        form.setIssuedQty(totalIssued);
+        form.setIssuedQty(newTotalIssued);
         form.setReceiverName(receiverName);
         form.setIssueTime(new Date());
         form.setStatus(newStatus);
@@ -164,7 +193,7 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
         updateNoticeProgress(form.getNoticeId());
 
         log.info("【班级领书出库】完成! 领书单号={}, 班级={}, 实发数量={}, 状态={}",
-                form.getFormNo(), form.getClassName(), totalIssued, newStatus);
+                form.getFormNo(), form.getClassName(), totalIssuedQtyParam, newStatus);
         return 1;
     }
 

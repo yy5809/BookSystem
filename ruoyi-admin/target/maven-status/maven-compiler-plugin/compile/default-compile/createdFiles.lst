@@ -15,6 +15,7 @@ com\ruoyi\web\controller\monitor\SysLogininforController.class
 com\ruoyi\web\controller\monitor\SysUserOnlineController.class
 com\ruoyi\web\controller\system\SysLoginController.class
 com\ruoyi\web\controller\monitor\CacheController.class
+com\ruoyi\textbook\service\INoticePushService.class
 com\ruoyi\web\controller\system\SysNoticeController.class
 com\ruoyi\web\controller\system\SysDictTypeController.class
 com\ruoyi\web\controller\system\SysProfileController.class

@@ -59,7 +59,6 @@
         <set>
             <if test="storageAddr != null">storage_addr=#{storageAddr},</if>
             <if test="warningNum != null">warning_num=#{warningNum},</if>
-            <if test="stockNum != null">stock_num=#{stockNum},</if>
             <if test="stockStatus != null">stock_status=#{stockStatus},</if>
         </set> WHERE stock_id=#{stockId}
     </update>
@@ -74,6 +73,37 @@
 
     <update id="updateInventoryQuantity">
         UPDATE textbook_stock SET stock_num=stock_num+#{arg1}, version=version+1 WHERE book_id=#{arg0} AND del_flag='0' AND stock_num+#{arg1} >= 0
+    </update>
+
+    <select id="selectStockNumByBookId" resultType="int">
+        SELECT COALESCE(stock_num, 0) FROM textbook_stock WHERE book_id = #{bookId} AND del_flag = '0'
+    </select>
+
+    <select id="selectVersionByBookId" resultType="int">
+        SELECT COALESCE(version, 0) FROM textbook_stock WHERE book_id = #{bookId} AND del_flag = '0'
+    </select>
+
+    <update id="deductStockWithVersion">
+        UPDATE textbook_stock
+        SET stock_num = stock_num - #{qty},
+            version = version + 1,
+            total_issued = COALESCE(total_issued, 0) + #{qty},
+            update_time = NOW()
+        WHERE book_id = #{bookId}
+          AND version = #{version}
+          AND del_flag = '0'
+          AND stock_num >= #{qty}
+    </update>
+
+    <update id="addStockWithVersion">
+        UPDATE textbook_stock
+        SET stock_num = stock_num + #{qty},
+            version = version + 1,
+            total_purchase = COALESCE(total_purchase, 0) + #{qty},
+            update_time = NOW()
+        WHERE book_id = #{bookId}
+          AND version = #{version}
+          AND del_flag = '0'
     </update>
 
     <update id="updateInventoryQuantityWithCheck">

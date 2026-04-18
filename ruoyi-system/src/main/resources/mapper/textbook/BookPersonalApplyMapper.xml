@@ -31,7 +31,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select apply_id, apply_no, teacher_id, teacher_name, textbook_id, isbn, book_name, apply_qty, purpose,
                status, audit_opinion, audit_by, audit_time, issue_time, create_by, create_time, update_by, update_time,
                del_flag, remark
-        from book_personal_apply
+        from textbook_personal_apply
     </sql>
 
     <select id="selectBookPersonalApplyList" parameterType="com.ruoyi.system.textbook.domain.BookPersonalApply" resultMap="BookPersonalApplyResult">
@@ -68,7 +68,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <insert id="insertBookPersonalApply" parameterType="com.ruoyi.system.textbook.domain.BookPersonalApply" useGeneratedKeys="true" keyProperty="applyId">
-        insert into book_personal_apply (
+        insert into textbook_personal_apply (
             <if test="applyNo != null and applyNo != ''">apply_no,</if>
             <if test="teacherId != null">teacher_id,</if>
             <if test="teacherName != null and teacherName != ''">teacher_name,</if>
@@ -96,7 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </insert>
 
     <update id="updateBookPersonalApply" parameterType="com.ruoyi.system.textbook.domain.BookPersonalApply">
-        update book_personal_apply
+        update textbook_personal_apply
         <set>
             <if test="auditOpinion != null">audit_opinion = #{auditOpinion},</if>
             <if test="auditBy != null and auditBy != ''">audit_by = #{auditBy},</if>
@@ -110,14 +110,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <delete id="deleteBookPersonalApplyByIds" parameterType="String">
-        update book_personal_apply set del_flag = '2' where apply_id in
+        update textbook_personal_apply set del_flag = '2' where apply_id in
         <foreach item="applyId" collection="array" open="(" separator="," close=")">
             #{applyId}
         </foreach>
     </delete>
 
     <delete id="deleteBookPersonalApplyById" parameterType="Long">
-        update book_personal_apply set del_flag = '2' where apply_id = #{applyId}
+        update textbook_personal_apply set del_flag = '2' where apply_id = #{applyId}
     </delete>
 
 </mapper>

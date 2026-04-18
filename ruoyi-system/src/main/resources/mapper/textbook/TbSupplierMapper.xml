@@ -22,7 +22,7 @@
     <sql id="selectTbSupplierVo">
         SELECT supplier_id, supplier_code, supplier_name, contact_person, contact_phone, contact_email, 
                address, discount_rate, payment_terms, bank_name, bank_account, tax_number, status, del_flag, user_id 
-        FROM tb_supplier 
+        FROM textbook_supplier 
         WHERE del_flag = '0'
     </sql>
 
@@ -37,7 +37,7 @@
     </select>
 
     <insert id="insertTbSupplier" parameterType="com.ruoyi.textbook.domain.TbSupplier" useGeneratedKeys="true" keyProperty="supplierId">
-        INSERT INTO tb_supplier
+        INSERT INTO textbook_supplier
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="supplierCode != null and supplierCode != ''">supplier_code,</if>
             <if test="supplierName != null and supplierName != ''">supplier_name,</if>
@@ -73,7 +73,7 @@
     </insert>
 
     <update id="updateTbSupplier" parameterType="com.ruoyi.textbook.domain.TbSupplier">
-        UPDATE tb_supplier
+        UPDATE textbook_supplier
         <set>
             <if test="supplierCode != null and supplierCode != ''">supplier_code = #{supplierCode},</if>
             <if test="supplierName != null and supplierName != ''">supplier_name = #{supplierName},</if>
@@ -94,7 +94,7 @@
     </update>
 
     <delete id="deleteTbSupplierById" parameterType="Long">
-        UPDATE tb_supplier SET del_flag = '1' WHERE supplier_id = #{supplierId}
+        UPDATE textbook_supplier SET del_flag = '1' WHERE supplier_id = #{supplierId}
     </delete>
 
     <select id="selectTbSupplierList" parameterType="com.ruoyi.textbook.domain.TbSupplier" resultMap="TbSupplierResult">

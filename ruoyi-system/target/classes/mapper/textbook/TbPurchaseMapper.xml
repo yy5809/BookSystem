@@ -20,6 +20,11 @@
         <result property="delFlag" column="del_flag"/>
         <result property="fundingSource" column="funding_source"/>
         <result property="fileHash" column="file_hash"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="purchaseStatus" column="purchase_status"/>
+        <result property="logisticsNo" column="logistics_no"/>
+        <result property="logisticsCompany" column="logistics_company"/>
+        <result property="invoiceNo" column="invoice_no"/>
     </resultMap>
 
     <sql id="selectTbPurchaseVo">
@@ -64,6 +69,11 @@
             <if test="receiveTime != null">receive_time,</if>
             <if test="fundingSource != null and fundingSource != ''">funding_source,</if>
             <if test="fileHash != null and fileHash != ''">file_hash,</if>
+            <if test="supplierId != null">supplier_id,</if>
+            <if test="purchaseStatus != null and purchaseStatus != ''">purchase_status,</if>
+            <if test="logisticsNo != null and logisticsNo != ''">logistics_no,</if>
+            <if test="logisticsCompany != null and logisticsCompany != ''">logistics_company,</if>
+            <if test="invoiceNo != null and invoiceNo != ''">invoice_no,</if>
          </trim>
          <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="bookId != null">#{bookId},</if>
@@ -82,6 +92,11 @@
             <if test="receiveTime != null">#{receiveTime},</if>
             <if test="fundingSource != null and fundingSource != ''">#{fundingSource},</if>
             <if test="fileHash != null and fileHash != ''">#{fileHash},</if>
+            <if test="supplierId != null">#{supplierId},</if>
+            <if test="purchaseStatus != null and purchaseStatus != ''">#{purchaseStatus},</if>
+            <if test="logisticsNo != null and logisticsNo != ''">#{logisticsNo},</if>
+            <if test="logisticsCompany != null and logisticsCompany != ''">#{logisticsCompany},</if>
+            <if test="invoiceNo != null and invoiceNo != ''">#{invoiceNo},</if>
          </trim>
     </insert>
 
@@ -94,6 +109,11 @@
             <if test="auditOpinion != null">audit_opinion=#{auditOpinion},</if>
             <if test="receiveStatus != null">receive_status=#{receiveStatus},</if>
             <if test="receiveStatus == '1'">receive_time=NOW(),</if>
+            <if test="supplierId != null">supplier_id=#{supplierId},</if>
+            <if test="purchaseStatus != null">purchase_status=#{purchaseStatus},</if>
+            <if test="logisticsNo != null">logistics_no=#{logisticsNo},</if>
+            <if test="logisticsCompany != null">logistics_company=#{logisticsCompany},</if>
+            <if test="invoiceNo != null">invoice_no=#{invoiceNo},</if>
         </set> WHERE buy_id=#{buyId}
     </update>
 

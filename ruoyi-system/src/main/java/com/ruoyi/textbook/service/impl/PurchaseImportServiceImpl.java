@@ -3,6 +3,7 @@ package com.ruoyi.textbook.service.impl;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.textbook.domain.TbBook;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class PurchaseImportServiceImpl implements IPurchaseImportService {
@@ -37,6 +39,8 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
 
     @Autowired
     private NoticeService noticeService;
+
+    private static final AtomicInteger sequence = new AtomicInteger(0);
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -72,7 +76,7 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         }
 
         TbPurchase purchase = new TbPurchase();
-        String purchaseNo = "CG" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + String.format("%03d", System.currentTimeMillis() % 1000);
+        String purchaseNo = "CG" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + IdUtils.fastSimpleUUID().substring(0, 6);
         purchase.setPurchaseNo(purchaseNo);
         purchase.setAuditStatus("0");
         purchase.setFileHash(fileHash);

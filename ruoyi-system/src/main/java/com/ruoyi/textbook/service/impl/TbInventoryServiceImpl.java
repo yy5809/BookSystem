@@ -112,7 +112,20 @@ public class TbInventoryServiceImpl implements ITbInventoryService
         if (!validateBookExists(bookId)) {
             throw new ServiceException("教材信息不存在，无法入库，bookId=" + bookId);
         }
-        return tbInventoryMapper.updateInventoryQuantity(bookId, quantity);
+        TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(bookId);
+        if (inventory == null) {
+            throw new ServiceException("库存记录不存在，bookId=" + bookId);
+        }
+        int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
+        int rowsAffected = tbInventoryMapper.addStockWithVersion(
+                bookId,
+                quantity,
+                currentVersion
+        );
+        if (rowsAffected <= 0) {
+            throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
+        }
+        return rowsAffected;
     }
 
     /**
@@ -131,7 +144,16 @@ public class TbInventoryServiceImpl implements ITbInventoryService
         if (stock.getStockNum() < quantity) {
             throw new ServiceException("库存不足：当前库存" + stock.getStockNum() + "本，需要扣减" + quantity + "本");
         }
-        return tbInventoryMapper.updateInventoryQuantity(bookId, -quantity);
+        int currentVersion = stock.getVersion() != null ? stock.getVersion() : 0;
+        int rowsAffected = tbInventoryMapper.deductStockWithVersion(
+                bookId,
+                quantity,
+                currentVersion
+        );
+        if (rowsAffected <= 0) {
+            throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
+        }
+        return rowsAffected;
     }
 
     /**
@@ -151,11 +173,16 @@ public class TbInventoryServiceImpl implements ITbInventoryService
         if (stock.getStockNum() < quantity) {
             throw new ServiceException("库存不足：当前库存" + stock.getStockNum() + "本，需要扣减" + quantity + "本");
         }
-        int rows = tbInventoryMapper.updateInventoryQuantity(bookId, -quantity);
-        if (rows == 0) {
+        int currentVersion = stock.getVersion() != null ? stock.getVersion() : 0;
+        int rowsAffected = tbInventoryMapper.deductStockWithVersion(
+                bookId,
+                quantity,
+                currentVersion
+        );
+        if (rowsAffected <= 0) {
             throw new Exception("库存扣减失败，可能存在并发操作，请重试");
         }
-        return rows;
+        return rowsAffected;
     }
 
     /**

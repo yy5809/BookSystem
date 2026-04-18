@@ -80,16 +80,17 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
             if (inventory == null) {
                 throw new ServiceException("教材库存记录不存在，bookId=" + tbOutbound.getBookId());
             }
-            
-            Integer beforeStock = inventory.getStockNum();
+
+            int beforeStock = inventory.getStockNum();
             if (beforeStock < tbOutbound.getOutNum()) {
                 throw new ServiceException("库存不足，当前库存：" + beforeStock + "，需求：" + tbOutbound.getOutNum());
             }
-            
-            int rowsAffected = tbInventoryMapper.updateInventoryQuantityWithCheck(
+
+            int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
+            int rowsAffected = tbInventoryMapper.deductStockWithVersion(
                     tbOutbound.getBookId(),
-                    beforeStock,
-                    -tbOutbound.getOutNum()
+                    tbOutbound.getOutNum(),
+                    currentVersion
             );
             if (rowsAffected <= 0) {
                 throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
@@ -123,16 +124,25 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
     @Override
     public int deleteTbOutboundById(Long outboundId) {
         TbOutbound outbound = tbOutboundMapper.selectTbOutboundById(outboundId);
-        int result = tbOutboundMapper.deleteTbOutboundById(outboundId);
-        if (result > 0 && outbound != null && outbound.getBookId() != null && outbound.getOutNum() != null) {
-            try {
-                tbInventoryMapper.updateInventoryQuantity(outbound.getBookId(), outbound.getOutNum());
-            } catch (Exception e) {
-                log.error("【出库删除错误】库存恢复失败, bookId={}, outNum={}, error={}", outbound.getBookId(), outbound.getOutNum(), e.getMessage());
-                throw new ServiceException("库存恢复失败，请联系管理员处理");
+        if (outbound == null) {
+            throw new ServiceException("出库单不存在");
+        }
+
+        TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(outbound.getBookId());
+        if (inventory != null && outbound.getBookId() != null && outbound.getOutNum() != null) {
+            int currentStock = inventory.getStockNum();
+            int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
+            int rowsAffected = tbInventoryMapper.addStockWithVersion(
+                    outbound.getBookId(),
+                    outbound.getOutNum(),
+                    currentVersion
+            );
+            if (rowsAffected <= 0) {
+                throw new ServiceException("并发冲突：该教材库存已被其他操作修改，删除失败");
             }
         }
-        return result;
+
+        return tbOutboundMapper.deleteTbOutboundById(outboundId);
     }
 
     @Override
@@ -178,7 +188,7 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
                 continue;
             }
 
-            Integer currentStock = inventory.getStockNum();
+            int currentStock = inventory.getStockNum();
             if (currentStock < detail.getQuantity()) {
                 failMessages.add("教材《" + detail.getBookName() + "》库存不足（当前:" + currentStock + ",需求:" + detail.getQuantity() + "）");
                 continue;
@@ -202,10 +212,11 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
             tbOutboundMapper.insertTbOutbound(outbound);
             outboundList.add(outbound);
 
-            int rowsAffected = tbInventoryMapper.updateInventoryQuantityWithCheck(
+            int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
+            int rowsAffected = tbInventoryMapper.deductStockWithVersion(
                     detail.getBookId(),
-                    currentStock,
-                    -detail.getQuantity()
+                    detail.getQuantity(),
+                    currentVersion
             );
             if (rowsAffected <= 0) {
                 throw new ServiceException("并发冲突：教材《" + detail.getBookName() + "》库存已被其他操作修改，请刷新后重试");

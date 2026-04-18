@@ -76,6 +76,9 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
                 if (inventory.getStockNum() < detail.getPlannedQty()) {
                     throw new ServiceException("教材《" + detail.getBookName() + "》库存不足，当前库存：" + inventory.getStockNum() + "，需求：" + detail.getPlannedQty());
                 }
+                
+                // 保存领书明细（暂时保存到临时表或关联到通知）
+                // 这里简化处理，实际应该有专门的表来存储通知的领书明细
             }
         }
         
@@ -121,8 +124,21 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
             throw new ServiceException("只有草稿状态的通知才能发布");
         }
         
+        // 再次校验库存（防止创建后库存被其他操作消耗）
+        if (notice.getDetails() != null && !notice.getDetails().isEmpty()) {
+            for (BookClaimFormDetail detail : notice.getDetails()) {
+                TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(detail.getTextbookId());
+                if (inventory == null) {
+                    throw new ServiceException("教材《" + detail.getBookName() + "》库存记录不存在");
+                }
+                if (inventory.getStockNum() < detail.getPlannedQty()) {
+                    throw new ServiceException("教材《" + detail.getBookName() + "》库存不足，当前库存：" + inventory.getStockNum() + "，需求：" + detail.getPlannedQty());
+                }
+            }
+        }
+        
         // 生成领书单（按班级分组）
-        List<BookClaimForm> forms = generateClaimFormsByClass(noticeId);
+        List<BookClaimForm> forms = generateClaimFormsByClass(notice);
         if (forms == null || forms.isEmpty()) {
             throw new ServiceException("请先添加领书明细后再发布");
         }
@@ -140,11 +156,16 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
     
     // 按班级生成领书单
     @Transactional(rollbackFor = Exception.class)
-    private List<BookClaimForm> generateClaimFormsByClass(Long noticeId) {
+    private List<BookClaimForm> generateClaimFormsByClass(BookNotice notice) {
+        // 先检查是否已存在领书单
+        List<BookClaimForm> existingForms = bookClaimFormMapper.selectBookClaimFormsByNoticeId(notice.getNoticeId());
+        if (existingForms != null && !existingForms.isEmpty()) {
+            return existingForms;
+        }
+        
         // 从领书通知中获取领书明细
-        BookNotice notice = bookNoticeMapper.selectBookNoticeById(noticeId);
-        if (notice == null || notice.getDetails() == null || notice.getDetails().isEmpty()) {
-            return bookClaimFormMapper.selectBookClaimFormsByNoticeId(noticeId);
+        if (notice.getDetails() == null || notice.getDetails().isEmpty()) {
+            return new ArrayList<>();
         }
         
         // 按班级分组
@@ -166,7 +187,7 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
                 
                 // 创建领书单
                 BookClaimForm form = new BookClaimForm();
-                form.setNoticeId(noticeId);
+                form.setNoticeId(notice.getNoticeId());
                 form.setCollegeId(firstDetail.getCollegeId());
                 form.setMajorId(firstDetail.getMajorId());
                 form.setClassId(firstDetail.getClassId());
@@ -215,7 +236,8 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
         if (existingForms != null && !existingForms.isEmpty()) {
             return existingForms;
         }
-
-        throw new ServiceException("请先通过领书通知添加领书明细，系统将自动生成领书单");
+        
+        // 生成领书单
+        return generateClaimFormsByClass(notice);
     }
 }
