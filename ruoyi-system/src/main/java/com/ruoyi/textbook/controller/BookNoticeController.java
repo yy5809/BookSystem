@@ -11,9 +11,8 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.textbook.domain.BookNotice;
-import com.ruoyi.textbook.domain.BookClaimForm;
-import com.ruoyi.textbook.service.IBookNoticeService;
+import com.ruoyi.common.core.domain.entity.SysDictData;
+import com.ruoyi.system.mapper.SysDictDataMapper;
 
 @RestController
 @RequestMapping("/textbook/notice")
@@ -21,6 +20,9 @@ public class BookNoticeController extends BaseController {
 
     @Autowired
     private IBookNoticeService bookNoticeService;
+
+    @Autowired
+    private SysDictDataMapper dictDataMapper;
 
     @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @GetMapping("/list")
@@ -80,20 +82,18 @@ public class BookNoticeController extends BaseController {
      */
     @GetMapping("/college/list")
     public AjaxResult getColleges() {
-        // 这里返回模拟的学院数据，实际项目中应该从数据库获取
+        // 从字典表获取学院数据
         List<Map<String, Object>> colleges = new ArrayList<>();
-        Map<String, Object> college1 = new java.util.HashMap<>();
-        college1.put("id", 1);
-        college1.put("name", "计算机学院");
-        colleges.add(college1);
-        Map<String, Object> college2 = new java.util.HashMap<>();
-        college2.put("id", 2);
-        college2.put("name", "电子工程学院");
-        colleges.add(college2);
-        Map<String, Object> college3 = new java.util.HashMap<>();
-        college3.put("id", 3);
-        college3.put("name", "机械工程学院");
-        colleges.add(college3);
+        SysDictData query = new SysDictData();
+        query.setDictType("tb_college");
+        query.setStatus("0");
+        List<SysDictData> dictList = dictDataMapper.selectDictDataList(query);
+        for (SysDictData dict : dictList) {
+            Map<String, Object> college = new java.util.HashMap<>();
+            college.put("id", dict.getDictCode());
+            college.put("name", dict.getDictLabel());
+            colleges.add(college);
+        }
         return AjaxResult.success(colleges);
     }
     
