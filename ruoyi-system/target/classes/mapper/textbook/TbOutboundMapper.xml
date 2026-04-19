@@ -61,7 +61,7 @@
             <if test="outReason != null">out_reason=#{outReason},</if>
             <if test="remark != null">remark=#{remark},</if>
         </set>
-        WHERE out_id=#{outId}
+        WHERE out_id=#{outId} AND del_flag='0'
     </update>
 
     <delete id="deleteTbOutboundById" parameterType="Long">

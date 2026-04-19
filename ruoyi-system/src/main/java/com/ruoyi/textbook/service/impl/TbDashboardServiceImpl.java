@@ -44,8 +44,8 @@ public class TbDashboardServiceImpl implements ITbDashboardService {
         List<TbPurchase> auditList = new java.util.ArrayList<>();
         List<TbPurchase> receiveList = new java.util.ArrayList<>();
         for (TbPurchase p : allPurchases) {
-            if ("0".equals(p.getAuditStatus())) { auditCount++; if (auditList.size() < 5) auditList.add(p); }
-            if ("1".equals(p.getAuditStatus()) && !"1".equals(p.getReceiveStatus())) { receiveCount++; if (receiveList.size() < 5) receiveList.add(p); }
+            if ("0".equals(p.getStatus())) { auditCount++; if (auditList.size() < 5) auditList.add(p); }
+            if ("1".equals(p.getStatus())) { receiveCount++; if (receiveList.size() < 5) receiveList.add(p); }
         }
         vo.setPendingAudit(auditCount);
         vo.setPendingReceive(receiveCount);

@@ -48,7 +48,7 @@
             <if test="handleStatus != null">handle_status=#{handleStatus},</if>
             <if test="handleTime != null">handle_time=#{handleTime},</if>
             <if test="purchaseId != null">purchase_id=#{purchaseId},</if>
-        </set> WHERE lack_id=#{lackId}
+        </set> WHERE lack_id=#{lackId} AND del_flag='0'
     </update>
 
     <delete id="deleteTbShortageById" parameterType="Long">

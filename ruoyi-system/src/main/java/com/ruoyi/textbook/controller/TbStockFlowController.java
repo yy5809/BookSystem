@@ -43,6 +43,6 @@ public class TbStockFlowController extends BaseController {
     @Log(title = "库存流水", businessType = BusinessType.DELETE)
     @DeleteMapping("/remove/{flowIds}")
     public AjaxResult remove(@PathVariable Long[] flowIds) {
-        return toAjax(1);
+        return AjaxResult.error("库存流水为不可删除数据");
     }
 }

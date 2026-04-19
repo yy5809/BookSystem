@@ -1,10 +1,12 @@
 package com.ruoyi.textbook.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.textbook.domain.TbSupplier;
+import com.ruoyi.textbook.domain.vo.SupplierVO;
 import com.ruoyi.textbook.mapper.TbSupplierMapper;
 import com.ruoyi.textbook.service.ITbSupplierService;
 
@@ -20,6 +22,26 @@ public class TbSupplierServiceImpl implements ITbSupplierService {
     @Override
     public List<TbSupplier> selectTbSupplierList(TbSupplier tbSupplier) {
         return tbSupplierMapper.selectTbSupplierList(tbSupplier);
+    }
+
+    @Override
+    public SupplierVO selectSupplierVOById(Long supplierId) {
+        TbSupplier supplier = tbSupplierMapper.selectBySupplierId(supplierId);
+        if (supplier == null) {
+            return null;
+        }
+        SupplierVO vo = new SupplierVO();
+        vo.setSupplierId(supplier.getSupplierId());
+        vo.setSupplierCode(supplier.getSupplierCode());
+        vo.setSupplierName(supplier.getSupplierName());
+        vo.setContactPerson(supplier.getContactPerson());
+        vo.setContactPhone(supplier.getContactPhone());
+        vo.setContactEmail(supplier.getContactEmail());
+        vo.setAddress(supplier.getAddress());
+        vo.setDiscountRate(supplier.getDiscountRate());
+        vo.setPaymentTerms(supplier.getPaymentTerms());
+        vo.setStatus(supplier.getStatus());
+        return vo;
     }
 
     @Override

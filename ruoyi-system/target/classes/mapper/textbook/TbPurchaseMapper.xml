@@ -9,19 +9,17 @@
         <result property="userType" column="user_type"/>
         <result property="deptName" column="dept_name"/>
         <result property="buyNum" column="buy_num"/>
-        <result property="auditStatus" column="audit_status"/>
+        <result property="status" column="status"/>
         <result property="auditUserId" column="audit_user_id"/>
         <result property="auditTime" column="audit_time"/>
         <result property="rejectReason" column="reject_reason"/>
         <result property="auditOpinion" column="audit_opinion"/>
-        <result property="receiveStatus" column="receive_status"/>
         <result property="receiveTime" column="receive_time"/>
         <result property="submitTime" column="submit_time"/>
         <result property="delFlag" column="del_flag"/>
         <result property="fundingSource" column="funding_source"/>
         <result property="fileHash" column="file_hash"/>
         <result property="supplierId" column="supplier_id"/>
-        <result property="purchaseStatus" column="purchase_status"/>
         <result property="logisticsNo" column="logistics_no"/>
         <result property="logisticsCompany" column="logistics_company"/>
         <result property="invoiceNo" column="invoice_no"/>
@@ -29,8 +27,8 @@
 
     <sql id="selectTbPurchaseVo">
         SELECT t.buy_id, t.purchase_no, t.user_id, t.user_name, t.user_type, t.dept_name,
-               t.buy_num, t.audit_status, t.audit_user_id, t.audit_time,
-               t.reject_reason, t.audit_opinion, t.receive_status, t.receive_time,
+               t.buy_num, t.status, t.audit_user_id, t.audit_time,
+               t.reject_reason, t.audit_opinion, t.receive_time,
                t.submit_time, t.del_flag, t.funding_source, t.file_hash
         FROM textbook_buy t WHERE t.del_flag = '0'
     </sql>
@@ -44,7 +42,7 @@
         <if test="userId != null">AND t.user_id = #{userId}</if>
         <if test="userName != null and userName != ''">AND t.user_name LIKE CONCAT('%',#{userName},'%')</if>
         <if test="userType != null and userType != ''">AND t.user_type = #{userType}</if>
-        <if test="auditStatus != null and auditStatus != ''">AND t.audit_status = #{auditStatus}</if>
+        <if test="status != null and status != ''">AND t.status = #{status}</if>
         <!-- 数据权限过滤 -->
         ${params.dataScope}
         ORDER BY t.submit_time DESC
@@ -61,16 +59,14 @@
             <if test="deptName != null and deptName != ''">dept_name,</if>
             <if test="buyNum != null">buy_num,</if>
             <if test="submitTime != null">submit_time,</if>
-            <if test="auditStatus != null and auditStatus != ''">audit_status,</if>
+            <if test="status != null and status != ''">status,</if>
             <if test="auditUserId != null">audit_user_id,</if>
             <if test="auditTime != null">audit_time,</if>
             <if test="rejectReason != null and rejectReason != ''">reject_reason,</if>
-            <if test="receiveStatus != null and receiveStatus != ''">receive_status,</if>
             <if test="receiveTime != null">receive_time,</if>
             <if test="fundingSource != null and fundingSource != ''">funding_source,</if>
             <if test="fileHash != null and fileHash != ''">file_hash,</if>
             <if test="supplierId != null">supplier_id,</if>
-            <if test="purchaseStatus != null and purchaseStatus != ''">purchase_status,</if>
             <if test="logisticsNo != null and logisticsNo != ''">logistics_no,</if>
             <if test="logisticsCompany != null and logisticsCompany != ''">logistics_company,</if>
             <if test="invoiceNo != null and invoiceNo != ''">invoice_no,</if>
@@ -84,16 +80,14 @@
             <if test="deptName != null and deptName != ''">#{deptName},</if>
             <if test="buyNum != null">#{buyNum},</if>
             <if test="submitTime != null">#{submitTime},</if>
-            <if test="auditStatus != null and auditStatus != ''">#{auditStatus},</if>
+            <if test="status != null and status != ''">#{status},</if>
             <if test="auditUserId != null">#{auditUserId},</if>
             <if test="auditTime != null">#{auditTime},</if>
             <if test="rejectReason != null and rejectReason != ''">#{rejectReason},</if>
-            <if test="receiveStatus != null and receiveStatus != ''">#{receiveStatus},</if>
             <if test="receiveTime != null">#{receiveTime},</if>
             <if test="fundingSource != null and fundingSource != ''">#{fundingSource},</if>
             <if test="fileHash != null and fileHash != ''">#{fileHash},</if>
             <if test="supplierId != null">#{supplierId},</if>
-            <if test="purchaseStatus != null and purchaseStatus != ''">#{purchaseStatus},</if>
             <if test="logisticsNo != null and logisticsNo != ''">#{logisticsNo},</if>
             <if test="logisticsCompany != null and logisticsCompany != ''">#{logisticsCompany},</if>
             <if test="invoiceNo != null and invoiceNo != ''">#{invoiceNo},</if>
@@ -103,18 +97,16 @@
     <update id="updateTbPurchase" parameterType="com.ruoyi.textbook.domain.TbPurchase">
         UPDATE textbook_buy
         <set>
-            <if test="auditStatus != null">audit_status=#{auditStatus},</if>
+            <if test="status != null">status=#{status},</if>
             <if test="auditUserId != null">audit_user_id=#{auditUserId},</if>
-            <if test="auditStatus == '2' and rejectReason != null">reject_reason=#{rejectReason},</if>
+            <if test="status == '2' and rejectReason != null">reject_reason=#{rejectReason},</if>
             <if test="auditOpinion != null">audit_opinion=#{auditOpinion},</if>
-            <if test="receiveStatus != null">receive_status=#{receiveStatus},</if>
-            <if test="receiveStatus == '1'">receive_time=NOW(),</if>
+            <if test="status == '3'">receive_time=NOW(),</if>
             <if test="supplierId != null">supplier_id=#{supplierId},</if>
-            <if test="purchaseStatus != null">purchase_status=#{purchaseStatus},</if>
             <if test="logisticsNo != null">logistics_no=#{logisticsNo},</if>
             <if test="logisticsCompany != null">logistics_company=#{logisticsCompany},</if>
             <if test="invoiceNo != null">invoice_no=#{invoiceNo},</if>
-        </set> WHERE buy_id=#{buyId}
+        </set> WHERE buy_id=#{buyId} AND del_flag='0'
     </update>
 
     <delete id="deleteTbPurchaseById" parameterType="Long">
@@ -126,7 +118,7 @@
     </delete>
 
     <update id="updateTbPurchaseStatus">
-        UPDATE textbook_buy SET audit_status=#{arg1} WHERE buy_id=#{arg0} AND del_flag='0'
+        UPDATE textbook_buy SET status=#{arg1} WHERE buy_id=#{arg0} AND del_flag='0'
     </update>
     <select id="selectTbPurchaseListByUserId" parameterType="Long" resultMap="TbPurchaseResult">
         <include refid="selectTbPurchaseVo"/> AND t.user_id = #{userId} ORDER BY t.submit_time DESC
@@ -172,14 +164,14 @@
         <include refid="selectTbPurchaseVo"/>
         <if test="supplierId != null">AND t.supplier_id = #{supplierId}</if>
         <if test="purchaseNo != null and purchaseNo != ''">AND t.purchase_no LIKE CONCAT('%',#{purchaseNo},'%')</if>
-        <if test="purchaseStatus != null and purchaseStatus != ''">AND t.purchase_status = #{purchaseStatus}</if>
+        <if test="status != null and status != ''">AND t.status = #{status}</if>
         ORDER BY t.submit_time DESC
     </select>
 
     <select id="countPendingShipmentBySupplierId" parameterType="Long" resultType="Integer">
         SELECT COUNT(*) FROM textbook_buy 
         WHERE supplier_id = #{supplierId} 
-        AND purchase_status = '1' 
+        AND status = '1' 
         AND del_flag = '0'
     </select>
 </mapper>

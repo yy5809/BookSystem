@@ -101,7 +101,7 @@
         update textbook_notice set issued_classes = #{issuedClasses},
             <choose>
                 <when test="issuedClasses > 0 and issuedClasses &lt; total_classes">status = '2'</when>
-                <otherwise>status = '3'</otherwise>
+                <when test="issuedClasses >= total_classes and total_classes > 0">status = '3'</when>
             </choose>,
             update_time = sysdate()
         where notice_id = #{noticeId}

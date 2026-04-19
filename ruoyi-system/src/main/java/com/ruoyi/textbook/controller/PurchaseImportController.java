@@ -1,6 +1,8 @@
-package com.ruoyi.system.textbook.controller;
+package com.ruoyi.textbook.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +27,23 @@ public class PurchaseImportController extends BaseController {
     @Autowired
     private IPurchaseImportService purchaseImportService;
 
+    private String calculateFileMD5(MultipartFile file) throws Exception {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        try (InputStream is = file.getInputStream()) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = is.read(buffer)) != -1) {
+                md.update(buffer, 0, read);
+            }
+        }
+        byte[] digest = md.digest();
+        StringBuilder sb = new StringBuilder();
+        for (byte b : digest) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
     @PreAuthorize("@ss.hasPermi('textbook:import:excel')")
     @Log(title = "采购单Excel导入", businessType = BusinessType.IMPORT)
     @PostMapping("/excel")
@@ -38,7 +57,7 @@ public class PurchaseImportController extends BaseController {
             return error("文件大小不能超过10MB");
         }
 
-        String fileHash = originalFilename + "_" + file.getSize() + "_" + System.currentTimeMillis();
+        String fileHash = calculateFileMD5(file);
 
         List<TbPurchaseImportDTO> dataList = ExcelImportUtil.parsePurchaseExcel(file);
         if (dataList == null || dataList.isEmpty()) {

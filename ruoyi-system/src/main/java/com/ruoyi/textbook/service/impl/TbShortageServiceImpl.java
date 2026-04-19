@@ -250,8 +250,7 @@ public class TbShortageServiceImpl implements ITbShortageService
         purchase.setUserName(operatorName);
         purchase.setUserType("2");
         purchase.setDeptName(currentUser != null && currentUser.getDept() != null ? currentUser.getDept().getDeptName() : "");
-        purchase.setAuditStatus("0");
-        purchase.setReceiveStatus("0");
+        purchase.setStatus("0");
         purchase.setSubmitTime(LocalDateTime.now());
         purchase.setFundingSource("school");
 

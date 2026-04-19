@@ -109,8 +109,11 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
         int totalPlannedQty = details.stream().mapToInt(BookClaimFormDetail::getPlannedQty).sum();
         int totalIssuedQtyParam = (issuedQty != null ? issuedQty : totalPlannedQty);
 
-        if (totalIssuedQtyParam > totalPlannedQty) {
-            throw new ServiceException("实发数量不能超过应发总数，当前应发总数：" + totalPlannedQty);
+        if (totalIssuedQtyParam <= 0) {
+            throw new ServiceException("实发数量必须大于0");
+        }
+        if (form.getIssuedQty() + totalIssuedQtyParam > totalPlannedQty) {
+            throw new ServiceException("累计实发数量不能超过应发总数，已发：" + form.getIssuedQty() + "，本次：" + totalIssuedQtyParam + "，应发：" + totalPlannedQty);
         }
 
         int remainingToIssue = totalIssuedQtyParam;

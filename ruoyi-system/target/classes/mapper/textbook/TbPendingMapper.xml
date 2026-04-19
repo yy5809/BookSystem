@@ -56,7 +56,7 @@
             <if test="supplier != null">supplier=#{supplier},</if>
             <if test="actualDate != null">actual_date=#{actualDate},</if>
             <if test="remark != null">remark=#{remark},</if>
-        </set> WHERE pending_id=#{pendingId}
+        </set> WHERE pending_id=#{pendingId} AND del_flag='0'
     </update>
 
     <delete id="deleteTbPendingById" parameterType="Long">

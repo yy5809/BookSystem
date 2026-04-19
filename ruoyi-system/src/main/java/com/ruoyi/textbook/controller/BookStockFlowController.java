@@ -1,4 +1,4 @@
-package com.ruoyi.system.textbook.controller;
+package com.ruoyi.textbook.controller;
 
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;

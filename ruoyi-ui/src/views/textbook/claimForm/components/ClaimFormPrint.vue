@@ -32,7 +32,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(item, index) in form.details" :key="index">
+          <tr v-for="(item, index) in form.details" :key="item.isbn + index">
             <td style="text-align: center;">{{ index + 1 }}</td>
             <td>{{ item.isbn }}</td>
             <td>{{ item.bookName }}</td>

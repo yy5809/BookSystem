@@ -45,8 +45,8 @@ public class TbPurchase extends BaseEntity {
     @Excel(name = "申请时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime submitTime;
 
-    @Excel(name = "审核状态", readConverterExp = "0=待审核,1=已通过,2=已驳回,3=已领书,4=已取消")
-    private String auditStatus;
+    @Excel(name = "状态", readConverterExp = "0=待审核,1=已通过,2=已驳回,3=已领书,4=已取消")
+    private String status;
 
     private Long auditUserId;
 
@@ -58,9 +58,6 @@ public class TbPurchase extends BaseEntity {
 
     @Excel(name = "审核意见")
     private String auditOpinion;
-
-    @Excel(name = "领书状态", readConverterExp = "0=未领,1=已领")
-    private String receiveStatus;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime receiveTime;
@@ -79,7 +76,6 @@ public class TbPurchase extends BaseEntity {
 
     private String fileHash;
     private Long supplierId;
-    private String purchaseStatus;
     private String logisticsNo;
     private String logisticsCompany;
     private String invoiceNo;
@@ -100,8 +96,8 @@ public class TbPurchase extends BaseEntity {
     public void setBuyNum(Integer buyNum) { this.buyNum = buyNum; }
     public LocalDateTime getSubmitTime() { return submitTime; }
     public void setSubmitTime(LocalDateTime submitTime) { this.submitTime = submitTime; }
-    public String getAuditStatus() { return auditStatus; }
-    public void setAuditStatus(String auditStatus) { this.auditStatus = auditStatus; }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public Long getAuditUserId() { return auditUserId; }
     public void setAuditUserId(Long auditUserId) { this.auditUserId = auditUserId; }
     public LocalDateTime getAuditTime() { return auditTime; }
@@ -110,8 +106,6 @@ public class TbPurchase extends BaseEntity {
     public void setRejectReason(String rejectReason) { this.rejectReason = rejectReason; }
     public String getAuditOpinion() { return auditOpinion; }
     public void setAuditOpinion(String auditOpinion) { this.auditOpinion = auditOpinion; }
-    public String getReceiveStatus() { return receiveStatus; }
-    public void setReceiveStatus(String receiveStatus) { this.receiveStatus = receiveStatus; }
     public LocalDateTime getReceiveTime() { return receiveTime; }
     public void setReceiveTime(LocalDateTime receiveTime) { this.receiveTime = receiveTime; }
     public String getDelFlag() { return delFlag; }
@@ -129,8 +123,6 @@ public class TbPurchase extends BaseEntity {
     public void setFileHash(String fileHash) { this.fileHash = fileHash; }
     public Long getSupplierId() { return supplierId; }
     public void setSupplierId(Long supplierId) { this.supplierId = supplierId; }
-    public String getPurchaseStatus() { return purchaseStatus; }
-    public void setPurchaseStatus(String purchaseStatus) { this.purchaseStatus = purchaseStatus; }
     public String getLogisticsNo() { return logisticsNo; }
     public void setLogisticsNo(String logisticsNo) { this.logisticsNo = logisticsNo; }
     public String getLogisticsCompany() { return logisticsCompany; }
@@ -142,6 +134,6 @@ public class TbPurchase extends BaseEntity {
     public String toString() {
         return new org.apache.commons.lang3.builder.ToStringBuilder(this, org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE)
             .append("buyId", buyId).append("purchaseNo", purchaseNo)
-            .append("userName", userName).append("auditStatus", auditStatus).toString();
+            .append("userName", userName).append("status", status).toString();
     }
 }

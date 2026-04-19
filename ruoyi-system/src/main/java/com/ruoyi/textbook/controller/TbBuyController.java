@@ -90,10 +90,10 @@ public class TbBuyController extends BaseController {
     public AjaxResult delete(@PathVariable("id") Long buyId) {
         TbPurchase order = tbBuyService.getById(buyId);
         if (order == null) { return AjaxResult.error("购书单不存在"); }
-        if ("1".equals(order.getAuditStatus()) && "1".equals(order.getReceiveStatus())) {
+        if ("3".equals(order.getStatus())) {
             return AjaxResult.error("该购书单已完成领书，禁止删除。已完成领书的单据不可删除以保证数据完整性。");
         }
-        if ("1".equals(order.getAuditStatus())) {
+        if ("1".equals(order.getStatus())) {
             return AjaxResult.error("该购书单已审核通过，禁止删除。如需取消请联系库管员驳回。");
         }
         return toAjax(tbBuyService.delete(new Long[]{buyId}));

@@ -73,7 +73,7 @@ public class TbPurchaseController extends BaseController {
         if (!order.getUserId().equals(SecurityUtils.getUserId())) {
             return AjaxResult.error("只能取消自己的订单");
         }
-        if (!"0".equals(order.getAuditStatus())) {
+        if (!"0".equals(order.getStatus())) {
             return AjaxResult.error("只能取消待审核的订单");
         }
         return toAjax(tbBuyService.cancelOrder(buyId));
@@ -92,16 +92,16 @@ public class TbPurchaseController extends BaseController {
     public AjaxResult remove(@PathVariable("id") Long buyId) {
         TbPurchase order = tbBuyService.getById(buyId);
         if (order == null) { return AjaxResult.error("订单不存在"); }
-        if ("3".equals(order.getPurchaseStatus())) {
+        if ("3".equals(order.getStatus())) {
             return AjaxResult.error("该采购单已入库，禁止删除。已入库的单据不可删除以保证数据完整性。");
         }
-        if ("2".equals(order.getPurchaseStatus())) {
+        if ("2".equals(order.getStatus())) {
             return AjaxResult.error("该采购单已到货，禁止删除。请先完成入库流程。");
         }
-        if ("1".equals(order.getAuditStatus()) && "1".equals(order.getReceiveStatus())) {
+        if ("3".equals(order.getStatus())) {
             return AjaxResult.error("该订单已完成领书，禁止删除。已完成领书的单据不可删除以保证数据完整性。");
         }
-        if ("1".equals(order.getAuditStatus())) {
+        if ("1".equals(order.getStatus())) {
             return AjaxResult.error("该订单已审核通过，禁止删除。如需取消请联系库管员驳回。");
         }
         return toAjax(tbBuyService.delete(new Long[]{buyId}));

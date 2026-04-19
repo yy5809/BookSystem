@@ -1,4 +1,4 @@
-package com.ruoyi.system.textbook.controller;
+package com.ruoyi.textbook.controller;
 
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,7 +43,15 @@ public class BookPersonalApplyController extends BaseController {
     @PreAuthorize("@ss.hasPermi('textbook:personalApply:query')")
     @GetMapping(value = "/{applyId}")
     public AjaxResult getInfo(@PathVariable("applyId") Long applyId) {
-        return success(bookPersonalApplyService.selectBookPersonalApplyById(applyId));
+        BookPersonalApply apply = bookPersonalApplyService.selectBookPersonalApplyById(applyId);
+        if (apply == null) {
+            return error("申请记录不存在");
+        }
+        Long currentUserId = SecurityUtils.getUserId();
+        if (!currentUserId.equals(apply.getTeacherId())) {
+            return error("无权查看他人的申请记录");
+        }
+        return success(apply);
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:personalApply:add')")
@@ -62,6 +70,10 @@ public class BookPersonalApplyController extends BaseController {
         BookPersonalApply existingApply = bookPersonalApplyService.selectBookPersonalApplyById(applyId);
         if (existingApply == null) {
             return error("申请记录不存在");
+        }
+        Long currentUserId = SecurityUtils.getUserId();
+        if (!currentUserId.equals(existingApply.getTeacherId())) {
+            return error("无权取消他人的申请记录");
         }
         if (!"0".equals(existingApply.getStatus())) {
             return error("只有待审核状态的申请才能取消");

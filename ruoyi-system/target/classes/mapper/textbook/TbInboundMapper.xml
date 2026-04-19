@@ -64,7 +64,7 @@
             <if test="supplier != null">supplier=#{supplier},</if>
             <if test="remark != null">remark=#{remark},</if>
         </set>
-        WHERE in_id=#{inId}
+        WHERE in_id=#{inId} AND del_flag='0'
     </update>
 
     <delete id="deleteTbInboundByInboundId" parameterType="Long">

@@ -79,7 +79,7 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
     {
         String purchaseNo = "CG" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + String.format("%03d", System.currentTimeMillis() % 1000);
         tbPurchase.setPurchaseNo(purchaseNo);
-        tbPurchase.setAuditStatus("0"); // 待审核
+        tbPurchase.setStatus("0"); // 待审核
         tbPurchase.setCreateTime(DateUtils.getNowDate());
         tbPurchase.setUpdateTime(DateUtils.getNowDate());
 
@@ -99,13 +99,26 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
 
     /**
      * 修改购书信息
-     * 
+     *
      * @param tbPurchase 购书信息
      * @return 结果
      */
     @Override
     public int updateTbPurchase(TbPurchase tbPurchase)
     {
+        TbPurchase existing = tbPurchaseMapper.selectTbPurchaseById(tbPurchase.getBuyId());
+        if (existing == null) {
+            return 0;
+        }
+        if ("3".equals(existing.getStatus())) {
+            throw new RuntimeException("该采购单已入库，禁止修改");
+        }
+        if ("2".equals(existing.getStatus())) {
+            throw new RuntimeException("该采购单已到货，禁止修改");
+        }
+        if ("1".equals(existing.getStatus())) {
+            throw new RuntimeException("该订单已审核通过，禁止修改");
+        }
         tbPurchase.setUpdateTime(DateUtils.getNowDate());
         return tbPurchaseMapper.updateTbPurchase(tbPurchase);
     }
@@ -162,7 +175,7 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
             return 0;
         }
 
-        purchase.setAuditStatus(status);
+        purchase.setStatus(status);
         purchase.setUpdateTime(DateUtils.getNowDate());
         int result = tbPurchaseMapper.updateTbPurchase(purchase);
 
@@ -230,7 +243,7 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
         }
 
         purchase.setRejectReason(invoiceNo);
-        purchase.setReceiveStatus("1"); // 已完成
+        purchase.setStatus("3"); // 已完成
         purchase.setUpdateTime(DateUtils.getNowDate());
         return tbPurchaseMapper.updateTbPurchase(purchase);
     }

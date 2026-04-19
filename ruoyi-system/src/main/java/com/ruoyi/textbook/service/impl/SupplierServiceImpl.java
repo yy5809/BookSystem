@@ -98,12 +98,12 @@ public class SupplierServiceImpl implements ISupplierService {
             throw new RuntimeException("采购单不存在或无权操作");
         }
         
-        if (!"1".equals(purchase.getPurchaseStatus())) {
+        if (!"1".equals(purchase.getStatus())) {
             throw new RuntimeException("采购单状态不是采购中，无法确认发货");
         }
         
         // 更新采购单状态和物流信息
-        purchase.setPurchaseStatus("2"); // 已发货
+        purchase.setStatus("2"); // 已发货
         purchase.setLogisticsCompany(logisticsCompany);
         purchase.setLogisticsNo(logisticsNo);
         tbPurchaseMapper.updateTbPurchase(purchase);

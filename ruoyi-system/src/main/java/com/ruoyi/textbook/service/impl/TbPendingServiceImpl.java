@@ -2,7 +2,7 @@ package com.ruoyi.textbook.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.common.utils.IdUtils;
+import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.textbook.domain.TbInbound;
 import com.ruoyi.textbook.domain.TbInventory;

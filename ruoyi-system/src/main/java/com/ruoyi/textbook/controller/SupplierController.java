@@ -1,4 +1,4 @@
-package com.ruoyi.system.textbook.controller;
+package com.ruoyi.textbook.controller;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -9,6 +9,7 @@ import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbSupplier;
 import com.ruoyi.textbook.service.ISupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class SupplierController extends BaseController {
     private ISupplierService supplierService;
 
     // 供应商工作台数据
+    @PreAuthorize("@ss.hasRole('supplier')")
     @GetMapping("/dashboard")
     public AjaxResult getDashboard() {
         Map<String, Object> dashboardData = supplierService.getSupplierDashboard();
@@ -29,6 +31,7 @@ public class SupplierController extends BaseController {
     }
 
     // 供应商采购单列表
+    @PreAuthorize("@ss.hasRole('supplier')")
     @GetMapping("/purchase/list")
     public TableDataInfo listSupplierPurchases(TbPurchase purchase) {
         startPage();
@@ -37,6 +40,7 @@ public class SupplierController extends BaseController {
     }
 
     // 供应商采购单详情
+    @PreAuthorize("@ss.hasRole('supplier')")
     @GetMapping("/purchase/detail/{purchaseId}")
     public AjaxResult getSupplierPurchaseDetail(@PathVariable Long purchaseId) {
         TbPurchase purchase = supplierService.getSupplierPurchaseDetail(purchaseId);
@@ -44,6 +48,7 @@ public class SupplierController extends BaseController {
     }
 
     // 供应商确认发货
+    @PreAuthorize("@ss.hasRole('supplier')")
     @PostMapping("/purchase/shipment")
     public AjaxResult confirmShipment(@RequestBody Map<String, Object> shipmentData) {
         Long purchaseId = Long.valueOf(shipmentData.get("purchaseId").toString());
@@ -55,6 +60,7 @@ public class SupplierController extends BaseController {
     }
 
     // 供应商通知列表
+    @PreAuthorize("@ss.hasRole('supplier')")
     @GetMapping("/notice/list")
     public TableDataInfo listSupplierNotices() {
         startPage();
@@ -63,6 +69,7 @@ public class SupplierController extends BaseController {
     }
 
     // 供应商通知详情
+    @PreAuthorize("@ss.hasRole('supplier')")
     @GetMapping("/notice/detail/{noticeId}")
     public AjaxResult getSupplierNoticeDetail(@PathVariable Long noticeId) {
         Map<String, Object> notice = supplierService.getSupplierNoticeDetail(noticeId);
@@ -70,6 +77,7 @@ public class SupplierController extends BaseController {
     }
 
     // 标记通知为已读
+    @PreAuthorize("@ss.hasRole('supplier')")
     @PutMapping("/notice/read/{noticeId}")
     public AjaxResult markNoticeAsRead(@PathVariable Long noticeId) {
         supplierService.markNoticeAsRead(noticeId);
@@ -77,6 +85,7 @@ public class SupplierController extends BaseController {
     }
 
     // 全部标记为已读
+    @PreAuthorize("@ss.hasRole('supplier')")
     @PutMapping("/notice/read/all")
     public AjaxResult markAllNoticesAsRead() {
         supplierService.markAllNoticesAsRead();

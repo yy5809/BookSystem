@@ -4,7 +4,6 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.domain.entity.SysRole;
@@ -17,17 +16,22 @@ import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbInventory;
 import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.domain.TbOutbound;
+import com.ruoyi.textbook.domain.TbStockLog;
 import com.ruoyi.textbook.domain.dto.TbPurchaseImportDTO;
 import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.textbook.mapper.TbOutboundMapper;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
+import com.ruoyi.textbook.mapper.TbStockLogMapper;
 import com.ruoyi.textbook.service.ITbBuyService;
+import com.ruoyi.textbook.service.ITbStockLogService;
 import com.ruoyi.textbook.service.NoticeService;
 import com.ruoyi.textbook.enums.AuditStatusEnum;
 import com.ruoyi.textbook.enums.ReceiveStatusEnum;
+import com.ruoyi.textbook.enums.PurchaseStatusEnum;
 import com.ruoyi.textbook.constants.TextbookConstants;
+import com.ruoyi.textbook.util.PurchaseNoGenerator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +47,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Service
 public class TbBuyServiceImpl implements ITbBuyService {
@@ -75,6 +78,12 @@ public class TbBuyServiceImpl implements ITbBuyService {
     @Autowired
     private NoticeService noticeService;
 
+    @Autowired
+    private TbStockLogMapper tbStockLogMapper;
+
+    @Autowired
+    private ITbStockLogService tbStockLogService;
+
     @Override
     public TbPurchase getById(Long buyId) {
         return tbPurchaseMapper.selectTbPurchaseById(buyId);
@@ -88,10 +97,9 @@ public class TbBuyServiceImpl implements ITbBuyService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int submit(TbPurchase buy) {
-        String purchaseNo = "PUR" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + IdUtils.fastSimpleUUID().substring(0, 6);
+        String purchaseNo = PurchaseNoGenerator.generate();
         buy.setPurchaseNo(purchaseNo);
-        buy.setAuditStatus(AuditStatusEnum.PENDING.getCode());
-        buy.setReceiveStatus(ReceiveStatusEnum.NOT_RECEIVED.getCode());
+        buy.setStatus(AuditStatusEnum.PENDING.getCode());
         buy.setSubmitTime(LocalDateTime.now());
         buy.setCreateTime(DateUtils.getNowDate());
         int result = tbPurchaseMapper.insertTbPurchase(buy);
@@ -111,7 +119,12 @@ public class TbBuyServiceImpl implements ITbBuyService {
         TbPurchase buy = tbPurchaseMapper.selectTbPurchaseById(buyId);
         if (buy == null) return 0;
 
-        buy.setAuditStatus(status);
+        if (!PurchaseStatusEnum.canTransition(buy.getStatus(), status)) {
+            throw new ServiceException(PurchaseStatusEnum.getTransitionErrorMsg(buy.getStatus(), status));
+        }
+
+        String currentStatus = buy.getStatus();
+        buy.setStatus(status);
         if (StringUtils.isNotEmpty(rejectReason)) {
             buy.setRejectReason(rejectReason);
         }
@@ -121,9 +134,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
         List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
 
         if (AuditStatusEnum.APPROVED.getCode().equals(status)) {
-            // 只有待审核的订单才创建缺书单
-            if (!AuditStatusEnum.PENDING.getCode().equals(buy.getAuditStatus())) {
-                // 已审核的订单不重复创建缺书单
+            if (!AuditStatusEnum.PENDING.getCode().equals(currentStatus)) {
                 noticeService.sendOrderApproveNotice(
                     buy.getUserId(),
                     details.stream().map(TbPurchaseDetail::getBookName).collect(Collectors.joining("、")),
@@ -170,7 +181,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
             }
 
             if (hasShortage) {
-                buy.setAuditStatus(AuditStatusEnum.REJECTED.getCode());
+                buy.setStatus(AuditStatusEnum.REJECTED.getCode());
                 buy.setRejectReason("部分教材库存不足，无法通过审核。详情：" + shortageInfo.toString());
                 tbPurchaseMapper.updateTbPurchase(buy);
 
@@ -207,7 +218,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
 
         int result = tbPurchaseMapper.updateTbPurchase(buy);
 
-        if (AuditStatusEnum.APPROVED.getCode().equals(status) && AuditStatusEnum.PENDING.getCode().equals(buy.getAuditStatus())) {
+        if (AuditStatusEnum.APPROVED.getCode().equals(status) && AuditStatusEnum.PENDING.getCode().equals(buy.getStatus())) {
             List<TbPurchaseDetail> approveDetails = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
             noticeService.sendOrderApproveNotice(
                 buy.getUserId(),
@@ -226,8 +237,11 @@ public class TbBuyServiceImpl implements ITbBuyService {
     public int confirmReceive(Long buyId) {
         TbPurchase buy = tbPurchaseMapper.selectTbPurchaseById(buyId);
         if (buy == null) throw new ServiceException("购书单不存在");
-        if (!AuditStatusEnum.APPROVED.getCode().equals(buy.getAuditStatus())) throw new ServiceException("购书单未审核通过");
-        if (ReceiveStatusEnum.RECEIVED.getCode().equals(buy.getReceiveStatus())) throw new ServiceException("该购书单已领书");
+        if (!AuditStatusEnum.APPROVED.getCode().equals(buy.getStatus())) throw new ServiceException("购书单未审核通过");
+
+        if (!PurchaseStatusEnum.canTransition(buy.getStatus(), PurchaseStatusEnum.RECEIVED.getCode())) {
+            throw new ServiceException(PurchaseStatusEnum.getTransitionErrorMsg(buy.getStatus(), PurchaseStatusEnum.RECEIVED.getCode()));
+        }
 
         List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
         for (TbPurchaseDetail detail : details) {
@@ -235,6 +249,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
             if (stock == null || stock.getStockNum() < detail.getQuantity()) {
                 throw new ServiceException("教材「" + detail.getBookName() + "」库存不足，无法出库");
             }
+            int beforeStock = stock.getStockNum();
             int currentVersion = stock.getVersion() != null ? stock.getVersion() : 0;
             int rowsAffected = tbInventoryMapper.deductStockWithVersion(
                     detail.getBookId(),
@@ -255,9 +270,24 @@ public class TbBuyServiceImpl implements ITbBuyService {
             out.setReceiveId(buy.getUserId());
             out.setOperatorId(SecurityUtils.getUserId());
             tbOutboundMapper.insertTbOutbound(out);
+
+            TbStockLog stockLog = new TbStockLog();
+            stockLog.setBookId(detail.getBookId());
+            stockLog.setIsbn(detail.getIsbn());
+            stockLog.setBookName(detail.getBookName());
+            stockLog.setBizType("2");
+            stockLog.setChangeNum(-detail.getQuantity());
+            stockLog.setBeforeStock(beforeStock);
+            stockLog.setAfterStock(beforeStock - detail.getQuantity());
+            stockLog.setOperatorId(SecurityUtils.getUserId());
+            stockLog.setOperatorName(SecurityUtils.getUsername());
+            stockLog.setRefBizType("PURCHASE_RECEIVE");
+            stockLog.setRefBizId(buyId);
+            stockLog.setRemark("采购单领书，单号：" + buy.getPurchaseNo());
+            tbStockLogMapper.insert(stockLog);
         }
 
-        buy.setReceiveStatus(ReceiveStatusEnum.RECEIVED.getCode());
+        buy.setStatus(PurchaseStatusEnum.RECEIVED.getCode());
         buy.setReceiveTime(LocalDateTime.now());
         return tbPurchaseMapper.updateTbPurchase(buy);
     }
@@ -289,16 +319,21 @@ public class TbBuyServiceImpl implements ITbBuyService {
         int pendingCount = 0, approvedCount = 0, rejectedCount = 0, receivedCount = 0;
         java.math.BigDecimal totalAmount = java.math.BigDecimal.ZERO;
         int totalBooks = 0;
+
+        List<Long> orderIds = allOrders.stream().map(TbPurchase::getBuyId).collect(Collectors.toList());
+        List<TbPurchaseDetail> allDetails = batchSelectDetailsByPurchaseIds(orderIds);
+
         for (TbPurchase order : allOrders) {
-            String status = order.getAuditStatus();
+            String status = order.getStatus();
             if (AuditStatusEnum.PENDING.getCode().equals(status)) pendingCount++;
-            else if (AuditStatusEnum.APPROVED.getCode().equals(status)) { approvedCount++; if (ReceiveStatusEnum.RECEIVED.getCode().equals(order.getReceiveStatus())) receivedCount++; }
+            else if (AuditStatusEnum.APPROVED.getCode().equals(status)) approvedCount++;
+            else if (PurchaseStatusEnum.RECEIVED.getCode().equals(status)) receivedCount++;
             else if (AuditStatusEnum.REJECTED.getCode().equals(status)) rejectedCount++;
-            List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(order.getBuyId());
-            for (TbPurchaseDetail d : details) {
-                totalBooks += d.getQuantity() != null ? d.getQuantity() : 0;
-                if (d.getTotalPrice() != null) totalAmount = totalAmount.add(d.getTotalPrice());
-            }
+        }
+
+        for (TbPurchaseDetail d : allDetails) {
+            totalBooks += d.getQuantity() != null ? d.getQuantity() : 0;
+            if (d.getTotalPrice() != null) totalAmount = totalAmount.add(d.getTotalPrice());
         }
         stats.put("totalOrders", allOrders.size());
         stats.put("pendingCount", pendingCount);
@@ -315,8 +350,8 @@ public class TbBuyServiceImpl implements ITbBuyService {
     public int cancelOrder(Long buyId) {
         TbPurchase buy = tbPurchaseMapper.selectTbPurchaseById(buyId);
         if (buy == null) throw new ServiceException("订单不存在");
-        if (!AuditStatusEnum.PENDING.getCode().equals(buy.getAuditStatus())) throw new ServiceException("只能取消待审核的订单");
-        buy.setAuditStatus(AuditStatusEnum.REJECTED.getCode());
+        if (!AuditStatusEnum.PENDING.getCode().equals(buy.getStatus())) throw new ServiceException("只能取消待审核的订单");
+        buy.setStatus(AuditStatusEnum.REJECTED.getCode());
         buy.setRejectReason("用户自行取消");
         return tbPurchaseMapper.updateTbPurchase(buy);
     }
@@ -377,20 +412,18 @@ public class TbBuyServiceImpl implements ITbBuyService {
             SysUser currentUser = sysUserMapper.selectUserById(currentUserId);
             if (currentUser == null) { throw new ServiceException("获取当前用户信息失败"); }
 
-            String seqNum = String.format("%03d", System.currentTimeMillis() % 1000);
-            String purchaseNo = "CG" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + seqNum;
+            String purchaseNo = PurchaseNoGenerator.generate();
 
             TbPurchase purchase = new TbPurchase();
             purchase.setPurchaseNo(purchaseNo);
             purchase.setUserId(currentUserId);
             purchase.setUserName(currentUser.getNickName());
-            purchase.setUserType(getUserTypeByRoles(currentUser));
-            purchase.setDeptName(currentUser.getDept() != null ? currentUser.getDept().getDeptName() : "");
-            purchase.setAuditStatus(AuditStatusEnum.PENDING.getCode());
-            purchase.setReceiveStatus(ReceiveStatusEnum.NOT_RECEIVED.getCode());
-            purchase.setSubmitTime(LocalDateTime.now());
-            purchase.setFundingSource(TextbookConstants.FUNDING_SOURCE_SCHOOL);
-            purchase.setFileHash(fileMd5);
+        purchase.setUserType(getUserTypeByRoles(currentUser));
+        purchase.setDeptName(currentUser.getDept() != null ? currentUser.getDept().getDeptName() : "");
+        purchase.setStatus(AuditStatusEnum.PENDING.getCode());
+        purchase.setSubmitTime(LocalDateTime.now());
+        purchase.setFundingSource(TextbookConstants.FUNDING_SOURCE_SCHOOL);
+        purchase.setFileHash(fileMd5);
 
             int rows = tbPurchaseMapper.insertTbPurchase(purchase);
             if (rows <= 0) { throw new ServiceException("创建采购主单失败"); }

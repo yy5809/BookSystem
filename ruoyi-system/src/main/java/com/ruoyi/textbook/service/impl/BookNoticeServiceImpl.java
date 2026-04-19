@@ -123,16 +123,22 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
         if (!"0".equals(notice.getStatus())) {
             throw new ServiceException("只有草稿状态的通知才能发布");
         }
-        
-        // 再次校验库存（防止创建后库存被其他操作消耗）
+
+        // 按教材汇总需求量后校验库存（防止同一教材被多个班级重复需求导致库存超额分配）
         if (notice.getDetails() != null && !notice.getDetails().isEmpty()) {
+            Map<Long, Integer> bookDemandMap = new HashMap<>();
+            Map<Long, String> bookNameMap = new HashMap<>();
             for (BookClaimFormDetail detail : notice.getDetails()) {
-                TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(detail.getTextbookId());
+                bookDemandMap.merge(detail.getTextbookId(), detail.getPlannedQty(), Integer::sum);
+                bookNameMap.putIfAbsent(detail.getTextbookId(), detail.getBookName());
+            }
+            for (Map.Entry<Long, Integer> entry : bookDemandMap.entrySet()) {
+                TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(entry.getKey());
                 if (inventory == null) {
-                    throw new ServiceException("教材《" + detail.getBookName() + "》库存记录不存在");
+                    throw new ServiceException("教材《" + bookNameMap.get(entry.getKey()) + "》库存记录不存在");
                 }
-                if (inventory.getStockNum() < detail.getPlannedQty()) {
-                    throw new ServiceException("教材《" + detail.getBookName() + "》库存不足，当前库存：" + inventory.getStockNum() + "，需求：" + detail.getPlannedQty());
+                if (inventory.getStockNum() < entry.getValue()) {
+                    throw new ServiceException("教材《" + bookNameMap.get(entry.getKey()) + "》库存不足，当前库存：" + inventory.getStockNum() + "，总需求：" + entry.getValue());
                 }
             }
         }

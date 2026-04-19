@@ -11,160 +11,11 @@
  Target Server Version : 80022
  File Encoding         : 65001
 
- Date: 17/04/2026 18:55:47
+ Date: 19/04/2026 18:07:17
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for book_claim_form
--- ----------------------------
-DROP TABLE IF EXISTS `book_claim_form`;
-CREATE TABLE `book_claim_form`  (
-  `form_id` bigint NOT NULL AUTO_INCREMENT COMMENT '领书单ID（主键）',
-  `form_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '领书单号（自动生成）',
-  `notice_id` bigint NOT NULL COMMENT '关联领书通知ID',
-  `college_id` bigint NULL DEFAULT NULL COMMENT '学院ID',
-  `major_id` bigint NULL DEFAULT NULL COMMENT '专业ID',
-  `class_id` bigint NULL DEFAULT NULL COMMENT '班级ID',
-  `class_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '班级名称',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '状态（0待领取/1部分出库/2已出库）',
-  `planned_qty` int NOT NULL DEFAULT 0 COMMENT '应发总数（所有教材合计）',
-  `issued_qty` int NOT NULL DEFAULT 0 COMMENT '实发总数',
-  `receiver_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '领书人姓名（班委签名）',
-  `issue_time` datetime(0) NULL DEFAULT NULL COMMENT '出库时间',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '删除标志（0存在 2删除）',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`form_id`) USING BTREE,
-  UNIQUE INDEX `uk_form_no`(`form_no`) USING BTREE,
-  INDEX `idx_notice_id`(`notice_id`) USING BTREE,
-  INDEX `idx_class_id`(`class_id`) USING BTREE,
-  INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '领书单表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of book_claim_form
--- ----------------------------
-
--- ----------------------------
--- Table structure for book_claim_form_detail
--- ----------------------------
-DROP TABLE IF EXISTS `book_claim_form_detail`;
-CREATE TABLE `book_claim_form_detail`  (
-  `detail_id` bigint NOT NULL AUTO_INCREMENT COMMENT '明细ID（主键）',
-  `form_id` bigint NOT NULL COMMENT '关联领书单ID',
-  `textbook_id` bigint NOT NULL COMMENT '教材ID',
-  `isbn` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'ISBN',
-  `book_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '教材名称',
-  `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '作者',
-  `publisher` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '出版社',
-  `price` decimal(10, 2) NULL DEFAULT NULL COMMENT '定价',
-  `planned_qty` int NOT NULL DEFAULT 0 COMMENT '应发数量',
-  `issued_qty` int NOT NULL DEFAULT 0 COMMENT '实发数量',
-  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  PRIMARY KEY (`detail_id`) USING BTREE,
-  INDEX `idx_form_id`(`form_id`) USING BTREE,
-  INDEX `idx_textbook_id`(`textbook_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '领书单明细表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of book_claim_form_detail
--- ----------------------------
-
--- ----------------------------
--- Table structure for book_notice
--- ----------------------------
-DROP TABLE IF EXISTS `book_notice`;
-CREATE TABLE `book_notice`  (
-  `notice_id` bigint NOT NULL AUTO_INCREMENT COMMENT '通知ID（主键）',
-  `notice_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '通知编号（自动生成，如 LS20260220001）',
-  `semester` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学期（如 2025-2026-2）',
-  `pickup_start` datetime(0) NOT NULL COMMENT '领取开始时间',
-  `pickup_end` datetime(0) NOT NULL COMMENT '领取结束时间',
-  `pickup_location` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '领取地点',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '状态（0草稿/1已发布/2领取中/3已完成）',
-  `total_classes` int NOT NULL DEFAULT 0 COMMENT '班级总数',
-  `issued_classes` int NOT NULL DEFAULT 0 COMMENT '已出库班级数',
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '删除标志（0存在 2删除）',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`notice_id`) USING BTREE,
-  UNIQUE INDEX `uk_notice_no`(`notice_no`) USING BTREE,
-  INDEX `idx_status`(`status`) USING BTREE,
-  INDEX `idx_semester`(`semester`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '领书通知表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of book_notice
--- ----------------------------
-
--- ----------------------------
--- Table structure for book_personal_apply
--- ----------------------------
-DROP TABLE IF EXISTS `book_personal_apply`;
-CREATE TABLE `book_personal_apply`  (
-  `apply_id` bigint NOT NULL AUTO_INCREMENT,
-  `apply_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `teacher_id` bigint NOT NULL,
-  `teacher_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `textbook_id` bigint NOT NULL,
-  `isbn` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `book_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `apply_qty` int NOT NULL DEFAULT 1,
-  `purpose` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0',
-  `audit_opinion` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `audit_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
-  `audit_time` datetime(0) NULL DEFAULT NULL,
-  `issue_time` datetime(0) NULL DEFAULT NULL,
-  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
-  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
-  `update_time` datetime(0) NULL DEFAULT NULL,
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`apply_id`) USING BTREE,
-  UNIQUE INDEX `uk_apply_no`(`apply_no`) USING BTREE,
-  INDEX `idx_teacher_id`(`teacher_id`) USING BTREE,
-  INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of book_personal_apply
--- ----------------------------
-
--- ----------------------------
--- Table structure for book_stock_flow
--- ----------------------------
-DROP TABLE IF EXISTS `book_stock_flow`;
-CREATE TABLE `book_stock_flow`  (
-  `flow_id` bigint NOT NULL AUTO_INCREMENT,
-  `textbook_id` bigint NOT NULL,
-  `isbn` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `business_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `business_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `change_qty` int NOT NULL DEFAULT 0,
-  `stock_before` int NOT NULL DEFAULT 0,
-  `stock_after` int NOT NULL DEFAULT 0,
-  `operator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
-  `operate_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
-  PRIMARY KEY (`flow_id`) USING BTREE,
-  INDEX `idx_textbook_id`(`textbook_id`) USING BTREE,
-  INDEX `idx_business_type`(`business_type`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of book_stock_flow
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for gen_table
@@ -249,7 +100,7 @@ CREATE TABLE `sys_config`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`config_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 102 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '参数配置表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 101 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '参数配置表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_config
@@ -321,7 +172,7 @@ CREATE TABLE `sys_dict_data`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`dict_code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 192 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '字典数据表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 191 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '字典数据表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_dict_data
@@ -447,6 +298,60 @@ INSERT INTO `sys_dict_data` VALUES (188, 1, 'pending', '0', 'tb_purchase_status'
 INSERT INTO `sys_dict_data` VALUES (189, 2, 'ordering', '1', 'tb_purchase_status', NULL, 'warning', 'N', '0', 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (190, 3, 'arrived', '2', 'tb_purchase_status', NULL, 'primary', 'N', '0', 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (191, 4, 'inbounded', '3', 'tb_purchase_status', NULL, 'success', 'N', '0', 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (192, 1, '智能制造学院', '智能制造学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (193, 2, '语言文化学院', '语言文化学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (194, 3, '环境科学与工程学院', '环境科学与工程学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (195, 4, '艺术学院', '艺术学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (196, 5, '土木工程学院', '土木工程学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (197, 6, '管理学院', '管理学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (198, 1, '智能制造工程', '智能制造工程', 'tb_major_192', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (199, 2, '智能装备与控制', '智能装备与控制', 'tb_major_192', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (200, 3, '计算机科学与技术', '计算机科学与技术', 'tb_major_192', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (201, 1, '英语', '英语', 'tb_major_193', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (202, 2, '日语', '日语', 'tb_major_193', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (203, 3, '汉语言文学', '汉语言文学', 'tb_major_193', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (204, 1, '环境工程', '环境工程', 'tb_major_194', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (205, 2, '环境科学', '环境科学', 'tb_major_194', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (206, 3, '给排水科学与工程', '给排水科学与工程', 'tb_major_194', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (207, 1, '视觉传达设计', '视觉传达设计', 'tb_major_195', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (208, 2, '环境设计', '环境设计', 'tb_major_195', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (209, 3, '产品设计', '产品设计', 'tb_major_195', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (210, 1, '土木工程', '土木工程', 'tb_major_196', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (211, 2, '建筑环境与能源应用工程', '建筑环境与能源应用工程', 'tb_major_196', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (212, 3, '工程管理', '工程管理', 'tb_major_196', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (213, 1, '工商管理', '工商管理', 'tb_major_197', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (214, 2, '市场营销', '市场营销', 'tb_major_197', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (215, 3, '财务管理', '财务管理', 'tb_major_197', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (216, 1, '智能2301', '智能2301', 'tb_class_192_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (217, 2, '智能2302', '智能2302', 'tb_class_192_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (218, 1, '装备2301', '装备2301', 'tb_class_192_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (219, 2, '装备2302', '装备2302', 'tb_class_192_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (220, 1, '计科2301', '计科2301', 'tb_class_192_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (221, 2, '计科2302', '计科2302', 'tb_class_192_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (222, 3, '计科2303', '计科2303', 'tb_class_192_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (223, 1, '英语2301', '英语2301', 'tb_class_193_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (224, 2, '英语2302', '英语2302', 'tb_class_193_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (225, 1, '日语2301', '日语2301', 'tb_class_193_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (226, 1, '中文2301', '中文2301', 'tb_class_193_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (227, 2, '中文2302', '中文2302', 'tb_class_193_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (228, 1, '环境2301', '环境2301', 'tb_class_194_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (229, 2, '环境2302', '环境2302', 'tb_class_194_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (230, 1, '环科2301', '环科2301', 'tb_class_194_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (231, 1, '给排水2301', '给排水2301', 'tb_class_194_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (232, 1, '视传2301', '视传2301', 'tb_class_195_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (233, 2, '视传2302', '视传2302', 'tb_class_195_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (234, 1, '环设2301', '环设2301', 'tb_class_195_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (235, 1, '产品2301', '产品2301', 'tb_class_195_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (236, 1, '土木2301', '土木2301', 'tb_class_196_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (237, 2, '土木2302', '土木2302', 'tb_class_196_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (238, 3, '土木2303', '土木2303', 'tb_class_196_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (239, 1, '建环2301', '建环2301', 'tb_class_196_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (240, 1, '工管2301', '工管2301', 'tb_class_196_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (241, 1, '工商2301', '工商2301', 'tb_class_197_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (242, 2, '工商2302', '工商2302', 'tb_class_197_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (243, 1, '市场2301', '市场2301', 'tb_class_197_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (244, 1, '财管2301', '财管2301', 'tb_class_197_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (245, 2, '财管2302', '财管2302', 'tb_class_197_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for sys_dict_type
@@ -560,7 +465,7 @@ CREATE TABLE `sys_logininfor`  (
   PRIMARY KEY (`info_id`) USING BTREE,
   INDEX `idx_sys_logininfor_s`(`status`) USING BTREE,
   INDEX `idx_sys_logininfor_lt`(`login_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 216 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '系统访问记录' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 215 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '系统访问记录' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -681,6 +586,9 @@ INSERT INTO `sys_logininfor` VALUES (212, 'admin', '127.0.0.1', '内网IP', 'Chr
 INSERT INTO `sys_logininfor` VALUES (213, 'purchaser', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '1', '验证码错误', '2026-04-16 19:18:14');
 INSERT INTO `sys_logininfor` VALUES (214, 'purchaser', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-04-16 19:18:19');
 INSERT INTO `sys_logininfor` VALUES (215, 'purchaser', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-04-17 18:54:39');
+INSERT INTO `sys_logininfor` VALUES (216, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-04-19 17:39:39');
+INSERT INTO `sys_logininfor` VALUES (217, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-04-19 17:40:34');
+INSERT INTO `sys_logininfor` VALUES (218, 'admin', '127.0.0.1', '内网IP', 'Chrome 14', 'Windows 10', '0', '登录成功', '2026-04-19 17:57:25');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -708,7 +616,7 @@ CREATE TABLE `sys_menu`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2193 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '菜单权限表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2192 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '菜单权限表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -899,7 +807,6 @@ INSERT INTO `sys_menu` VALUES (2124, '领书单新增', 2122, 2, '#', '', NULL, 
 INSERT INTO `sys_menu` VALUES (2125, '领书单修改', 2122, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:edit', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2126, '领书单出库', 2122, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:outbound', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2127, '领书单删除', 2122, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:remove', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2128, 'Textbook Mgmt', 0, 4, 'textbook', NULL, NULL, '', 1, 0, 'M', '0', '0', '', 'education', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2129, 'Book Info', 2128, 1, 'bookManage', 'textbook/book/index', NULL, 'TbBook', 1, 0, 'C', '0', '0', 'textbook:book:list', 'documentation', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2130, 'query', 2129, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2131, 'add', 2129, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
@@ -1079,7 +986,7 @@ CREATE TABLE `sys_role`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`role_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 106 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '角色信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '角色信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_role
@@ -1332,20 +1239,13 @@ CREATE TABLE `sys_user`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 107 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '用户信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 106 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '用户信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2026-04-16 19:18:00', '2026-03-31 20:06:20', 'admin', '2026-03-31 20:06:20', '', '2026-04-16 19:17:59', '管理员');
+INSERT INTO `sys_user` VALUES (1, 103, 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2026-04-19 17:57:25', '2026-03-31 20:06:20', 'admin', '2026-03-31 20:06:20', '', '2026-04-19 17:57:25', '管理员');
 INSERT INTO `sys_user` VALUES (2, 105, 'ry', '若依', '00', 'ry@qq.com', '15666666666', '1', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2026-03-31 20:06:20', '2026-03-31 20:06:20', 'admin', '2026-03-31 20:06:20', '', NULL, '测试员');
-INSERT INTO `sys_user` VALUES (100, 1, 'textbook_admin', '教材发行员', '00', '', '', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2026-04-16 19:16:42', NULL, 'admin', '2026-04-06 21:55:58', '', '2026-04-16 19:16:41', NULL);
-INSERT INTO `sys_user` VALUES (101, 1, 'teacher', '教师(测试)', '00', '', '', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2026-04-16 19:17:30', NULL, 'admin', '2026-04-06 21:56:24', '', '2026-04-16 19:17:29', NULL);
-INSERT INTO `sys_user` VALUES (102, 1, 'purchaser', '采购员(测试)', '00', '', '', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2026-04-17 18:54:40', NULL, 'admin', '2026-04-06 21:56:48', '', '2026-04-17 18:54:39', NULL);
-INSERT INTO `sys_user` VALUES (103, NULL, 'student', '学生(测试)', '00', 'student@edu.cn', '13800000103', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '127.0.0.1', '2026-04-14 15:55:36', NULL, 'admin', '2026-04-12 16:33:21', '', '2026-04-14 15:55:35', NULL);
-INSERT INTO `sys_user` VALUES (104, NULL, 'warehouse_mgr', 'Zhang Warehouse', '00', 'warehouse@edu.cn', '13800001001', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '', NULL, NULL, 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
-INSERT INTO `sys_user` VALUES (105, NULL, 'teacher_wang', 'Wang Teacher', '00', 'wang@edu.cn', '13800001002', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '', NULL, NULL, 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
-INSERT INTO `sys_user` VALUES (106, NULL, 'supplier_01', 'Xinhua Bookstore', '00', 'supplier@xhsd.com', '13800001003', '0', '', '$2a$10$7JB720yubVSZvUI0rEqK/.VqGOZTH.ulu33dHOiBE8ByOhJIrdAu2', '0', '0', '', NULL, NULL, 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for sys_user_post
@@ -1386,10 +1286,10 @@ INSERT INTO `sys_user_role` VALUES (105, 104);
 INSERT INTO `sys_user_role` VALUES (106, 105);
 
 -- ----------------------------
--- Table structure for tb_budget
+-- Table structure for textbook_budget
 -- ----------------------------
-DROP TABLE IF EXISTS `tb_budget`;
-CREATE TABLE `tb_budget`  (
+DROP TABLE IF EXISTS `textbook_budget`;
+CREATE TABLE `textbook_budget`  (
   `budget_id` bigint NOT NULL AUTO_INCREMENT COMMENT '预算ID',
   `budget_year` char(4) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '预算年度',
   `funding_source` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '经费来源（自费/科研经费/院系经费/项目经费）',
@@ -1410,220 +1310,11 @@ CREATE TABLE `tb_budget`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '年度预算管理表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Records of tb_budget
+-- Records of textbook_budget
 -- ----------------------------
-INSERT INTO `tb_budget` VALUES (1, '2026', '院系经费', 500000.00, 125600.00, 374400.00, '0', 1, 'admin', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_budget` VALUES (2, '2026', '科研经费', 200000.00, 45000.00, 155000.00, '0', 1, 'admin', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_budget` VALUES (3, '2026', '项目经费', 150000.00, 32000.00, 118000.00, '0', 1, 'admin', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-
--- ----------------------------
--- Table structure for tb_inventory_check
--- ----------------------------
-DROP TABLE IF EXISTS `tb_inventory_check`;
-CREATE TABLE `tb_inventory_check`  (
-  `check_id` bigint NOT NULL AUTO_INCREMENT COMMENT '盘点任务ID',
-  `check_no` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '盘点单号',
-  `check_type` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '1' COMMENT '盘点类型（1全盘 2抽盘 3循环盘）',
-  `check_status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '状态（0待执行 1进行中 2已完成 9已取消）',
-  `warehouseman_id` bigint NULL DEFAULT NULL COMMENT '库管员ID',
-  `warehouseman_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库管员姓名',
-  `plan_start_time` datetime(0) NULL DEFAULT NULL COMMENT '计划开始时间',
-  `plan_end_time` date NULL DEFAULT NULL COMMENT '计划完成时间',
-  `actual_start_time` datetime(0) NULL DEFAULT NULL COMMENT '实际开始时间',
-  `actual_end_time` datetime(0) NULL DEFAULT NULL COMMENT '实际完成时间',
-  `total_items` int NULL DEFAULT 0 COMMENT '应盘项数',
-  `checked_items` int NULL DEFAULT 0 COMMENT '已盘项数',
-  `diff_items` int NULL DEFAULT 0 COMMENT '差异项数',
-  `total_diff_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '差异金额',
-  `remark` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
-  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '删除标志',
-  `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  PRIMARY KEY (`check_id`) USING BTREE,
-  UNIQUE INDEX `check_no`(`check_no`) USING BTREE,
-  INDEX `idx_check_no`(`check_no`) USING BTREE,
-  INDEX `idx_warehouseman`(`warehouseman_id`) USING BTREE,
-  INDEX `idx_check_status`(`check_status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '库存盘点任务表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of tb_inventory_check
--- ----------------------------
-
--- ----------------------------
--- Table structure for tb_inventory_check_detail
--- ----------------------------
-DROP TABLE IF EXISTS `tb_inventory_check_detail`;
-CREATE TABLE `tb_inventory_check_detail`  (
-  `detail_id` bigint NOT NULL AUTO_INCREMENT COMMENT '明细ID',
-  `check_id` bigint NOT NULL COMMENT '盘点任务ID',
-  `book_id` bigint NOT NULL COMMENT '教材ID',
-  `book_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '教材名称',
-  `isbn` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'ISBN',
-  `location` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '存放位置',
-  `book_quantity` int NULL DEFAULT 0 COMMENT '账面数量',
-  `actual_quantity` int NULL DEFAULT 0 COMMENT '实盘数量',
-  `diff_quantity` int NULL DEFAULT 0 COMMENT '差异数量（实盘-账面）',
-  `unit_price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '单价',
-  `diff_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '差异金额',
-  `check_result` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '盘点结果（0正常 1盘盈 2盘亏）',
-  `checker` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '盘点人',
-  `check_time` datetime(0) NULL DEFAULT NULL COMMENT '盘点时间',
-  `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`detail_id`) USING BTREE,
-  INDEX `idx_check_id`(`check_id`) USING BTREE,
-  INDEX `idx_book_id`(`book_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '库存盘点明细表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of tb_inventory_check_detail
--- ----------------------------
-
--- ----------------------------
--- Table structure for tb_location
--- ----------------------------
-DROP TABLE IF EXISTS `tb_location`;
-CREATE TABLE `tb_location`  (
-  `location_id` bigint NOT NULL AUTO_INCREMENT COMMENT '库位ID',
-  `location_code` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '库位编码',
-  `area_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '库区编码',
-  `area_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '库名称（A区教材区等）',
-  `shelf_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '货架编码',
-  `shelf_layer` int NULL DEFAULT NULL COMMENT '层号',
-  `grid_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '格位编码',
-  `location_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库位名称',
-  `max_capacity` int NULL DEFAULT 100 COMMENT '最大容量（本）',
-  `current_qty` int NULL DEFAULT 0 COMMENT '当前存量',
-  `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '状态（0正常 1停用 2维修中）',
-  `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
-  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '删除标志',
-  `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  PRIMARY KEY (`location_id`) USING BTREE,
-  UNIQUE INDEX `location_code`(`location_code`) USING BTREE,
-  INDEX `idx_area`(`area_code`) USING BTREE,
-  INDEX `idx_location_code`(`location_code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '库位管理表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of tb_location
--- ----------------------------
-INSERT INTO `tb_location` VALUES (1, 'LOC-A01-01-01', 'A', '教材主库区', 'A01', 1, '01', 'A区1架1层1格', 50, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_location` VALUES (2, 'LOC-A01-01-02', 'A', '教材主库区', 'A01', 1, '02', 'A区1架1层2格', 50, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_location` VALUES (3, 'LOC-A01-02-01', 'A', '教材主库区', 'A01', 2, '01', 'A区1架2层1格', 40, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_location` VALUES (4, 'LOC-B01-01-01', 'B', '参考书库区', 'B01', 1, '01', 'B区1架1层1格', 30, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_location` VALUES (5, 'LOC-C01-01-01', 'C', '样本书库区', 'C01', 1, '01', 'C区1架1层1格', 20, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-
--- ----------------------------
--- Table structure for tb_purchase_order
--- ----------------------------
-DROP TABLE IF EXISTS `tb_purchase_order`;
-CREATE TABLE `tb_purchase_order`  (
-  `order_id` bigint NOT NULL AUTO_INCREMENT COMMENT '采购订单ID',
-  `order_no` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '采购订单号',
-  `supplier_id` bigint NOT NULL COMMENT '供应商ID',
-  `supplier_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '供应商名称',
-  `total_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '订单总金额',
-  `discount_amount` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '折扣金额',
-  `actual_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '实付金额',
-  `order_status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '订单状态（0待审批 1已批准 2已付款 3已发货 4已入库 5已完成 9已取消）',
-  `payment_status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '付款状态（0未付 1部分支付 2已付清）',
-  `delivery_date` date NULL DEFAULT NULL COMMENT '要求交货日期',
-  `actual_delivery` date NULL DEFAULT NULL COMMENT '实际到货日期',
-  `purchaser_id` bigint NULL DEFAULT NULL COMMENT '采购员ID',
-  `purchaser_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '采购员姓名',
-  `approver_id` bigint NULL DEFAULT NULL COMMENT '审批人ID',
-  `approver_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '审批人姓名',
-  `approve_time` datetime(0) NULL DEFAULT NULL COMMENT '审批时间',
-  `approve_remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '审批意见',
-  `remark` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
-  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '删除标志',
-  `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  PRIMARY KEY (`order_id`) USING BTREE,
-  UNIQUE INDEX `order_no`(`order_no`) USING BTREE,
-  INDEX `idx_supplier_id`(`supplier_id`) USING BTREE,
-  INDEX `idx_order_no`(`order_no`) USING BTREE,
-  INDEX `idx_order_status`(`order_status`) USING BTREE,
-  INDEX `idx_purchaser`(`purchaser_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '采购订单主表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of tb_purchase_order
--- ----------------------------
-
--- ----------------------------
--- Table structure for tb_purchase_order_detail
--- ----------------------------
-DROP TABLE IF EXISTS `tb_purchase_order_detail`;
-CREATE TABLE `tb_purchase_order_detail`  (
-  `detail_id` bigint NOT NULL AUTO_INCREMENT COMMENT '明细ID',
-  `order_id` bigint NOT NULL COMMENT '采购订单ID',
-  `book_id` bigint NULL DEFAULT NULL COMMENT '教材ID',
-  `book_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '教材名称',
-  `isbn` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'ISBN',
-  `author` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '作者',
-  `publisher` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '出版社',
-  `unit_price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '单价',
-  `quantity` int NULL DEFAULT 0 COMMENT '数量',
-  `discount_price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '折后单价',
-  `subtotal` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '小计',
-  `received_qty` int NULL DEFAULT 0 COMMENT '已收货数量',
-  `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`detail_id`) USING BTREE,
-  INDEX `idx_order_id`(`order_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '采购订单明细表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of tb_purchase_order_detail
--- ----------------------------
-
--- ----------------------------
--- Table structure for tb_supplier
--- ----------------------------
-DROP TABLE IF EXISTS `tb_supplier`;
-CREATE TABLE `tb_supplier`  (
-  `supplier_id` bigint NOT NULL AUTO_INCREMENT COMMENT '供应商ID',
-  `user_id` bigint NULL DEFAULT NULL COMMENT '关联系统用户ID',
-  `supplier_code` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '供应商编码',
-  `supplier_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '供应商名称',
-  `contact_person` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '联系人',
-  `contact_phone` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '联系电话',
-  `contact_email` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '联系邮箱',
-  `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '地址',
-  `discount_rate` decimal(5, 2) NULL DEFAULT 100.00 COMMENT '折扣率(%)',
-  `payment_terms` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '月结30天' COMMENT '付款账期',
-  `bank_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '开户银行',
-  `bank_account` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '银行账号',
-  `tax_number` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '税号',
-  `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '状态（0正常 1停用）',
-  `logistics_no` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '物流单号',
-  `logistics_company` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '物流公司',
-  `ship_time` datetime(0) NULL DEFAULT NULL COMMENT '发货时间',
-  `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
-  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '删除标志（0存在 1删除）',
-  `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  PRIMARY KEY (`supplier_id`) USING BTREE,
-  UNIQUE INDEX `supplier_code`(`supplier_code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '教材供应商表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of tb_supplier
--- ----------------------------
-INSERT INTO `tb_supplier` VALUES (1, NULL, 'SUP001', '高等教育出版社', '张经理', '010-58581111', NULL, '北京市西城区德外大街4号', 85.00, '月结60天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_supplier` VALUES (2, NULL, 'SUP002', '清华大学出版社', '李经理', '010-62770175', NULL, '北京市海淀区双清路学研大厦', 88.00, '月结30天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_supplier` VALUES (3, NULL, 'SUP003', '人民邮电出版社', '王经理', '010-67129213', NULL, '北京市丰台区成寿寺路11号', 82.00, '月结45天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_supplier` VALUES (4, NULL, 'SUP004', '机械工业出版社', '赵经理', '010-88379739', NULL, '北京市西城区百万庄大街22号', 80.00, '月结30天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
-INSERT INTO `tb_supplier` VALUES (5, NULL, 'SUP005', '电子工业出版社', '刘经理', '010-88258888', NULL, '北京市海淀区万寿路27号院', 83.00, '月结30天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_budget` VALUES (1, '2026', '院系经费', 500000.00, 125600.00, 374400.00, '0', 1, 'admin', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_budget` VALUES (2, '2026', '科研经费', 200000.00, 45000.00, 155000.00, '0', 1, 'admin', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_budget` VALUES (3, '2026', '项目经费', 150000.00, 32000.00, 118000.00, '0', 1, 'admin', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
 
 -- ----------------------------
 -- Table structure for textbook_buy
@@ -1648,6 +1339,8 @@ CREATE TABLE `textbook_buy`  (
   `receive_time` datetime(0) NULL DEFAULT NULL COMMENT '????',
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '????(0?? 2??)',
   `funding_source` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '自费' COMMENT '经费来源(自费/科研经费/院系经费/项目经费)',
+  `supplier_id` bigint NULL DEFAULT NULL,
+  `purchase_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0',
   `file_hash` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '导入文件MD5防重复',
   PRIMARY KEY (`buy_id`) USING BTREE,
   INDEX `idx_user_id`(`user_id`) USING BTREE,
@@ -1658,47 +1351,94 @@ CREATE TABLE `textbook_buy`  (
 -- ----------------------------
 -- Records of textbook_buy
 -- ----------------------------
-INSERT INTO `textbook_buy` VALUES (1, 'BUY202403010001', 101, '张明远', '1', '计算机科学与技术学院', 1, 3, '2026-04-07 00:06:21', '1', NULL, NULL, NULL, NULL, '1', NULL, '0', '自费', NULL);
-INSERT INTO `textbook_buy` VALUES (2, 'BUY202403020002', 102, '李小华', '2', '软件工程学院', 2, 2, '2026-04-09 00:06:21', '1', NULL, NULL, NULL, NULL, '0', NULL, '0', '自费', NULL);
-INSERT INTO `textbook_buy` VALUES (3, 'BUY202403030003', 101, '张明远', '1', '计算机科学与技术学院', 3, 2, '2026-04-10 00:06:21', '0', NULL, NULL, NULL, NULL, '0', NULL, '0', '自费', NULL);
-INSERT INTO `textbook_buy` VALUES (4, 'BUY202403040004', 102, '李小华', '2', '软件工程学院', 7, 1, '2026-04-11 00:06:21', '0', NULL, NULL, NULL, NULL, '0', NULL, '0', '自费', NULL);
-INSERT INTO `textbook_buy` VALUES (5, 'BUY202403050005', 101, '张明远', '1', '计算机科学与技术学院', 9, 3, '2026-04-12 00:06:21', '0', NULL, NULL, NULL, NULL, '0', NULL, '0', '自费', NULL);
+
+-- ----------------------------
+-- Table structure for textbook_claim_form
+-- ----------------------------
+DROP TABLE IF EXISTS `textbook_claim_form`;
+CREATE TABLE `textbook_claim_form`  (
+  `form_id` bigint NOT NULL AUTO_INCREMENT COMMENT '领书单ID（主键）',
+  `form_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '领书单号（自动生成）',
+  `notice_id` bigint NOT NULL COMMENT '关联领书通知ID',
+  `college_id` bigint NULL DEFAULT NULL COMMENT '学院ID',
+  `major_id` bigint NULL DEFAULT NULL COMMENT '专业ID',
+  `class_id` bigint NULL DEFAULT NULL COMMENT '班级ID',
+  `class_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '班级名称',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '状态（0待领取/1部分出库/2已出库）',
+  `planned_qty` int NOT NULL DEFAULT 0 COMMENT '应发总数（所有教材合计）',
+  `issued_qty` int NOT NULL DEFAULT 0 COMMENT '实发总数',
+  `receiver_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '领书人姓名（班委签名）',
+  `issue_time` datetime(0) NULL DEFAULT NULL COMMENT '出库时间',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '删除标志（0存在 2删除）',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`form_id`) USING BTREE,
+  UNIQUE INDEX `uk_form_no`(`form_no`) USING BTREE,
+  INDEX `idx_notice_id`(`notice_id`) USING BTREE,
+  INDEX `idx_class_id`(`class_id`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  INDEX `idx_del_flag_status`(`del_flag`, `status`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '领书单表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of textbook_claim_form
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for textbook_claim_form_detail
+-- ----------------------------
+DROP TABLE IF EXISTS `textbook_claim_form_detail`;
+CREATE TABLE `textbook_claim_form_detail`  (
+  `detail_id` bigint NOT NULL AUTO_INCREMENT COMMENT '明细ID（主键）',
+  `form_id` bigint NOT NULL COMMENT '关联领书单ID',
+  `textbook_id` bigint NOT NULL COMMENT '教材ID',
+  `isbn` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'ISBN',
+  `book_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '教材名称',
+  `author` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '作者',
+  `publisher` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '出版社',
+  `price` decimal(10, 2) NULL DEFAULT NULL COMMENT '定价',
+  `planned_qty` int NOT NULL DEFAULT 0 COMMENT '应发数量',
+  `issued_qty` int NOT NULL DEFAULT 0 COMMENT '实发数量',
+  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+  PRIMARY KEY (`detail_id`) USING BTREE,
+  INDEX `idx_form_id`(`form_id`) USING BTREE,
+  INDEX `idx_textbook_id`(`textbook_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '领书单明细表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of textbook_claim_form_detail
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for textbook_in
 -- ----------------------------
 DROP TABLE IF EXISTS `textbook_in`;
 CREATE TABLE `textbook_in`  (
-  `in_id` bigint NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `inbound_no` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '入库单号',
-  `pending_id` bigint NULL DEFAULT NULL COMMENT '???ID(??textbook_pending)',
-  `book_id` bigint NOT NULL COMMENT '??ID(??textbook_info)',
-  `book_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '教材名称',
-  `isbn` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'ISBN',
-  `in_num` int NOT NULL COMMENT '????',
-  `in_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '????',
-  `operator_id` bigint NOT NULL COMMENT '????ID(??sys_user)',
-  `in_reason` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '入库原因',
-  `supplier` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '?????',
-  `supplier_phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '???????',
-  `unit_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '????',
-  `total_price` decimal(10, 2) NULL DEFAULT NULL COMMENT '????',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '??',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '????(0?? 2??)',
-  PRIMARY KEY (`in_id`) USING BTREE,
-  INDEX `idx_book_id`(`book_id`) USING BTREE,
-  INDEX `idx_in_time`(`in_time`) USING BTREE,
-  INDEX `idx_pending_id`(`pending_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '???' ROW_FORMAT = Dynamic;
+  `in_id` bigint NOT NULL AUTO_INCREMENT,
+  `inbound_no` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `pending_id` bigint NULL DEFAULT NULL,
+  `book_id` bigint NOT NULL,
+  `book_name` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `isbn` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `in_num` int NOT NULL,
+  `in_time` datetime(0) NOT NULL,
+  `operator_id` bigint NULL DEFAULT NULL,
+  `in_reason` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `supplier` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `supplier_phone` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `unit_price` decimal(10, 2) NULL DEFAULT NULL,
+  `total_price` decimal(10, 2) NULL DEFAULT NULL,
+  `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0',
+  PRIMARY KEY (`in_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of textbook_in
 -- ----------------------------
-INSERT INTO `textbook_in` VALUES (1, 'IN202403010001', NULL, 1, 'Java程序设计教程', '9787302123456', 50, '2026-04-12 00:06:21', 100, NULL, '高等教育出版社', NULL, 52.00, 2600.00, '春季采购第一批次入库', '0');
-INSERT INTO `textbook_in` VALUES (2, 'IN202403150002', NULL, 2, 'Python数据分析实战', '9787302123463', 30, '2026-04-12 00:06:21', 100, NULL, '清华大学出版社', NULL, 40.00, 1200.00, '春季采购第二批次入库', '0');
-INSERT INTO `textbook_in` VALUES (3, 'IN202403200003', NULL, 5, 'C语言程序设计', '9787564601234', 80, '2026-04-12 00:06:21', 100, NULL, '东南大学出版社', NULL, 32.00, 2560.00, '大批量入库补充库存', '0');
-INSERT INTO `textbook_in` VALUES (4, 'IN202403250004', NULL, 8, 'Java核心技术卷I', '9787115543256', 20, '2026-04-12 00:06:21', 100, NULL, '机械工业出版社', NULL, 105.00, 2100.00, '研究生用书入库', '0');
-INSERT INTO `textbook_in` VALUES (5, 'IN20260412005537', NULL, 5, NULL, NULL, 80, '2026-04-12 00:55:37', 1, NULL, NULL, NULL, NULL, NULL, NULL, '0');
 
 -- ----------------------------
 -- Table structure for textbook_info
@@ -1736,21 +1476,81 @@ CREATE TABLE `textbook_info`  (
   INDEX `idx_book_name`(`book_name`) USING BTREE,
   INDEX `idx_category`(`category`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of textbook_info
 -- ----------------------------
-INSERT INTO `textbook_info` VALUES (1, 'Java程序设计教程', '9787302123456', '张三', '清华大学出版社', '2022-03-01', '第4版', NULL, NULL, NULL, 59.00, NULL, NULL, 'Java程序设计', '软件工程', '本科大二', NULL, '计算机', '经典Java入门教材', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
-INSERT INTO `textbook_info` VALUES (2, 'Python数据分析实战', '9787302123463', '李四', '清华大学出版社', '2023-02-01', '第2版', NULL, NULL, NULL, 45.00, NULL, NULL, 'Python数据分析', '大数据技术', '研究生', NULL, '计算机', '结合案例讲解Python数据分析', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
-INSERT INTO `textbook_info` VALUES (3, '高等数学（上册）', '9787040123456', '王五', '高等教育出版社', '2021-06-01', '第7版', NULL, NULL, NULL, 35.00, NULL, NULL, '高等数学', '理工科通用', '本科大一', NULL, '数学', '同济大学经典教材', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
-INSERT INTO `textbook_info` VALUES (4, '线性代数', '9787040123463', '赵六', '高等教育出版社', '2021-08-01', '第6版', NULL, NULL, NULL, 35.00, NULL, NULL, '线性代数', '理工科通用', '本科大一', NULL, '数学', '国内最通用的线性代数教材', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
-INSERT INTO `textbook_info` VALUES (5, 'C语言程序设计', '9787564601234', '钱七', '东南大学出版社', '2022-09-01', '第5版', NULL, NULL, NULL, 38.00, NULL, NULL, 'C语言程序设计', '计算机科学', '本科大一', NULL, '计算机', '谭浩强经典C语言教材', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
-INSERT INTO `textbook_info` VALUES (6, '计算机网络原理', '9787115234567', '孙八', '人民邮电出版社', '2023-01-01', '第8版', NULL, NULL, NULL, 49.00, NULL, NULL, '计算机网络', '网络工程', '本科大三', NULL, '计算机', '谢希仁编著网络方向权威教材', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
-INSERT INTO `textbook_info` VALUES (7, 'C++ Primer Plus（中文版）', '9787115598765', 'Stephen Prata', '人民邮电出版社', '2022-11-01', '第6版', NULL, NULL, NULL, 89.00, NULL, NULL, 'C++程序设计', '软件工程', '本科大三', NULL, '计算机', 'C++学习圣经全面覆盖C++11/14标准', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
-INSERT INTO `textbook_info` VALUES (8, 'Java核心技术卷I', '9787115543256', 'Cay S. Horstmann', '机械工业出版社', '2022-05-01', '第11版', NULL, NULL, NULL, 119.00, NULL, NULL, 'Java高级编程', '软件工程', '研究生', NULL, '计算机', 'Java领域权威著作深入理解Java核心机制', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
-INSERT INTO `textbook_info` VALUES (9, 'Python编程从入门到实践', '9787115545368', 'Eric Matthes', '人民邮电出版社', '2023-04-01', '第3版', NULL, NULL, NULL, 69.00, NULL, NULL, 'Python基础', '人工智能', '本科大一', NULL, '计算机', '零基础学Python的最佳入门书籍', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
-INSERT INTO `textbook_info` VALUES (10, '数据库系统概论', '9787303456789', '王珊', '高等教育出版社', '2022-07-01', '第5版', NULL, NULL, NULL, 45.00, NULL, NULL, '数据库原理', '计算机科学', '本科大三', NULL, '计算机', '国内数据库课程经典教材', NULL, '1', '', '2026-04-12 00:06:21', '', NULL, '0');
+INSERT INTO `textbook_info` VALUES (11, 'Java程序设计', '9787111111111', '张三', '清华大学出版社', NULL, NULL, NULL, NULL, NULL, 49.00, NULL, NULL, NULL, '软件工程', '大一', NULL, '专业基础课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0');
+INSERT INTO `textbook_info` VALUES (12, '数据结构', '9787112222222', '李四', '高等教育出版社', NULL, NULL, NULL, NULL, NULL, 45.00, NULL, NULL, NULL, '计算机科学与技术', '大二', NULL, '专业基础课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0');
+INSERT INTO `textbook_info` VALUES (13, '数据库原理', '9787113333333', '王五', '人民邮电出版社', NULL, NULL, NULL, NULL, NULL, 52.00, NULL, NULL, NULL, '软件工程', '大二', NULL, '专业核心课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0');
+INSERT INTO `textbook_info` VALUES (14, '操作系统', '9787114444444', '赵六', '电子工业出版社', NULL, NULL, NULL, NULL, NULL, 48.00, NULL, NULL, NULL, '计算机科学与技术', '大二', NULL, '专业核心课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0');
+INSERT INTO `textbook_info` VALUES (15, '计算机网络', '9787115555555', '钱七', '机械工业出版社', NULL, NULL, NULL, NULL, NULL, 46.00, NULL, NULL, NULL, '网络工程', '大三', NULL, '专业核心课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0');
+
+-- ----------------------------
+-- Table structure for textbook_inventory_check
+-- ----------------------------
+DROP TABLE IF EXISTS `textbook_inventory_check`;
+CREATE TABLE `textbook_inventory_check`  (
+  `check_id` bigint NOT NULL AUTO_INCREMENT COMMENT '盘点任务ID',
+  `check_no` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '盘点单号',
+  `check_type` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '1' COMMENT '盘点类型（1全盘 2抽盘 3循环盘）',
+  `check_status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '状态（0待执行 1进行中 2已完成 9已取消）',
+  `warehouseman_id` bigint NULL DEFAULT NULL COMMENT '库管员ID',
+  `warehouseman_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库管员姓名',
+  `plan_start_time` datetime(0) NULL DEFAULT NULL COMMENT '计划开始时间',
+  `plan_end_time` date NULL DEFAULT NULL COMMENT '计划完成时间',
+  `actual_start_time` datetime(0) NULL DEFAULT NULL COMMENT '实际开始时间',
+  `actual_end_time` datetime(0) NULL DEFAULT NULL COMMENT '实际完成时间',
+  `total_items` int NULL DEFAULT 0 COMMENT '应盘项数',
+  `checked_items` int NULL DEFAULT 0 COMMENT '已盘项数',
+  `diff_items` int NULL DEFAULT 0 COMMENT '差异项数',
+  `total_diff_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '差异金额',
+  `remark` varchar(1000) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '删除标志',
+  `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
+  PRIMARY KEY (`check_id`) USING BTREE,
+  UNIQUE INDEX `check_no`(`check_no`) USING BTREE,
+  INDEX `idx_check_no`(`check_no`) USING BTREE,
+  INDEX `idx_warehouseman`(`warehouseman_id`) USING BTREE,
+  INDEX `idx_check_status`(`check_status`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '库存盘点任务表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of textbook_inventory_check
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for textbook_inventory_check_detail
+-- ----------------------------
+DROP TABLE IF EXISTS `textbook_inventory_check_detail`;
+CREATE TABLE `textbook_inventory_check_detail`  (
+  `detail_id` bigint NOT NULL AUTO_INCREMENT COMMENT '明细ID',
+  `check_id` bigint NOT NULL COMMENT '盘点任务ID',
+  `book_id` bigint NOT NULL COMMENT '教材ID',
+  `book_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '教材名称',
+  `isbn` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'ISBN',
+  `location` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '存放位置',
+  `book_quantity` int NULL DEFAULT 0 COMMENT '账面数量',
+  `actual_quantity` int NULL DEFAULT 0 COMMENT '实盘数量',
+  `diff_quantity` int NULL DEFAULT 0 COMMENT '差异数量（实盘-账面）',
+  `unit_price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '单价',
+  `diff_amount` decimal(12, 2) NULL DEFAULT 0.00 COMMENT '差异金额',
+  `check_result` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '盘点结果（0正常 1盘盈 2盘亏）',
+  `checker` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '盘点人',
+  `check_time` datetime(0) NULL DEFAULT NULL COMMENT '盘点时间',
+  `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`detail_id`) USING BTREE,
+  INDEX `idx_check_id`(`check_id`) USING BTREE,
+  INDEX `idx_book_id`(`book_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '库存盘点明细表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of textbook_inventory_check_detail
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for textbook_lack
@@ -1775,80 +1575,170 @@ CREATE TABLE `textbook_lack`  (
   PRIMARY KEY (`lack_id`) USING BTREE,
   INDEX `idx_book_id`(`book_id`) USING BTREE,
   INDEX `idx_handle_status`(`handle_status`) USING BTREE,
-  INDEX `idx_textbook_lack_book_id`(`book_id`) USING BTREE
+  INDEX `idx_textbook_lack_book_id`(`book_id`) USING BTREE,
+  INDEX `idx_isbn`(`isbn`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '?????' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of textbook_lack
 -- ----------------------------
-INSERT INTO `textbook_lack` VALUES (1, 3, 18, NULL, NULL, '1', 100, '2026-04-09 00:06:21', '1', NULL, NULL, NULL, '1', NULL, '0');
-INSERT INTO `textbook_lack` VALUES (2, 7, 15, NULL, NULL, '1', 100, '2026-04-10 00:06:21', '1', NULL, NULL, NULL, '1', NULL, '0');
-INSERT INTO `textbook_lack` VALUES (3, 9, 10, NULL, NULL, '2', 101, '2026-04-11 00:06:21', '0', NULL, NULL, NULL, '1', 102, '0');
+
+-- ----------------------------
+-- Table structure for textbook_location
+-- ----------------------------
+DROP TABLE IF EXISTS `textbook_location`;
+CREATE TABLE `textbook_location`  (
+  `location_id` bigint NOT NULL AUTO_INCREMENT COMMENT '库位ID',
+  `location_code` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '库位编码',
+  `area_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '库区编码',
+  `area_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '库名称（A区教材区等）',
+  `shelf_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '货架编码',
+  `shelf_layer` int NULL DEFAULT NULL COMMENT '层号',
+  `grid_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '格位编码',
+  `location_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库位名称',
+  `max_capacity` int NULL DEFAULT 100 COMMENT '最大容量（本）',
+  `current_qty` int NULL DEFAULT 0 COMMENT '当前存量',
+  `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '状态（0正常 1停用 2维修中）',
+  `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '删除标志',
+  `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
+  PRIMARY KEY (`location_id`) USING BTREE,
+  UNIQUE INDEX `location_code`(`location_code`) USING BTREE,
+  INDEX `idx_area`(`area_code`) USING BTREE,
+  INDEX `idx_location_code`(`location_code`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '库位管理表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of textbook_location
+-- ----------------------------
+INSERT INTO `textbook_location` VALUES (1, 'LOC-A01-01-01', 'A', '教材主库区', 'A01', 1, '01', 'A区1架1层1格', 50, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_location` VALUES (2, 'LOC-A01-01-02', 'A', '教材主库区', 'A01', 1, '02', 'A区1架1层2格', 50, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_location` VALUES (3, 'LOC-A01-02-01', 'A', '教材主库区', 'A01', 2, '01', 'A区1架2层1格', 40, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_location` VALUES (4, 'LOC-B01-01-01', 'B', '参考书库区', 'B01', 1, '01', 'B区1架1层1格', 30, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_location` VALUES (5, 'LOC-C01-01-01', 'C', '样本书库区', 'C01', 1, '01', 'C区1架1层1格', 20, 0, '0', NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+
+-- ----------------------------
+-- Table structure for textbook_notice
+-- ----------------------------
+DROP TABLE IF EXISTS `textbook_notice`;
+CREATE TABLE `textbook_notice`  (
+  `notice_id` bigint NOT NULL AUTO_INCREMENT COMMENT '通知ID（主键）',
+  `notice_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '通知编号（自动生成，如 LS20260220001）',
+  `semester` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '学期（如 2025-2026-2）',
+  `pickup_start` datetime(0) NOT NULL COMMENT '领取开始时间',
+  `pickup_end` datetime(0) NOT NULL COMMENT '领取结束时间',
+  `pickup_location` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '领取地点',
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '状态（0草稿/1已发布/2领取中/3已完成）',
+  `total_classes` int NOT NULL DEFAULT 0 COMMENT '班级总数',
+  `issued_classes` int NOT NULL DEFAULT 0 COMMENT '已出库班级数',
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '删除标志（0存在 2删除）',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`notice_id`) USING BTREE,
+  UNIQUE INDEX `uk_notice_no`(`notice_no`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  INDEX `idx_semester`(`semester`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '领书通知表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of textbook_notice
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for textbook_out
 -- ----------------------------
 DROP TABLE IF EXISTS `textbook_out`;
 CREATE TABLE `textbook_out`  (
-  `out_id` bigint NOT NULL AUTO_INCREMENT COMMENT '??ID',
-  `outbound_no` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '出库单号',
-  `book_id` bigint NOT NULL COMMENT '??ID(??textbook_info)',
-  `book_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '教材名称',
-  `isbn` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'ISBN',
-  `out_num` int NOT NULL COMMENT '????',
-  `out_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '????',
-  `receive_id` bigint NOT NULL COMMENT '???ID(??sys_user)',
-  `buy_id` bigint NOT NULL COMMENT '???ID(??textbook_buy)',
-  `operator_id` bigint NOT NULL COMMENT '????ID(??sys_user)',
-  `out_reason` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '出库原因',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '??',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '????(0?? 2??)',
-  PRIMARY KEY (`out_id`) USING BTREE,
-  INDEX `idx_book_id`(`book_id`) USING BTREE,
-  INDEX `idx_out_time`(`out_time`) USING BTREE,
-  INDEX `idx_buy_id`(`buy_id`) USING BTREE,
-  INDEX `idx_receive_id`(`receive_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '???' ROW_FORMAT = Dynamic;
+  `out_id` bigint NOT NULL AUTO_INCREMENT,
+  `outbound_no` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+  `buy_id` bigint NULL DEFAULT NULL,
+  `book_id` bigint NOT NULL,
+  `book_name` varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `isbn` varchar(30) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `out_num` int NOT NULL,
+  `out_time` datetime(0) NOT NULL,
+  `receive_id` bigint NULL DEFAULT NULL,
+  `operator_id` bigint NULL DEFAULT NULL,
+  `out_reason` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '0',
+  PRIMARY KEY (`out_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of textbook_out
 -- ----------------------------
-INSERT INTO `textbook_out` VALUES (1, 'OUT202403060001', 1, 'Java程序设计教程', '9787302123456', 3, '2026-04-12 00:06:21', 101, 1, 100, NULL, '正常领书发放', '0');
-INSERT INTO `textbook_out` VALUES (2, 'OUT202403070002', 2, 'Python数据分析实战', '9787302123463', 2, '2026-04-12 00:06:21', 102, 2, 100, NULL, '正常领书发放', '0');
 
 -- ----------------------------
 -- Table structure for textbook_pending
 -- ----------------------------
 DROP TABLE IF EXISTS `textbook_pending`;
 CREATE TABLE `textbook_pending`  (
-  `pending_id` bigint NOT NULL AUTO_INCREMENT COMMENT '???ID',
-  `pending_no` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '采购单号',
-  `lack_id` bigint NULL DEFAULT NULL COMMENT '???ID(??textbook_lack)',
-  `book_id` bigint NOT NULL COMMENT '??ID(??textbook_info)',
-  `purchase_num` int NOT NULL COMMENT '????',
-  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '??(0??? 1??? 2???)',
-  `supplier` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '???',
-  `supplier_phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '?????',
-  `expected_date` date NULL DEFAULT NULL COMMENT '??????',
-  `actual_date` date NULL DEFAULT NULL COMMENT '??????',
-  `purchase_user_id` bigint NULL DEFAULT NULL COMMENT '???ID(??sys_user)',
-  `purchaser_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '采购负责人',
-  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '????',
-  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '??',
-  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '????(0?? 2??)',
+  `pending_id` bigint NOT NULL AUTO_INCREMENT,
+  `pending_no` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `lack_id` bigint NULL DEFAULT NULL,
+  `book_id` bigint NOT NULL,
+  `purchase_num` int NOT NULL,
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0',
+  `supplier` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `supplier_phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `expected_date` date NULL DEFAULT NULL,
+  `actual_date` date NULL DEFAULT NULL,
+  `purchase_user_id` bigint NULL DEFAULT NULL,
+  `purchaser_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0',
   PRIMARY KEY (`pending_id`) USING BTREE,
-  INDEX `idx_lack_id`(`lack_id`) USING BTREE,
   INDEX `idx_book_id`(`book_id`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '?????(???)' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of textbook_pending
 -- ----------------------------
-INSERT INTO `textbook_pending` VALUES (1, 'PD202403010001', NULL, 2, 2, '1', NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-12 00:06:21', '李小华提交的Python数据分析购书申请需要审核', '0');
-INSERT INTO `textbook_pending` VALUES (2, 'PD202403020002', NULL, 2, 2, '1', NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-12 00:06:21', '李小华的Python书籍已审核通过请及时领取', '0');
-INSERT INTO `textbook_pending` VALUES (3, 'PD202403030003', 3, 5, 80, '3', NULL, NULL, NULL, '2026-04-12', NULL, NULL, '2026-04-12 00:06:21', '新到一批C语言程序设计教材需要办理入库', '0');
-INSERT INTO `textbook_pending` VALUES (4, 'PD202403040004', NULL, 3, 18, '1', NULL, NULL, NULL, NULL, NULL, NULL, '2026-04-12 00:06:21', '高等数学库存不足需尽快补货', '0');
+
+-- ----------------------------
+-- Table structure for textbook_personal_apply
+-- ----------------------------
+DROP TABLE IF EXISTS `textbook_personal_apply`;
+CREATE TABLE `textbook_personal_apply`  (
+  `apply_id` bigint NOT NULL AUTO_INCREMENT,
+  `apply_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `teacher_id` bigint NOT NULL,
+  `teacher_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `textbook_id` bigint NOT NULL,
+  `isbn` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `book_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `apply_qty` int NOT NULL DEFAULT 1,
+  `purpose` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0',
+  `audit_opinion` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `audit_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
+  `audit_time` datetime(0) NULL DEFAULT NULL,
+  `issue_time` datetime(0) NULL DEFAULT NULL,
+  `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
+  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+  `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
+  `update_time` datetime(0) NULL DEFAULT NULL,
+  `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0',
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`apply_id`) USING BTREE,
+  UNIQUE INDEX `uk_apply_no`(`apply_no`) USING BTREE,
+  INDEX `idx_teacher_id`(`teacher_id`) USING BTREE,
+  INDEX `idx_status`(`status`) USING BTREE,
+  INDEX `idx_del_flag_status`(`del_flag`, `status`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of textbook_personal_apply
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for textbook_purchase_detail
@@ -1889,56 +1779,85 @@ CREATE TABLE `textbook_stock`  (
   `total_purchase` int NULL DEFAULT 0,
   `total_issued` int NULL DEFAULT 0,
   PRIMARY KEY (`stock_id`) USING BTREE,
-  UNIQUE INDEX `uk_book_id`(`book_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '???' ROW_FORMAT = Dynamic;
+  UNIQUE INDEX `uk_book_id`(`book_id`) USING BTREE,
+  INDEX `idx_stock_status`(`stock_status`) USING BTREE,
+  INDEX `idx_stock_num_warning_num`(`stock_num`, `warning_num`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '???' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of textbook_stock
 -- ----------------------------
-INSERT INTO `textbook_stock` VALUES (1, 1, 156, 'A区01架02层', 10, '2026-04-12 00:06:21', '0', 'normal', 0, 200, 44);
-INSERT INTO `textbook_stock` VALUES (2, 2, 88, 'A区01架03层', 15, '2026-04-12 00:06:21', '0', 'normal', 0, 120, 31);
-INSERT INTO `textbook_stock` VALUES (3, 3, 12, 'B区02架01层', 20, '2026-04-12 00:06:21', '0', 'shortage', 0, 80, 68);
-INSERT INTO `textbook_stock` VALUES (4, 4, 45, 'B区02架02层', 20, '2026-04-12 00:06:21', '0', 'normal', 0, 100, 55);
-INSERT INTO `textbook_stock` VALUES (5, 5, 283, 'A区02架01层', 30, '2026-04-12 00:55:37', '0', 'normal', 0, 300, 97);
-INSERT INTO `textbook_stock` VALUES (6, 6, 67, 'B区02架03层', 25, '2026-04-12 00:06:21', '0', 'warning', 0, 100, 33);
-INSERT INTO `textbook_stock` VALUES (7, 7, 8, 'A区03架01层', 10, '2026-04-12 00:06:21', '0', 'shortage', 0, 60, 52);
-INSERT INTO `textbook_stock` VALUES (8, 8, 134, 'A区03架02层', 40, '2026-04-12 00:06:21', '0', 'normal', 0, 180, 46);
-INSERT INTO `textbook_stock` VALUES (9, 9, 5, 'B区03架01层', 20, '2026-04-12 00:06:21', '0', 'shortage', 0, 50, 45);
-INSERT INTO `textbook_stock` VALUES (10, 10, 78, 'B区03架02层', 25, '2026-04-12 00:06:21', '0', 'normal', 0, 110, 32);
+INSERT INTO `textbook_stock` VALUES (11, 11, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0);
+INSERT INTO `textbook_stock` VALUES (12, 12, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0);
+INSERT INTO `textbook_stock` VALUES (13, 13, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0);
+INSERT INTO `textbook_stock` VALUES (14, 14, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0);
+INSERT INTO `textbook_stock` VALUES (15, 15, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0);
 
 -- ----------------------------
--- Table structure for textbook_stock_log
+-- Table structure for textbook_stock_flow
 -- ----------------------------
-DROP TABLE IF EXISTS `textbook_stock_log`;
-CREATE TABLE `textbook_stock_log`  (
-  `log_id` bigint NOT NULL AUTO_INCREMENT COMMENT '流水ID',
-  `book_id` bigint NOT NULL COMMENT '教材ID',
-  `biz_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '业务类型:purchase_in/issue_out/return_in/manual_adj',
-  `change_num` int NOT NULL COMMENT '变动数量(正=入库,负=出库)',
-  `before_stock` int NOT NULL DEFAULT 0 COMMENT '变动前库存',
-  `after_stock` int NOT NULL DEFAULT 0 COMMENT '变动后库存',
-  `operator_id` bigint NULL DEFAULT NULL COMMENT '操作人ID',
-  `operator_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '操作人姓名',
-  `ref_biz_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '关联业务类型:buy/in/out/pending/lack',
-  `ref_biz_id` bigint NULL DEFAULT NULL COMMENT '关联业务ID',
-  `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
-  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '操作时间',
-  PRIMARY KEY (`log_id`) USING BTREE,
-  INDEX `idx_book_id`(`book_id`) USING BTREE,
-  INDEX `idx_ref_biz`(`ref_biz_type`, `ref_biz_id`) USING BTREE,
-  INDEX `idx_create_time`(`create_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '库存流水日志表' ROW_FORMAT = Dynamic;
+DROP TABLE IF EXISTS `textbook_stock_flow`;
+CREATE TABLE `textbook_stock_flow`  (
+  `flow_id` bigint NOT NULL AUTO_INCREMENT,
+  `textbook_id` bigint NOT NULL,
+  `isbn` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `business_type` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `business_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `change_qty` int NOT NULL DEFAULT 0,
+  `stock_before` int NOT NULL DEFAULT 0,
+  `stock_after` int NOT NULL DEFAULT 0,
+  `operator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
+  `operate_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+  `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+  PRIMARY KEY (`flow_id`) USING BTREE,
+  INDEX `idx_textbook_id`(`textbook_id`) USING BTREE,
+  INDEX `idx_business_type`(`business_type`) USING BTREE,
+  INDEX `idx_operate_time`(`operate_time`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
--- Records of textbook_stock_log
+-- Records of textbook_stock_flow
 -- ----------------------------
-INSERT INTO `textbook_stock_log` VALUES (1, 1, 'in', 50, 106, 156, 102, '采购员小赵', 'inbound', 1, '采购入库IN202403010001', '2026-04-12 00:06:21');
-INSERT INTO `textbook_stock_log` VALUES (2, 1, 'out', 3, 159, 156, 100, '发行员老王', 'outbound', 1, '领书出库OUT202403060001', '2026-04-12 00:06:21');
-INSERT INTO `textbook_stock_log` VALUES (3, 2, 'in', 30, 58, 88, 102, '采购员小赵', 'inbound', 2, '采购入库IN202403150002', '2026-04-12 00:06:21');
-INSERT INTO `textbook_stock_log` VALUES (4, 2, 'out', 2, 90, 88, 100, '发行员老王', 'outbound', 2, '领书出库OUT202403070002', '2026-04-12 00:06:21');
-INSERT INTO `textbook_stock_log` VALUES (5, 5, 'in', 80, 123, 203, 102, '采购员小赵', 'inbound', 3, '采购入库IN202403200003', '2026-04-12 00:06:21');
-INSERT INTO `textbook_stock_log` VALUES (6, 3, 'out', 8, 20, 12, 100, '发行员老王', 'outbound', NULL, '领书出库', '2026-04-12 00:06:21');
-INSERT INTO `textbook_stock_log` VALUES (7, 7, 'out', 5, 13, 8, 100, '发行员老王', 'outbound', NULL, '领书出库', '2026-04-12 00:06:21');
-INSERT INTO `textbook_stock_log` VALUES (8, 9, 'out', 3, 8, 5, 100, '发行员老王', 'outbound', NULL, '领书出库', '2026-04-12 00:06:21');
+
+-- ----------------------------
+-- Table structure for textbook_supplier
+-- ----------------------------
+DROP TABLE IF EXISTS `textbook_supplier`;
+CREATE TABLE `textbook_supplier`  (
+  `supplier_id` bigint NOT NULL AUTO_INCREMENT COMMENT '供应商ID',
+  `user_id` bigint NULL DEFAULT NULL COMMENT '关联系统用户ID',
+  `supplier_code` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '供应商编码',
+  `supplier_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '供应商名称',
+  `contact_person` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '联系人',
+  `contact_phone` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '联系电话',
+  `contact_email` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '联系邮箱',
+  `address` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '地址',
+  `discount_rate` decimal(5, 2) NULL DEFAULT 100.00 COMMENT '折扣率(%)',
+  `payment_terms` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '月结30天' COMMENT '付款账期',
+  `bank_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '开户银行',
+  `bank_account` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '银行账号',
+  `tax_number` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '税号',
+  `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '状态（0正常 1停用）',
+  `logistics_no` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '物流单号',
+  `logistics_company` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '物流公司',
+  `ship_time` datetime(0) NULL DEFAULT NULL COMMENT '发货时间',
+  `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '删除标志（0存在 1删除）',
+  `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',
+  `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
+  `update_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '更新者',
+  `update_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
+  PRIMARY KEY (`supplier_id`) USING BTREE,
+  UNIQUE INDEX `supplier_code`(`supplier_code`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '教材供应商表' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of textbook_supplier
+-- ----------------------------
+INSERT INTO `textbook_supplier` VALUES (1, NULL, 'SUP001', '高等教育出版社', '张经理', '010-58581111', NULL, '北京市西城区德外大街4号', 85.00, '月结60天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_supplier` VALUES (2, NULL, 'SUP002', '清华大学出版社', '李经理', '010-62770175', NULL, '北京市海淀区双清路学研大厦', 88.00, '月结30天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_supplier` VALUES (3, NULL, 'SUP003', '人民邮电出版社', '王经理', '010-67129213', NULL, '北京市丰台区成寿寺路11号', 82.00, '月结45天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_supplier` VALUES (4, NULL, 'SUP004', '机械工业出版社', '赵经理', '010-88379739', NULL, '北京市西城区百万庄大街22号', 80.00, '月结30天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
+INSERT INTO `textbook_supplier` VALUES (5, NULL, 'SUP005', '电子工业出版社', '刘经理', '010-88258888', NULL, '北京市海淀区万寿路27号院', 83.00, '月结30天', NULL, NULL, NULL, '0', NULL, NULL, NULL, NULL, '0', '', '2026-04-13 15:21:33', '', NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

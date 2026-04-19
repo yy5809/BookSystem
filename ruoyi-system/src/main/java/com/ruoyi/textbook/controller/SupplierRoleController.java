@@ -1,10 +1,11 @@
-package com.ruoyi.system.textbook.controller;
+package com.ruoyi.textbook.controller;
 
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.system.service.ISysRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +23,7 @@ public class SupplierRoleController extends BaseController {
     /**
      * 创建供应商角色
      */
+    @PreAuthorize("@ss.hasRole('admin')")
     @PostMapping("/create")
     public AjaxResult createSupplierRole() {
         SysRole role = new SysRole();

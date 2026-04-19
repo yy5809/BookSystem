@@ -122,6 +122,7 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbOutboundById(Long outboundId) {
         TbOutbound outbound = tbOutboundMapper.selectTbOutboundById(outboundId);
         if (outbound == null) {
@@ -140,14 +141,65 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
             if (rowsAffected <= 0) {
                 throw new ServiceException("并发冲突：该教材库存已被其他操作修改，删除失败");
             }
+            TbStockLog stockLog = new TbStockLog();
+            stockLog.setBookId(outbound.getBookId());
+            stockLog.setIsbn(outbound.getIsbn());
+            stockLog.setBookName(outbound.getBookName());
+            stockLog.setBizType("1");
+            stockLog.setChangeNum(outbound.getOutNum());
+            stockLog.setBeforeStock(currentStock);
+            stockLog.setAfterStock(currentStock + outbound.getOutNum());
+            stockLog.setOperatorId(SecurityUtils.getUserId());
+            stockLog.setOperatorName(SecurityUtils.getUsername());
+            stockLog.setRefBizType("OUTBOUND_DELETE");
+            stockLog.setRefBizId(outbound.getOutId());
+            stockLog.setRemark("删除出库单，回退库存，出库单号：" + outbound.getOutboundNo());
+            stockLogService.insert(stockLog);
+            log.info("【删除出库单】已回退库存并生成流水, outboundId={}", outboundId);
         }
 
         return tbOutboundMapper.deleteTbOutboundById(outboundId);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbOutboundByIds(Long[] outboundIds) {
-        return tbOutboundMapper.deleteTbOutboundByIds(outboundIds);
+        for (Long outboundId : outboundIds) {
+            TbOutbound outbound = tbOutboundMapper.selectTbOutboundById(outboundId);
+            if (outbound == null) {
+                continue;
+            }
+            TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(outbound.getBookId());
+            if (inventory != null && outbound.getBookId() != null && outbound.getOutNum() != null) {
+                int currentStock = inventory.getStockNum();
+                int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
+                int rowsAffected = tbInventoryMapper.addStockWithVersion(
+                        outbound.getBookId(),
+                        outbound.getOutNum(),
+                        currentVersion
+                );
+                if (rowsAffected <= 0) {
+                    throw new ServiceException("并发冲突：该教材库存已被其他操作修改，删除失败");
+                }
+                TbStockLog stockLog = new TbStockLog();
+                stockLog.setBookId(outbound.getBookId());
+                stockLog.setIsbn(outbound.getIsbn());
+                stockLog.setBookName(outbound.getBookName());
+                stockLog.setBizType("1");
+                stockLog.setChangeNum(outbound.getOutNum());
+                stockLog.setBeforeStock(currentStock);
+                stockLog.setAfterStock(currentStock + outbound.getOutNum());
+                stockLog.setOperatorId(SecurityUtils.getUserId());
+                stockLog.setOperatorName(SecurityUtils.getUsername());
+                stockLog.setRefBizType("OUTBOUND_DELETE");
+                stockLog.setRefBizId(outbound.getOutId());
+                stockLog.setRemark("批量删除出库单，回退库存，出库单号：" + outbound.getOutboundNo());
+                stockLogService.insert(stockLog);
+                log.info("【批量删除出库单】已回退库存并生成流水, outboundId={}", outboundId);
+            }
+            tbOutboundMapper.deleteTbOutboundById(outboundId);
+        }
+        return outboundIds.length;
     }
 
     @Override
@@ -169,7 +221,7 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
         if (purchase == null) {
             throw new ServiceException("采购单不存在");
         }
-        if (!"1".equals(purchase.getAuditStatus())) {
+        if (!"1".equals(purchase.getStatus())) {
             throw new ServiceException("该采购单尚未审核通过，无法出库");
         }
 
@@ -246,7 +298,7 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
             log.info("【出库处理】已生成{}条库存流水记录", stockLogList.size());
         }
 
-        purchase.setReceiveStatus("2");
+        purchase.setStatus("3");
         tbPurchaseMapper.updateTbPurchase(purchase);
 
         if (successCount > 0 && purchase.getUserId() != null) {

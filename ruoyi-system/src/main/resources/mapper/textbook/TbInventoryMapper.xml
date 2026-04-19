@@ -51,7 +51,7 @@
 
     <insert id="insertTbInventory" useGeneratedKeys="true" keyProperty="stockId">
         INSERT INTO textbook_stock(book_id, stock_num, storage_addr, warning_num, version, del_flag)
-        VALUES(#{bookId}, 0, #{storageAddr}, #{warningNum}, 0, '0')
+        VALUES(#{bookId}, #{stockNum}, #{storageAddr}, #{warningNum}, 0, '0')
     </insert>
 
     <update id="updateTbInventory" parameterType="com.ruoyi.textbook.domain.TbInventory">
@@ -60,7 +60,7 @@
             <if test="storageAddr != null">storage_addr=#{storageAddr},</if>
             <if test="warningNum != null">warning_num=#{warningNum},</if>
             <if test="stockStatus != null">stock_status=#{stockStatus},</if>
-        </set> WHERE stock_id=#{stockId}
+        </set> WHERE stock_id=#{stockId} AND del_flag='0'
     </update>
 
     <delete id="deleteTbInventoryById" parameterType="Long">

@@ -65,7 +65,7 @@ public class TbBookController extends BaseController {
     /**
      * 新增教材基础信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:book:add')")
+    @PreAuthorize("@ss.hasPermi('textbook:book:add') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "教材基础信息", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbBook tbBook) {
@@ -75,7 +75,7 @@ public class TbBookController extends BaseController {
     /**
      * 修改教材基础信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:book:edit')")
+    @PreAuthorize("@ss.hasPermi('textbook:book:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "教材基础信息", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbBook tbBook) {
@@ -85,7 +85,7 @@ public class TbBookController extends BaseController {
     /**
      * 删除教材基础信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:book:remove')")
+    @PreAuthorize("@ss.hasPermi('textbook:book:remove') and @ss.hasAnyRole('admin','warehouse_manager')")
     @Log(title = "教材基础信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/{bookId}")
     public AjaxResult remove(@PathVariable Long bookId) {

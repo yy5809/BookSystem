@@ -39,9 +39,9 @@ public class TbInventoryController extends BaseController
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:inventory:query')")
-    @GetMapping(value = "/{stockId}")
-    public AjaxResult getInfo(@PathVariable("stockId") Long stockId) {
-        return AjaxResult.success(tbInventoryService.selectTbInventoryByInventoryId(stockId));
+    @GetMapping(value = "/{inventoryId}")
+    public AjaxResult getInfo(@PathVariable("inventoryId") Long inventoryId) {
+        return AjaxResult.success(tbInventoryService.selectTbInventoryByInventoryId(inventoryId));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:inventory:warning')")

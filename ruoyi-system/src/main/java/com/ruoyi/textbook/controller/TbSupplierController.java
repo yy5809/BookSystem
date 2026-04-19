@@ -43,7 +43,7 @@ public class TbSupplierController extends BaseController {
     @PreAuthorize("@ss.hasPermi('textbook:supplier:query')")
     @GetMapping("/{supplierId:\\d+}")
     public AjaxResult getInfo(@PathVariable Long supplierId) {
-        return AjaxResult.success(tbSupplierService.selectTbSupplierById(supplierId));
+        return AjaxResult.success(tbSupplierService.selectSupplierVOById(supplierId));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:supplier:add') and @ss.hasAnyRole('admin','warehouse_manager')")
