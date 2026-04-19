@@ -3,6 +3,7 @@ package com.ruoyi.textbook.controller;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.textbook.domain.TbOutbound;
 import com.ruoyi.textbook.service.ITbOutboundService;
@@ -45,18 +46,24 @@ public class TbOutboundController extends BaseController
         return AjaxResult.success(tbOutboundService.selectTbOutboundById(outboundId));
     }
 
+    /**
+     * 新增出库信息（已禁用，出库记录只能通过业务流程生成）
+     */
     @PreAuthorize("@ss.hasPermi('textbook:outbound:add') and @ss.hasAnyRole('admin','warehouse_manager')")
     @PostMapping
     public AjaxResult add(@RequestBody TbOutbound tbOutbound)
     {
-        return toAjax(tbOutboundService.insertTbOutbound(tbOutbound));
+        return AjaxResult.error("出库记录只能通过业务流程生成");
     }
 
+    /**
+     * 修改出库信息（已禁用，出库记录一旦生成无法修改）
+     */
     @PreAuthorize("@ss.hasPermi('textbook:outbound:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
     @PutMapping
     public AjaxResult edit(@RequestBody TbOutbound tbOutbound)
     {
-        return toAjax(tbOutboundService.updateTbOutbound(tbOutbound));
+        return AjaxResult.error("出库记录一旦生成无法修改");
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:outbound:remove') and @ss.hasAnyRole('admin','warehouse_manager')")
@@ -68,8 +75,10 @@ public class TbOutboundController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('textbook:outbound:process') and @ss.hasAnyRole('admin','warehouse_manager')")
     @PostMapping("/process/{purchaseId}")
-    public AjaxResult process(@PathVariable Long purchaseId, @RequestParam Long operatorId, @RequestParam String operatorName)
+    public AjaxResult process(@PathVariable Long purchaseId)
     {
+        Long operatorId = SecurityUtils.getUserId();
+        String operatorName = SecurityUtils.getUsername();
         return toAjax(tbOutboundService.processOutbound(purchaseId, operatorId, operatorName));
     }
 

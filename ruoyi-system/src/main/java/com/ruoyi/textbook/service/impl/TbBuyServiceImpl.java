@@ -218,17 +218,6 @@ public class TbBuyServiceImpl implements ITbBuyService {
 
         int result = tbPurchaseMapper.updateTbPurchase(buy);
 
-        if (AuditStatusEnum.APPROVED.getCode().equals(status) && AuditStatusEnum.PENDING.getCode().equals(buy.getStatus())) {
-            List<TbPurchaseDetail> approveDetails = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
-            noticeService.sendOrderApproveNotice(
-                buy.getUserId(),
-                approveDetails.stream().map(TbPurchaseDetail::getBookName).collect(Collectors.joining("、")),
-                "1",
-                "审核通过，请前往书库领取",
-                buyId
-            );
-        }
-
         return result;
     }
 
@@ -346,7 +335,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int cancelOrder(Long buyId) {
         TbPurchase buy = tbPurchaseMapper.selectTbPurchaseById(buyId);
         if (buy == null) throw new ServiceException("订单不存在");
@@ -357,7 +346,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int batchSubmit(List<TbPurchase> buys) {
         if (buys == null || buys.isEmpty()) { return 0; }
         if (buys.size() > TextbookConstants.MAX_BATCH_SIZE) {

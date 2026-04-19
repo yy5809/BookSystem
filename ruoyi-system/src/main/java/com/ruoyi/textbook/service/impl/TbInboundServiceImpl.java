@@ -339,9 +339,9 @@ public class TbInboundServiceImpl implements ITbInboundService {
         if (tbInbound.getPurchaseId() != null) {
             TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(tbInbound.getPurchaseId());
             if (purchase != null && "1".equals(purchase.getStatus())) {
-                purchase.setStatus("3");
+                purchase.setStatus("5");
                 tbPurchaseMapper.updateTbPurchase(purchase);
-                log.info("【入库处理】采购单状态更新为'已领书', purchaseId={}", tbInbound.getPurchaseId());
+                log.info("【入库处理】采购单状态更新为'已入库', purchaseId={}", tbInbound.getPurchaseId());
             }
         }
 

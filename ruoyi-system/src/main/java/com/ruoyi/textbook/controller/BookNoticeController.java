@@ -84,6 +84,7 @@ public class BookNoticeController extends BaseController {
     /**
      * 获取学院列表
      */
+    @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @GetMapping("/college/list")
     public AjaxResult getColleges() {
         // 从字典表获取学院数据
@@ -104,6 +105,7 @@ public class BookNoticeController extends BaseController {
     /**
      * 获取专业列表
      */
+    @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @GetMapping("/major/list/{collegeId}")
     public AjaxResult getMajors(@PathVariable Long collegeId) {
         // 从字典表获取专业数据
@@ -125,6 +127,7 @@ public class BookNoticeController extends BaseController {
     /**
      * 获取班级列表
      */
+    @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @GetMapping("/class/list/{majorId}")
     public AjaxResult getClasses(@PathVariable Long majorId) {
         // 从字典表获取班级数据

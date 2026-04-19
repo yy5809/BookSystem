@@ -64,7 +64,7 @@
     </select>
     
     <select id="selectTbShortageListByBookId" parameterType="Long" resultMap="TbShortageResult">
-        <include refid="selectTbShortageVo"/> AND t.book_id = #{bookId} AND t.handle_status = '0'
+        <include refid="selectTbShortageVo"/> AND t.book_id = #{bookId} AND t.handle_status IN ('0', '1')
         ORDER BY t.create_time DESC
     </select>
 

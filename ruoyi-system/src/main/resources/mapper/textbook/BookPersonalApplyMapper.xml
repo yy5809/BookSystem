@@ -110,14 +110,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </update>
 
     <delete id="deleteBookPersonalApplyByIds" parameterType="String">
-        update textbook_personal_apply set del_flag = '2' where apply_id in
+        update textbook_personal_apply set del_flag = '1' where apply_id in
         <foreach item="applyId" collection="array" open="(" separator="," close=")">
             #{applyId}
         </foreach>
     </delete>
 
     <delete id="deleteBookPersonalApplyById" parameterType="Long">
-        update textbook_personal_apply set del_flag = '2' where apply_id = #{applyId}
+        update textbook_personal_apply set del_flag = '1' where apply_id = #{applyId}
     </delete>
 
 </mapper>

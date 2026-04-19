@@ -71,13 +71,13 @@ public class TbInboundController extends BaseController
     }
 
     /**
-     * 修改入库信息
+     * 修改入库信息（已禁用，入库单一旦确认无法修改）
      */
     @PreAuthorize("@ss.hasPermi('textbook:inbound:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
     @PutMapping
     public AjaxResult edit(@RequestBody TbInbound tbInbound)
     {
-        return toAjax(tbInboundService.updateTbInbound(tbInbound));
+        return AjaxResult.error("入库单一旦确认无法修改");
     }
 
     /**

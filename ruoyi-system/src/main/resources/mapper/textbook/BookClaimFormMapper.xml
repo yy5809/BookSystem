@@ -105,11 +105,11 @@
     </update>
 
     <delete id="deleteBookClaimFormById" parameterType="Long">
-        update textbook_claim_form set del_flag = '2' where form_id = #{formId}
+        update textbook_claim_form set del_flag = '1' where form_id = #{formId}
     </delete>
 
     <delete id="deleteBookClaimFormByIds" parameterType="String">
-        update textbook_claim_form set del_flag = '2' where form_id in
+        update textbook_claim_form set del_flag = '1' where form_id in
         <foreach item="formId" collection="array" open="(" separator="," close=")">
             #{formId}
         </foreach>
