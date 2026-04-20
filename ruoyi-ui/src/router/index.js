@@ -93,9 +93,9 @@ export const constantRoutes = [
 // 动态路由，基于用户权限动态去加载
 export const dynamicRoutes = [
   {
-    path: '/textbook/teacher',
+    path: '/textbook',
     component: Layout,
-    redirect: '/textbook/teacher/index',
+    redirect: '/textbook/index',
     meta: {
       title: '教师管理',
       icon: 'education',
@@ -139,6 +139,16 @@ export const dynamicRoutes = [
         meta: {
           title: '缺书登记',
           icon: 'warning',
+          roles: ['teacher']
+        }
+      },
+      {
+        path: 'inventory',
+        component: () => import('@/views/textbook/teacherInventory/index'),
+        name: 'TeacherInventory',
+        meta: {
+          title: '库存查询',
+          icon: 'inventory',
           roles: ['teacher']
         }
       },

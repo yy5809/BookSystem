@@ -43,24 +43,14 @@ public class TbStockController extends BaseController {
         return AjaxResult.success(tbInventoryService.selectTbInventoryByInventoryId(stockId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:stock:add')")
-    @Log(title = "库存", businessType = BusinessType.INSERT)
-    @PostMapping
-    public AjaxResult add(@RequestBody TbInventory stock) {
-        return toAjax(tbInventoryService.insertTbInventory(stock));
-    }
-
-    @PreAuthorize("@ss.hasPermi('textbook:stock:edit')")
-    @Log(title = "库存", businessType = BusinessType.UPDATE)
+    @PreAuthorize("@ss.hasPermi('textbook:stock:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
+    @Log(title = "库存-修改预警阈值和存放地址", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbInventory stock) {
+        stock.setStockNum(null);
+        stock.setTotalPurchase(null);
+        stock.setTotalIssued(null);
+        stock.setVersion(null);
         return toAjax(tbInventoryService.updateTbInventory(stock));
-    }
-
-    @PreAuthorize("@ss.hasPermi('textbook:stock:remove')")
-    @Log(title = "库存", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{stockId}")
-    public AjaxResult remove(@PathVariable Long stockId) {
-        return toAjax(tbInventoryService.deleteTbInventoryByInventoryIds(new Long[]{stockId}));
     }
 }

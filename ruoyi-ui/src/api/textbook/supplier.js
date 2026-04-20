@@ -2,22 +2,22 @@ import request from '@/utils/request'
 
 // 供应商管理相关
 export function listSupplier(query) {
-  return request({ url: '/textbook/supplier/list', method: 'get', params: query })
+  return request({ url: '/textbook/tbSupplier/list', method: 'get', params: query })
 }
 export function getSupplier(supplierId) {
-  return request({ url: `/textbook/supplier/${supplierId}`, method: 'get' })
+  return request({ url: `/textbook/tbSupplier/${supplierId}`, method: 'get' })
 }
 export function addSupplier(data) {
-  return request({ url: '/textbook/supplier', method: 'post', data })
+  return request({ url: '/textbook/tbSupplier', method: 'post', data })
 }
 export function updateSupplier(data) {
-  return request({ url: '/textbook/supplier', method: 'put', data })
+  return request({ url: '/textbook/tbSupplier', method: 'put', data })
 }
 export function delSupplier(supplierIds) {
-  return request({ url: `/textbook/supplier/${supplierIds}`, method: 'delete' })
+  return request({ url: `/textbook/tbSupplier/${supplierIds}`, method: 'delete' })
 }
 export function listSupplierOptions() {
-  return request({ url: '/textbook/supplier/options', method: 'get' })
+  return request({ url: '/textbook/tbSupplier/options', method: 'get' })
 }
 
 // 供应商工作台相关

@@ -74,7 +74,7 @@
         <el-card shadow="hover">
           <div slot="header"><span>快捷操作</span></div>
           <div class="quick-actions">
-            <div class="action-item" @click="$router.push('/textbook/myApply')">
+            <div class="action-item" @click="$router.push('/textbook/personalApply')">
               <i class="el-icon-plus"></i>
               <span>提交领书申请</span>
             </div>
@@ -86,23 +86,18 @@
               <i class="el-icon-edit-outline"></i>
               <span>登记缺书</span>
             </div>
-            <div class="action-item" @click="$router.push('/textbook/myNotice')">
+            <div class="action-item" @click="$router.push('/textbook/inventory')">
+              <i class="el-icon-s-operation"></i>
+              <span>库存查询</span>
+            </div>
+            <div class="action-item" @click="$router.push('/textbook/notice')">
               <i class="el-icon-bell"></i>
               <span>查看通知</span>
             </div>
           </div>
         </el-card>
 
-        <el-card shadow="hover" style="margin-top: 20px;">
-          <div slot="header"><span>库存预警提示</span></div>
-          <div v-if="warningList.length === 0" style="color: #67C23A; text-align: center; padding: 10px;">
-            <i class="el-icon-circle-check"></i> 暂无库存预警
-          </div>
-          <div v-else v-for="(item, index) in warningList" :key="index" class="warning-item">
-            <span>{{ item.bookName }}</span>
-            <el-tag type="danger" size="mini">库存: {{ item.stock }}</el-tag>
-          </div>
-        </el-card>
+
       </el-col>
     </el-row>
   </div>
@@ -110,7 +105,6 @@
 
 <script>
 import { listMyApply } from "@/api/textbook/personalApply";
-import { listInventory } from "@/api/textbook/inventory";
 
 export default {
   name: "Dashboard",
@@ -126,8 +120,7 @@ export default {
         issuedCount: 0,
         unreadNotice: 0
       },
-      recentApplies: [],
-      warningList: []
+      recentApplies: []
     };
   },
   created() {
@@ -142,11 +135,6 @@ export default {
         this.stats.pendingCount = rows.filter(r => r.status === '0').length;
         this.stats.approvedCount = rows.filter(r => r.status === '1' || r.status === '3').length;
         this.stats.issuedCount = rows.filter(r => r.status === '3').length;
-      });
-
-      listInventory({ pageNum: 1, pageSize: 999 }).then(response => {
-        const rows = response.rows || [];
-        this.warningList = rows.filter(item => item.stockNum <= 10).slice(0, 5);
       });
     },
     getStatusType(status) {
@@ -204,13 +192,4 @@ export default {
 .action-item:hover { background: #e6e8eb; transform: translateY(-2px); }
 .action-item i { font-size: 24px; color: #409EFF; margin-bottom: 8px; }
 .action-item span { font-size: 13px; color: #303133; }
-
-.warning-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #EBEEF5;
-}
-.warning-item:last-child { border-bottom: none; }
 </style>

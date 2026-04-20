@@ -1,5 +1,6 @@
 package com.ruoyi.textbook.service.impl;
 
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.textbook.domain.TbPurchase;
@@ -17,11 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * 购书信息Service实现
- * 
- * @author ruoyi
- */
 @Service
 public class TbPurchaseServiceImpl implements ITbPurchaseService
 {
@@ -37,24 +33,12 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
     @Autowired
     private NoticeService noticeService;
 
-    /**
-     * 查询购书信息
-     * 
-     * @param purchaseId 购书ID
-     * @return 购书信息
-     */
     @Override
     public TbPurchase selectTbPurchaseById(Long purchaseId)
     {
         return tbPurchaseMapper.selectTbPurchaseById(purchaseId);
     }
 
-    /**
-     * 查询购书信息列表
-     * 
-     * @param tbPurchase 购书信息
-     * @return 购书信息集合
-     */
     @Override
     public List<TbPurchase> list(TbPurchase tbPurchase) {
         return tbPurchaseMapper.selectTbPurchaseList(tbPurchase);
@@ -66,27 +50,19 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
         return tbPurchaseMapper.selectTbPurchaseList(tbPurchase);
     }
 
-    /**
-     * 新增购书信息
-     * 
-     * @param tbPurchase 购书信息
-     * @param details 购书明细
-     * @return 结果
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertTbPurchase(TbPurchase tbPurchase, List<TbPurchaseDetail> details)
     {
-        String purchaseNo = "CG" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + String.format("%03d", System.currentTimeMillis() % 1000);
+        String purchaseNo = "CG" + DateUtils.dateTimeNow("yyyyMMddHHmmss")
+                + IdUtils.fastSimpleUUID().substring(0, 6).toUpperCase();
         tbPurchase.setPurchaseNo(purchaseNo);
-        tbPurchase.setStatus("0"); // 待审核
+        tbPurchase.setStatus("0");
         tbPurchase.setCreateTime(DateUtils.getNowDate());
         tbPurchase.setUpdateTime(DateUtils.getNowDate());
 
-        // 插入购书信息
         int result = tbPurchaseMapper.insertTbPurchase(tbPurchase);
 
-        // 插入购书明细
         if (result > 0 && details != null && !details.isEmpty()) {
             for (TbPurchaseDetail detail : details) {
                 detail.setPurchaseId(tbPurchase.getBuyId());
@@ -97,82 +73,69 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
         return result;
     }
 
-    /**
-     * 修改购书信息
-     *
-     * @param tbPurchase 购书信息
-     * @return 结果
-     */
     @Override
     public int updateTbPurchase(TbPurchase tbPurchase)
     {
         TbPurchase existing = tbPurchaseMapper.selectTbPurchaseById(tbPurchase.getBuyId());
         if (existing == null) {
-            return 0;
+            throw new ServiceException("采购单不存在");
         }
         if ("3".equals(existing.getStatus())) {
-            throw new RuntimeException("该采购单已入库，禁止修改");
+            throw new ServiceException("该采购单已入库，禁止修改");
         }
         if ("2".equals(existing.getStatus())) {
-            throw new RuntimeException("该采购单已到货，禁止修改");
+            throw new ServiceException("该采购单已到货，禁止修改");
         }
         if ("1".equals(existing.getStatus())) {
-            throw new RuntimeException("该订单已审核通过，禁止修改");
+            throw new ServiceException("该订单已审核通过，禁止修改");
         }
         tbPurchase.setUpdateTime(DateUtils.getNowDate());
         return tbPurchaseMapper.updateTbPurchase(tbPurchase);
     }
 
-    /**
-     * 删除购书信息
-     * 
-     * @param purchaseId 购书ID
-     * @return 结果
-     */
     @Override
     public int deleteTbPurchaseById(Long purchaseId)
     {
+        TbPurchase existing = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
+        if (existing != null && ("1".equals(existing.getStatus())
+                || "2".equals(existing.getStatus())
+                || "3".equals(existing.getStatus()))) {
+            throw new ServiceException("采购单[" + existing.getPurchaseNo() + "]已审核/已到货/已入库，禁止删除");
+        }
         return tbPurchaseMapper.deleteTbPurchaseById(purchaseId);
     }
 
-    /**
-     * 批量删除购书信息
-     * 
-     * @param purchaseIds 需要删除的购书ID
-     * @return 结果
-     */
     @Override
     public int deleteTbPurchaseByIds(Long[] purchaseIds)
     {
+        for (Long purchaseId : purchaseIds) {
+            TbPurchase existing = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
+            if (existing != null && ("1".equals(existing.getStatus())
+                    || "2".equals(existing.getStatus())
+                    || "3".equals(existing.getStatus()))) {
+                throw new ServiceException("采购单[" + existing.getPurchaseNo() + "]已审核/已到货/已入库，禁止删除");
+            }
+        }
         return tbPurchaseMapper.deleteTbPurchaseByIds(purchaseIds);
     }
 
-    /**
-     * 查询购书明细列表
-     * 
-     * @param purchaseId 购书ID
-     * @return 购书明细集合
-     */
     @Override
     public List<TbPurchaseDetail> selectTbPurchaseDetailListByPurchaseId(Long purchaseId)
     {
         return tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(purchaseId);
     }
 
-    /**
-     * 审核用书单
-     * 
-     * @param purchaseId 购书ID
-     * @param status 审核状态
-     * @return 结果
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int auditTbPurchase(Long purchaseId, String status)
     {
         TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
         if (purchase == null) {
-            return 0;
+            throw new ServiceException("采购单不存在");
+        }
+
+        if (!"0".equals(purchase.getStatus())) {
+            throw new ServiceException("采购单状态不是待审核，无法审核");
         }
 
         purchase.setStatus(status);
@@ -220,6 +183,15 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
                     shortage.setCreateTime(DateUtils.getNowDate());
                     shortage.setUpdateTime(DateUtils.getNowDate());
                     tbShortageMapper.insertTbShortage(shortage);
+
+                    noticeService.sendLackNotice(
+                            detail.getBookId(),
+                            detail.getBookName(),
+                            detail.getIsbn(),
+                            shortageQuantity,
+                            0,
+                            shortage.getLackId()
+                    );
                 }
             }
         }
@@ -227,23 +199,16 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
         return result;
     }
 
-    /**
-     * 开具发票
-     * 
-     * @param purchaseId 购书ID
-     * @param invoiceNo 发票编号
-     * @return 结果
-     */
     @Override
     public int invoiceTbPurchase(Long purchaseId, String invoiceNo)
     {
         TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
         if (purchase == null) {
-            return 0;
+            throw new ServiceException("采购单不存在");
         }
 
         purchase.setRejectReason(invoiceNo);
-        purchase.setStatus("3"); // 已完成
+        purchase.setStatus("3");
         purchase.setUpdateTime(DateUtils.getNowDate());
         return tbPurchaseMapper.updateTbPurchase(purchase);
     }

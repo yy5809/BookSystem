@@ -47,42 +47,42 @@ public class TbPendingController extends BaseController
         return AjaxResult.success(tbPendingService.selectTbPendingById(pendingId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:pending:add') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:pending:add') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PostMapping
     public AjaxResult add(@RequestBody TbPending tbPending)
     {
         return toAjax(tbPendingService.insertTbPending(tbPending));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:pending:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:pending:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PutMapping
     public AjaxResult edit(@RequestBody TbPending tbPending)
     {
         return toAjax(tbPendingService.updateTbPending(tbPending));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:pending:remove') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:pending:remove') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @DeleteMapping("/{pendingIds}")
     public AjaxResult remove(@PathVariable Long[] pendingIds)
     {
         return toAjax(tbPendingService.deleteTbPendingByIds(pendingIds));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:pending:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:pending:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PutMapping("/process/{pendingId}")
     public AjaxResult process(@PathVariable Long pendingId)
     {
         return toAjax(tbPendingService.updatePendingStatus(pendingId, "1"));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:pending:updateStatus') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:pending:updateStatus') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PutMapping("/updateStatus/{pendingId}")
     public AjaxResult updateStatus(@PathVariable Long pendingId, @RequestParam String status)
     {
         return toAjax(tbPendingService.updatePendingStatus(pendingId, status));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:pending:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:pending:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "待购确认入库", businessType = BusinessType.UPDATE)
     @PutMapping("/inbound/{pendingId}")
     public AjaxResult confirmInbound(@PathVariable Long pendingId) {

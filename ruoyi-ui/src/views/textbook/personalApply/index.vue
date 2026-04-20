@@ -31,8 +31,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="applyList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
+    <el-table v-loading="loading" :data="applyList" :row-key="row => row.applyId">
       <el-table-column label="申请编号" align="center" prop="applyNo" width="180" />
       <el-table-column label="申请人" align="center" prop="teacherName" width="100" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip />
@@ -50,6 +49,7 @@
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)" v-hasPermi="['textbook:personalApply:query']">详情</el-button>
           <el-button size="mini" type="text" icon="el-icon-check" @click="handleAudit(scope.row)" v-if="scope.row.status === '0'" v-hasPermi="['textbook:personalApply:audit']">审核</el-button>
           <el-button size="mini" type="text" icon="el-icon-sell" @click="handleIssue(scope.row)" v-if="scope.row.status === '1'" v-hasPermi="['textbook:personalApply:issue']">出库</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.status === '0'" v-hasPermi="['textbook:personalApply:cancel']">取消</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['textbook:personalApply:remove']">删除</el-button>
         </template>
       </el-table-column>
@@ -152,7 +152,7 @@
 </template>
 
 <script>
-import { listPersonalApply, getPersonalApply, addPersonalApply, delPersonalApply, auditApply, issueApply } from "@/api/textbook/personalApply";
+import { listPersonalApply, getPersonalApply, addPersonalApply, delPersonalApply, auditApply, issueApply, cancelApply } from "@/api/textbook/personalApply";
 import { listBook } from "@/api/textbook/book";
 
 export default {
@@ -309,6 +309,18 @@ export default {
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
+      });
+    },
+    handleCancel(row) {
+      this.$confirm('是否确认取消该申请?', "确认取消", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        return cancelApply(row.applyId);
+      }).then(() => {
+        this.getList();
+        this.$modal.msgSuccess("取消成功");
       });
     }
   }

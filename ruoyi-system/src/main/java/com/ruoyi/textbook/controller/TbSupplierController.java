@@ -46,23 +46,23 @@ public class TbSupplierController extends BaseController {
         return AjaxResult.success(tbSupplierService.selectSupplierVOById(supplierId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:supplier:add') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:supplier:add') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "供应商", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbSupplier tbSupplier) {
         return toAjax(tbSupplierService.insertTbSupplier(tbSupplier));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:supplier:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:supplier:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "供应商", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbSupplier tbSupplier) {
         return toAjax(tbSupplierService.updateTbSupplier(tbSupplier));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:supplier:remove') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:supplier:remove') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "供应商", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{supplierIds:\\d+}")
+    @DeleteMapping("/{supplierIds}")
     public AjaxResult remove(@PathVariable Long[] supplierIds) {
         return toAjax(tbSupplierService.deleteTbSupplierByIds(supplierIds));
     }

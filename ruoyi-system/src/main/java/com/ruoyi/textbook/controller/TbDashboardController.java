@@ -15,7 +15,7 @@ public class TbDashboardController extends BaseController {
     @Autowired
     private ITbDashboardService dashboardService;
 
-    @PreAuthorize("@ss.hasPermi('textbook:inventory:list')")
+    @PreAuthorize("@ss.hasPermi('textbook:dashboard:view')")
     @GetMapping("/stats")
     public AjaxResult getStats() {
         return AjaxResult.success(dashboardService.getDashboardData());

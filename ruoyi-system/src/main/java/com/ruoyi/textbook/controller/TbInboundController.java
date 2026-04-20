@@ -63,7 +63,7 @@ public class TbInboundController extends BaseController
     /**
      * 新增入库信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:inbound:add') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:inbound:add') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PostMapping
     public AjaxResult add(@RequestBody TbInbound tbInbound)
     {
@@ -73,7 +73,7 @@ public class TbInboundController extends BaseController
     /**
      * 修改入库信息（已禁用，入库单一旦确认无法修改）
      */
-    @PreAuthorize("@ss.hasPermi('textbook:inbound:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:inbound:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PutMapping
     public AjaxResult edit(@RequestBody TbInbound tbInbound)
     {
@@ -83,7 +83,7 @@ public class TbInboundController extends BaseController
     /**
      * 删除入库信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:inbound:remove') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:inbound:remove') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @DeleteMapping("/{inboundIds}")
     public AjaxResult remove(@PathVariable Long[] inboundIds)
     {
@@ -93,7 +93,7 @@ public class TbInboundController extends BaseController
     /**
      * 处理教材入库
      */
-    @PreAuthorize("@ss.hasPermi('textbook:inbound:process') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:inbound:process') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PostMapping("/process")
     public AjaxResult process(@RequestBody TbInbound tbInbound)
     {

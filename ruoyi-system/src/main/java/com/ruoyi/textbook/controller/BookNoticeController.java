@@ -41,21 +41,21 @@ public class BookNoticeController extends BaseController {
         return AjaxResult.success(bookNoticeService.selectBookNoticeById(noticeId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:add')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:add') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书通知", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody BookNotice bookNotice) {
         return toAjax(bookNoticeService.insertBookNotice(bookNotice));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:edit')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:edit') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书通知", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody BookNotice bookNotice) {
         return toAjax(bookNoticeService.updateBookNotice(bookNotice));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:publish')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:publish') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "发布领书通知", businessType = BusinessType.UPDATE)
     @PutMapping("/publish/{noticeId}")
     public AjaxResult publish(@PathVariable Long noticeId) {
@@ -67,7 +67,7 @@ public class BookNoticeController extends BaseController {
         }
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:remove')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:remove') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书通知", businessType = BusinessType.DELETE)
     @DeleteMapping("/{noticeIds}")
     public AjaxResult remove(@PathVariable Long[] noticeIds) {

@@ -43,21 +43,21 @@ public class TbInfoController extends BaseController {
         return AjaxResult.success(tbBookService.selectTbBookByBookId(bookId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:info:add')")
+    @PreAuthorize("@ss.hasPermi('textbook:info:add') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "教材信息", businessType = BusinessType.INSERT)
     @PostMapping("/add")
     public AjaxResult add(@RequestBody TbBook tbBook) {
         return toAjax(tbBookService.insertTbBook(tbBook));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:info:edit')")
+    @PreAuthorize("@ss.hasPermi('textbook:info:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "教材信息", businessType = BusinessType.UPDATE)
     @PutMapping("/edit")
     public AjaxResult edit(@RequestBody TbBook tbBook) {
         return toAjax(tbBookService.updateTbBook(tbBook));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:info:remove')")
+    @PreAuthorize("@ss.hasPermi('textbook:info:remove') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "教材信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/remove/{bookId}")
     public AjaxResult remove(@PathVariable Long bookId) {

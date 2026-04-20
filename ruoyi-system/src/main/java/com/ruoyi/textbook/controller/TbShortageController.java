@@ -65,7 +65,7 @@ public class TbShortageController extends BaseController
     /**
      * 新增缺书登记信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:add') and @ss.hasAnyRole('admin','warehouse_manager','teacher')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:add') and @ss.hasAnyRoles('admin,warehouse_manager,teacher')")
     @PostMapping
     public AjaxResult add(@RequestBody TbShortage tbShortage)
     {
@@ -75,7 +75,7 @@ public class TbShortageController extends BaseController
     /**
      * 修改缺书登记信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PutMapping
     public AjaxResult edit(@RequestBody TbShortage tbShortage)
     {
@@ -85,7 +85,7 @@ public class TbShortageController extends BaseController
     /**
      * 删除缺书登记信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:remove') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:remove') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @DeleteMapping("/{shortageIds}")
     public AjaxResult remove(@PathVariable Long[] shortageIds)
     {
@@ -95,7 +95,7 @@ public class TbShortageController extends BaseController
     /**
      * 处理缺书
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:process') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:process') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PutMapping("/process/{shortageId}")
     public AjaxResult process(@PathVariable Long shortageId, @RequestParam String status)
     {
@@ -112,7 +112,7 @@ public class TbShortageController extends BaseController
         return AjaxResult.success(tbShortageService.selectTbShortageByBookId(bookId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:process') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:process') and @ss.hasAnyRole('admin,warehouse_manager')")
     @Log(title = "缺书批量转采购(ISBN聚合)", businessType = BusinessType.UPDATE)
     @PostMapping("/convertToPurchase")
     public AjaxResult convertToPurchase(@RequestBody Long[] shortageIds)

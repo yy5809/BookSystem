@@ -33,15 +33,9 @@
                 <el-option label="已读" value="1"/>
               </el-select>
             </el-form-item>
-            <el-form-item>
-              <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-              <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-            </el-form-item>
           </el-form>
 
-          <el-table v-loading="loading" :data="noticeList" border stripe @selection-change="handleSelectionChange">
-            <el-table-column type="selection" width="55" align="center"/>
-            <el-table-column label="通知ID" align="center" prop="noticeId" width="80"/>
+          <el-table v-loading="loading" :data="noticeList" border stripe>
             <el-table-column label="标题" align="center" prop="noticeTitle" :show-overflow-tooltip="true" min-width="150"/>
             <el-table-column label="业务类型" align="center" prop="bizType" width="120">
               <template slot-scope="scope">

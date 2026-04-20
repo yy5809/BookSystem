@@ -1,7 +1,6 @@
 package com.ruoyi.textbook.controller;
 
 import com.ruoyi.common.annotation.Log;
-import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -14,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/textbook/notification")
@@ -41,6 +39,7 @@ public class TbNoticeController extends BaseController {
         return getDataTable(list);
     }
 
+    @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @GetMapping("/unread/count")
     public AjaxResult getUnreadCount() {
         Long userId = SecurityUtils.getUserId();
@@ -58,6 +57,7 @@ public class TbNoticeController extends BaseController {
         return AjaxResult.success(noticeService.selectNoticeById(noticeId));
     }
 
+    @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @Log(title = "通知公告", businessType = BusinessType.UPDATE)
     @PutMapping("/read/{noticeId}")
     public AjaxResult markAsRead(@PathVariable Long noticeId) {
@@ -67,6 +67,7 @@ public class TbNoticeController extends BaseController {
         return toAjax(noticeService.updateNotice(notice));
     }
 
+    @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @Log(title = "通知公告", businessType = BusinessType.UPDATE)
     @PutMapping("/read/batch")
     public AjaxResult batchMarkAsRead(@RequestBody Long[] noticeIds) {
@@ -80,6 +81,7 @@ public class TbNoticeController extends BaseController {
         return AjaxResult.success("成功标记" + count + "条通知为已读");
     }
 
+    @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @Log(title = "通知公告", businessType = BusinessType.UPDATE)
     @PutMapping("/read/all")
     public AjaxResult markAllAsRead() {
@@ -99,7 +101,7 @@ public class TbNoticeController extends BaseController {
         return AjaxResult.success("没有未读通知");
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:add')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:add') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "通知公告", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody SysNotice notice) {
@@ -107,7 +109,7 @@ public class TbNoticeController extends BaseController {
         return toAjax(noticeService.insertNotice(notice));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:edit')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "通知公告", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody SysNotice notice) {
@@ -115,7 +117,7 @@ public class TbNoticeController extends BaseController {
         return toAjax(noticeService.updateNotice(notice));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:remove')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:remove') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @Log(title = "通知公告", businessType = BusinessType.DELETE)
     @DeleteMapping("/{noticeIds}")
     public AjaxResult remove(@PathVariable Long[] noticeIds) {

@@ -57,7 +57,8 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertBookNotice(BookNotice bookNotice) {
-        String noticeNo = "LS" + DateUtils.dateTimeNow("yyyyMMdd") + String.format("%03d", System.currentTimeMillis() % 1000);
+        String noticeNo = "LS" + DateUtils.dateTimeNow("yyyyMMddHHmmss")
+                + IdUtils.fastSimpleUUID().substring(0, 6).toUpperCase();
         bookNotice.setNoticeNo(noticeNo);
         bookNotice.setStatus("0");
         bookNotice.setTotalClasses(0);

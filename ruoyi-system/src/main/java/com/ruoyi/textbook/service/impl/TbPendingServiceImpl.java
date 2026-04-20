@@ -155,10 +155,10 @@ public class TbPendingServiceImpl implements ITbPendingService
         TbPending pending = tbPendingMapper.selectTbPendingById(id);
         if (pending == null) return 0;
         if ("3".equals(pending.getStatus())) {
-            throw new RuntimeException("该待购单已入库，不可重复操作");
+            throw new ServiceException("该待购单已入库，不可重复操作");
         }
         if (!"2".equals(pending.getStatus())) {
-            throw new RuntimeException("待购单状态不是已到货，无法入库");
+            throw new ServiceException("待购单状态不是已到货，无法入库");
         }
 
         TbInventory stock = tbInventoryMapper.selectTbInventoryByBookId(pending.getBookId());

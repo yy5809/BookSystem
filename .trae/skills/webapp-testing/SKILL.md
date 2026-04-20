@@ -1,63 +1,50 @@
 ---
-name: "webapp-testing"
-description: "Tests web applications for functionality, performance, and security. Invoke when user needs to test web applications or identify issues."
+name: webapp-testing
+description: 基于 Playwright 生成并执行自动化测试脚本，以完成前端功能验证、界面调试与页面行为分析。
 ---
 
-# Web App Testing
+# WebApp Testing 技能
 
-This skill tests web applications and provides feedback on:
+## 一、功能介绍
 
-- Functionality testing
-- Performance testing
-- Security testing
-- Cross-browser compatibility
-- Responsive design testing
-- User experience testing
-- Accessibility testing
+- **自动化测试**：使用 Playwright 生成测试脚本
+- **功能验证**：验证前端页面功能正确性
+- **界面调试**：分析页面渲染和交互问题
+- **行为分析**：监控页面加载性能和用户行为
 
-## When to Invoke
+## 二、使用场景
 
-Invoke this skill when:
-- User needs to test a web application before deployment
-- User is experiencing issues with their web application
-- User wants to improve web application performance
-- User needs to ensure web application security
-- User wants to verify cross-browser compatibility
+- 前端功能回归测试
+- 页面性能测试
+- 跨浏览器兼容性测试
+- 自动化测试流程集成
 
-## Testing Methods
+## 三、使用示例
 
-- **Functional Testing**: Verify all features work as expected
-- **Performance Testing**: Measure load times and responsiveness
-- **Security Testing**: Identify potential security vulnerabilities
-- **Compatibility Testing**: Test across different browsers and devices
-- **Accessibility Testing**: Ensure compliance with WCAG standards
-- **User Experience Testing**: Evaluate overall usability
+### 示例1：登录功能测试
 
-## Supported Technologies
+```javascript
+// 生成的测试脚本
+const { test, expect } = require('@playwright/test');
 
-- Web applications (HTML, CSS, JavaScript)
-- Single-page applications (SPA)
-- Responsive web design
-- Web APIs
-- Authentication systems
-- Form submissions
+test('登录功能测试', async ({ page }) => {
+  await page.goto('http://localhost:8080/login');
+  await page.fill('#username', 'admin');
+  await page.fill('#password', 'admin123');
+  await page.click('#login-button');
+  await expect(page).toHaveURL('http://localhost:8080/dashboard');
+});
+```
 
-## Testing Process
+### 示例2：表单提交测试
 
-1. Analyze web application requirements
-2. Develop test cases and scenarios
-3. Execute tests across different browsers and devices
-4. Identify and document issues
-5. Provide actionable recommendations
-6. Verify fixes and retest
-
-## Output Format
-
-The testing report will include:
-- Summary of test results
-- Detailed issue descriptions
-- Steps to reproduce issues
-- Screenshots (if applicable)
-- Priority levels for each issue
-- Recommended fixes
-- Test coverage analysis
+```javascript
+test('供应商添加测试', async ({ page }) => {
+  await page.goto('http://localhost:8080/textbook/supplier');
+  await page.click('#add-button');
+  await page.fill('#supplier-name', '测试供应商');
+  await page.fill('#contact-person', '张三');
+  await page.fill('#contact-phone', '13800138000');
+  await page.click('#save-button');
+  await expect(page.locator('.el-message')).toContainText('添加成功');
+});

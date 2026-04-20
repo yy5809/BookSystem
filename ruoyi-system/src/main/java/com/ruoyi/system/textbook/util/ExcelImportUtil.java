@@ -1,5 +1,6 @@
 package com.ruoyi.system.textbook.util;
 
+import com.ruoyi.common.exception.ServiceException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -171,7 +172,7 @@ public class ExcelImportUtil {
             double d = Double.parseDouble(value);
             return (int) d;
         } catch (NumberFormatException e) {
-            throw new RuntimeException("采购数量格式错误: " + value);
+            throw new ServiceException("采购数量格式错误: " + value);
         }
     }
 

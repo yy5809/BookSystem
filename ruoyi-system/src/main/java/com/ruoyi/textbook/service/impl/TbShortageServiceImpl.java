@@ -4,10 +4,12 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
+import com.ruoyi.textbook.domain.TbBook;
 import com.ruoyi.textbook.domain.TbPending;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbShortage;
+import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbPendingMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
@@ -42,6 +44,8 @@ public class TbShortageServiceImpl implements ITbShortageService
     private TbPendingMapper tbPendingMapper;
     @Autowired
     private TbPurchaseMapper tbPurchaseMapper;
+    @Autowired
+    private TbBookMapper tbBookMapper;
     @Autowired
     private SysUserMapper sysUserMapper;
     @Autowired
@@ -80,6 +84,46 @@ public class TbShortageServiceImpl implements ITbShortageService
     @Override
     public int insertTbShortage(TbShortage tbShortage)
     {
+        // 根据ISBN查询教材信息获取book_id
+        if (tbShortage.getIsbn() != null && !tbShortage.getIsbn().isEmpty()) {
+            TbBook book = tbBookMapper.selectTbBookByIsbn(tbShortage.getIsbn());
+            if (book != null) {
+                tbShortage.setBookId(book.getBookId());
+                if (StringUtils.isEmpty(tbShortage.getBookName())) {
+                    tbShortage.setBookName(book.getBookName());
+                }
+            } else {
+                // 如果ISBN不存在，自动创建新的教材记录
+                TbBook newBook = new TbBook();
+                newBook.setBookName(tbShortage.getBookName());
+                newBook.setIsbn(tbShortage.getIsbn());
+                newBook.setAuthor("未知");
+                newBook.setPublisher("未知");
+                newBook.setMajor("未知");
+                newBook.setGrade("未知");
+                newBook.setPrice(new java.math.BigDecimal(0));
+                newBook.setStatus("0");
+                newBook.setCreateBy(SecurityUtils.getUsername());
+                tbBookMapper.insertTbBook(newBook);
+                // 使用新创建的教材ID
+                tbShortage.setBookId(newBook.getBookId());
+                log.info("【缺书登记】ISBN={}不存在，自动创建教材记录，ID={}", tbShortage.getIsbn(), newBook.getBookId());
+            }
+        }
+
+        if (tbShortage.getBookId() != null) {
+            TbShortage existing = tbShortageMapper.selectTbShortageByBookId(tbShortage.getBookId());
+            if (existing != null && ("0".equals(existing.getHandleStatus()) || "1".equals(existing.getHandleStatus()))) {
+                int newLackNum = (existing.getLackNum() != null ? existing.getLackNum() : 0)
+                        + (tbShortage.getLackNum() != null ? tbShortage.getLackNum() : 0);
+                existing.setLackNum(newLackNum);
+                existing.setUpdateTime(DateUtils.getNowDate());
+                tbShortageMapper.updateTbShortage(existing);
+                log.info("【缺书登记】ISBN={}已存在未处理缺书单，累加数量为{}", tbShortage.getIsbn(), newLackNum);
+                return 1;
+            }
+        }
+
         tbShortage.setCreateTime(DateUtils.getNowDate());
         tbShortage.setUpdateTime(DateUtils.getNowDate());
         if (tbShortage.getRegisterId() == null) {
@@ -94,6 +138,7 @@ public class TbShortageServiceImpl implements ITbShortageService
         int rows = tbShortageMapper.insertTbShortage(tbShortage);
         if (rows > 0) {
             try {
+                // MyBatis-Plus会自动设置自增主键值到实体对象中
                 noticeService.sendLackNotice(
                         tbShortage.getBookId(),
                         tbShortage.getBookName(),
@@ -241,8 +286,8 @@ public class TbShortageServiceImpl implements ITbShortageService
         SysUser currentUser = sysUserMapper.selectUserById(currentUserId);
         String operatorName = currentUser != null ? currentUser.getNickName() : "系统";
 
-        String seqNum = String.format("%03d", System.currentTimeMillis() % 1000);
-        String purchaseNo = "CG" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + seqNum;
+        String purchaseNo = "CG" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+                + IdUtils.fastSimpleUUID().substring(0, 6).toUpperCase();
 
         TbPurchase purchase = new TbPurchase();
         purchase.setPurchaseNo(purchaseNo);

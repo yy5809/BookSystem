@@ -1,5 +1,6 @@
 package com.ruoyi.textbook.service.impl;
 
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
@@ -90,16 +91,16 @@ public class SupplierServiceImpl implements ISupplierService {
     public void confirmShipment(Long purchaseId, String logisticsCompany, String logisticsNo, String remark) {
         TbSupplier supplier = getCurrentSupplier();
         if (supplier == null) {
-            throw new RuntimeException("供应商信息不存在");
+            throw new ServiceException("供应商信息不存在");
         }
         
         TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
         if (purchase == null || !supplier.getSupplierId().equals(purchase.getSupplierId())) {
-            throw new RuntimeException("采购单不存在或无权操作");
+            throw new ServiceException("采购单不存在或无权操作");
         }
         
         if (!"1".equals(purchase.getStatus())) {
-            throw new RuntimeException("采购单状态不是采购中，无法确认发货");
+            throw new ServiceException("采购单状态不是采购中，无法确认发货");
         }
         
         // 更新采购单状态和物流信息

@@ -45,7 +45,8 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
 
     @Override
     public int insertBookPersonalApply(BookPersonalApply bookPersonalApply) {
-        String applyNo = "SQ" + System.currentTimeMillis();
+        String applyNo = "SQ" + com.ruoyi.common.utils.DateUtils.dateTimeNow("yyyyMMddHHmmss")
+                + com.ruoyi.common.utils.uuid.IdUtils.fastSimpleUUID().substring(0, 6);
         bookPersonalApply.setApplyNo(applyNo);
         bookPersonalApply.setStatus("0");
         bookPersonalApply.setCreateBy(SecurityUtils.getUsername());
@@ -59,7 +60,14 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteBookPersonalApplyByIds(Long[] applyIds) {
+        for (Long applyId : applyIds) {
+            BookPersonalApply existing = bookPersonalApplyMapper.selectBookPersonalApplyById(applyId);
+            if (existing != null && !"0".equals(existing.getStatus())) {
+                throw new ServiceException("申请单[" + existing.getApplyNo() + "]状态不是待审核，无法删除");
+            }
+        }
         return bookPersonalApplyMapper.deleteBookPersonalApplyByIds(applyIds);
     }
 
@@ -78,6 +86,23 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
         bookPersonalApply.setAuditBy(SecurityUtils.getUsername());
         bookPersonalApply.setAuditTime(new Date());
 
+        if ("1".equals(bookPersonalApply.getStatus())) {
+            int currentStock = stockOperationService.getCurrentStock(existingApply.getTextbookId());
+            if (currentStock < existingApply.getApplyQty()) {
+                throw new ServiceException("库存不足，无法通过审核（当前库存：" + currentStock + "，需求：" + existingApply.getApplyQty() + "）");
+            }
+            stockOperationService.deductStock(
+                    existingApply.getTextbookId(),
+                    existingApply.getApplyQty(),
+                    "3",
+                    existingApply.getApplyNo(),
+                    SecurityUtils.getUsername()
+            );
+
+            bookPersonalApply.setStatus("3");
+            bookPersonalApply.setIssueTime(new Date());
+        }
+
         int result = bookPersonalApplyMapper.updateBookPersonalApply(bookPersonalApply);
 
         if (result > 0) {
@@ -86,12 +111,8 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
             String auditOpinion = bookPersonalApply.getAuditOpinion();
             Long teacherId = existingApply.getTeacherId();
 
-            if ("1".equals(status)) {
-                int currentStock = stockOperationService.getCurrentStock(existingApply.getTextbookId());
-                if (currentStock < existingApply.getApplyQty()) {
-                    throw new ServiceException("库存不足，无法通过审核");
-                }
-                noticeService.sendNoticeToUser(teacherId, "个人领书申请审核通过", "您的《" + bookName + "》领书申请已审核通过，请前往书库领取。", "personal_apply_audit", bookPersonalApply.getApplyId());
+            if ("3".equals(status)) {
+                noticeService.sendNoticeToUser(teacherId, "个人领书申请审核通过", "您的《" + bookName + "》领书申请已审核通过并完成出库，请前往书库领取。", "personal_apply_audit", bookPersonalApply.getApplyId());
             } else if ("2".equals(status)) {
                 noticeService.sendNoticeToUser(teacherId, "个人领书申请审核驳回", "您的《" + bookName + "》领书申请已被驳回，原因：" + (auditOpinion != null ? auditOpinion : "审核未通过"), "personal_apply_audit", bookPersonalApply.getApplyId());
             }

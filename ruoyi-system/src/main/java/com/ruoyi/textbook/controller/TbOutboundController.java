@@ -49,7 +49,7 @@ public class TbOutboundController extends BaseController
     /**
      * 新增出库信息（已禁用，出库记录只能通过业务流程生成）
      */
-    @PreAuthorize("@ss.hasPermi('textbook:outbound:add') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:outbound:add') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PostMapping
     public AjaxResult add(@RequestBody TbOutbound tbOutbound)
     {
@@ -59,21 +59,21 @@ public class TbOutboundController extends BaseController
     /**
      * 修改出库信息（已禁用，出库记录一旦生成无法修改）
      */
-    @PreAuthorize("@ss.hasPermi('textbook:outbound:edit') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:outbound:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PutMapping
     public AjaxResult edit(@RequestBody TbOutbound tbOutbound)
     {
         return AjaxResult.error("出库记录一旦生成无法修改");
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:outbound:remove') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:outbound:remove') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @DeleteMapping("/{outboundIds}")
     public AjaxResult remove(@PathVariable Long[] outboundIds)
     {
         return toAjax(tbOutboundService.deleteTbOutboundByIds(outboundIds));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:outbound:process') and @ss.hasAnyRole('admin','warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:outbound:process') and @ss.hasAnyRoles('admin,warehouse_manager')")
     @PostMapping("/process/{purchaseId}")
     public AjaxResult process(@PathVariable Long purchaseId)
     {

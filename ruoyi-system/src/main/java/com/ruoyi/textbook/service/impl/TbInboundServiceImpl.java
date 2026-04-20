@@ -137,6 +137,7 @@ public class TbInboundServiceImpl implements ITbInboundService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbInboundById(Long inboundId) {
         TbInbound inbound = tbInboundMapper.selectTbInboundByInboundId(inboundId);
         if (inbound == null) {
@@ -338,10 +339,17 @@ public class TbInboundServiceImpl implements ITbInboundService {
 
         if (tbInbound.getPurchaseId() != null) {
             TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(tbInbound.getPurchaseId());
-            if (purchase != null && "1".equals(purchase.getStatus())) {
-                purchase.setStatus("5");
-                tbPurchaseMapper.updateTbPurchase(purchase);
-                log.info("【入库处理】采购单状态更新为'已入库', purchaseId={}", tbInbound.getPurchaseId());
+            if (purchase != null) {
+                String currentStatus = purchase.getStatus();
+                if ("1".equals(currentStatus)) {
+                    purchase.setStatus("2");
+                    tbPurchaseMapper.updateTbPurchase(purchase);
+                    log.info("【入库处理】采购单状态更新为'已到货', purchaseId={}", tbInbound.getPurchaseId());
+                } else if ("2".equals(currentStatus)) {
+                    purchase.setStatus("5");
+                    tbPurchaseMapper.updateTbPurchase(purchase);
+                    log.info("【入库处理】采购单状态更新为'已入库', purchaseId={}", tbInbound.getPurchaseId());
+                }
             }
         }
 

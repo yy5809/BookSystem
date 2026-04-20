@@ -38,11 +38,4 @@ public class TbStockFlowController extends BaseController {
         startPage();
         return getDataTable(tbStockLogService.selectListByBookId(bookId));
     }
-
-    @PreAuthorize("@ss.hasPermi('textbook:stock:flow:remove')")
-    @Log(title = "库存流水", businessType = BusinessType.DELETE)
-    @DeleteMapping("/remove/{flowIds}")
-    public AjaxResult remove(@PathVariable Long[] flowIds) {
-        return AjaxResult.error("库存流水为不可删除数据");
-    }
 }
