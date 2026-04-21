@@ -101,7 +101,8 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
             stockLog.setBizType("3");
             stockLog.setChangeNum(-tbOutbound.getOutNum());
             stockLog.setBeforeStock(beforeStock);
-            stockLog.setAfterStock(beforeStock - tbOutbound.getOutNum());
+            int actualStock = tbInventoryMapper.selectStockNumByBookId(tbOutbound.getBookId());
+            stockLog.setAfterStock(actualStock);
             stockLog.setOperatorId(tbOutbound.getOperatorId());
             stockLog.setOperatorName(tbOutbound.getOperatorName());
             stockLog.setRefBizType("OUTBOUND");

@@ -15,11 +15,18 @@ export function getClaimForm(formId) {
   })
 }
 
-export function listClaimFormDetail(query) {
+export function listClaimFormDetail(formId) {
   return request({
-    url: '/textbook/claimFormDetail/list',
-    method: 'get',
-    params: query
+    url: '/textbook/claimForm/details/' + formId,
+    method: 'get'
+  })
+}
+
+export function confirmOutbound(data) {
+  return request({
+    url: '/textbook/claimForm/confirmOutbound',
+    method: 'put',
+    data: data
   })
 }
 

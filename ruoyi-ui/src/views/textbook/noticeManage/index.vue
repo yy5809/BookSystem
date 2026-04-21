@@ -3,7 +3,7 @@
     <el-card>
       <div slot="header" class="clearfix">
         <span>领书通知管理</span>
-        <el-button v-hasPermi="['textbook:notice:add']"
+        <el-button v-hasPermi="['textbook:noticeManage:add']"
                    style="float: right; padding: 3px 0"
                    type="primary"
                    icon="el-icon-plus"

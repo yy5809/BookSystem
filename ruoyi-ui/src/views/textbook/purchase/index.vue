@@ -3,7 +3,7 @@
     <el-card>
       <div slot="header" class="clearfix">
         <span>教材采购单管理</span>
-        <el-button v-hasPermi="['textbook:buy:import']"
+        <el-button v-hasPermi="['textbook:import:excel']"
                    style="float: right; padding: 3px 0"
                    type="success"
                    icon="el-icon-upload2"

@@ -28,19 +28,16 @@ export function importPurchaseExcel(file) {
   const formData = new FormData()
   formData.append('file', file)
   return request({
-    url: '/textbook/buy/import',
+    url: '/textbook/purchase/import/excel',
     method: 'post',
     data: formData,
     headers: { 'Content-Type': 'multipart/form-data' }
   })
 }
 
-/**
- * 下载采购单导入模板
- */
 export function downloadImportTemplate() {
   return request({
-    url: '/textbook/buy/import/template',
+    url: '/textbook/purchase/import/template',
     method: 'get',
     responseType: 'blob'
   })

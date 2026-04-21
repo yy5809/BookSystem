@@ -65,21 +65,21 @@ public class TbBookController extends BaseController {
     /**
      * 新增教材基础信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:book:add') and @ss.hasAnyRoles('admin,warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:book:add') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "教材信息", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbBook tbBook) {
         return toAjax(tbBookService.insertTbBook(tbBook));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:book:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:book:edit') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "教材信息", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbBook tbBook) {
         return toAjax(tbBookService.updateTbBook(tbBook));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:book:remove') and @ss.hasAnyRoles('admin,warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:book:remove') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "教材信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/{bookId}")
     public AjaxResult remove(@PathVariable Long bookId) {

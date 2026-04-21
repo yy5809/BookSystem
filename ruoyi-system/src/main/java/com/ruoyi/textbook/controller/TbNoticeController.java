@@ -101,7 +101,7 @@ public class TbNoticeController extends BaseController {
         return AjaxResult.success("没有未读通知");
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:add') and @ss.hasAnyRoles('admin,warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:add') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "通知公告", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody SysNotice notice) {
@@ -109,7 +109,7 @@ public class TbNoticeController extends BaseController {
         return toAjax(noticeService.insertNotice(notice));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:edit') and @ss.hasAnyRoles('admin,warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:edit') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "通知公告", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody SysNotice notice) {
@@ -117,7 +117,7 @@ public class TbNoticeController extends BaseController {
         return toAjax(noticeService.updateNotice(notice));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:remove') and @ss.hasAnyRoles('admin,warehouse_manager')")
+    @PreAuthorize("@ss.hasPermi('textbook:notice:remove') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "通知公告", businessType = BusinessType.DELETE)
     @DeleteMapping("/{noticeIds}")
     public AjaxResult remove(@PathVariable Long[] noticeIds) {

@@ -1,6 +1,7 @@
 package com.ruoyi.textbook.controller;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -9,9 +10,11 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.textbook.domain.BookClaimForm;
 import com.ruoyi.textbook.domain.BookClaimFormDetail;
 import com.ruoyi.textbook.service.IBookClaimFormService;
+import com.ruoyi.textbook.util.ClaimFormPdfUtil;
 import com.ruoyi.common.utils.SecurityUtils;
 
 @RestController
@@ -83,5 +86,30 @@ public class BookClaimFormController extends BaseController {
     public AjaxResult getDetails(@PathVariable("formId") Long formId) {
         List<BookClaimFormDetail> details = bookClaimFormService.selectDetailsByFormId(formId);
         return AjaxResult.success(details);
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:query')")
+    @GetMapping(value = "/pdf/{formId}")
+    public void exportPdf(@PathVariable("formId") Long formId, HttpServletResponse response) {
+        try {
+            BookClaimForm form = bookClaimFormService.selectBookClaimFormById(formId);
+            if (form == null) {
+                response.setStatus(404);
+                response.getWriter().write("领书单不存在");
+                return;
+            }
+            List<BookClaimFormDetail> details = bookClaimFormService.selectDetailsByFormId(formId);
+            String fileName = "领书单_" + form.getFormNo() + ".pdf";
+            response.setContentType("application/pdf");
+            FileUtils.setAttachmentResponseHeader(response, fileName);
+            ClaimFormPdfUtil.generatePdf(form, details, response.getOutputStream());
+        } catch (Exception e) {
+            try {
+                response.reset();
+                response.setStatus(500);
+                response.getWriter().write("PDF生成失败: " + e.getMessage());
+            } catch (Exception ignored) {
+            }
+        }
     }
 }

@@ -79,7 +79,7 @@ public class TbPurchaseOrderServiceImpl implements ITbPurchaseOrderService
      * 审核购书订单
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int auditOrder(TbPurchaseOrder tbPurchaseOrder)
     {
         TbPurchaseOrder order = tbPurchaseOrderMapper.selectTbPurchaseOrderByOrderId(tbPurchaseOrder.getOrderId());

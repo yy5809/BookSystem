@@ -116,7 +116,8 @@ public class TbInboundServiceImpl implements ITbInboundService {
             stockLog.setBizType("1");
             stockLog.setChangeNum(tbInbound.getInNum());
             stockLog.setBeforeStock(beforeStock);
-            stockLog.setAfterStock(beforeStock + tbInbound.getInNum());
+            int actualStock = tbInventoryMapper.selectStockNumByBookId(tbInbound.getBookId());
+            stockLog.setAfterStock(actualStock);
             stockLog.setOperatorId(tbInbound.getOperatorId());
             stockLog.setOperatorName(tbInbound.getOperatorName());
             stockLog.setRefBizType("INBOUND");

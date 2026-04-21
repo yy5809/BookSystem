@@ -51,7 +51,7 @@ public class NoticeService {
         content.append("需采购数量：").append(lackNum).append("本\n");
         content.append("\n请及时处理采购事宜！");
 
-        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse");
         if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
             for (Long managerId : warehouseManagerIds) {
                 SysNotice notice = new SysNotice();
@@ -71,7 +71,7 @@ public class NoticeService {
     public void sendInboundNotice(Long bookId, String bookName, Long inboundId) {
         String content = "【新书到货】\n《" + bookName + "》已成功入库，库存已更新。\n\n相关待处理事项已自动更新，请查看。";
 
-        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse");
         if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
             for (Long managerId : warehouseManagerIds) {
                 SysNotice notice = new SysNotice();
@@ -106,7 +106,7 @@ public class NoticeService {
     public void sendStockWarningNotice(Long bookId, String bookName, Integer currentStock, Integer warningThreshold) {
         String content = "【库存预警】\n《" + bookName + "》库存低于预警阈值！\n当前库存：" + currentStock + "本\n预警阈值：" + warningThreshold + "本\n\n请及时安排采购补货。";
 
-        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse");
         if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
             for (Long managerId : warehouseManagerIds) {
                 SysNotice notice = new SysNotice();
@@ -126,7 +126,7 @@ public class NoticeService {
     public void sendPurchaseCreateNotice(Long purchaseId, String purchaseNo, int itemCount) {
         String content = "【新采购单】\n采购单号：" + purchaseNo + "\n包含教材：" + itemCount + "种\n\n请及时审核并安排采购流程。";
 
-        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse");
         if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
             for (Long managerId : warehouseManagerIds) {
                 SysNotice notice = new SysNotice();
@@ -193,7 +193,7 @@ public class NoticeService {
     public void sendNoticePublishNotice(Long noticeId, String semester, Integer classCount) {
         String content = "【领书通知发布】\n学期：" + semester + "\n涉及班级：" + classCount + "个\n\n请通知各班委按时领取。";
 
-        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse");
         if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
             for (Long managerId : warehouseManagerIds) {
                 SysNotice notice = new SysNotice();
@@ -214,7 +214,7 @@ public class NoticeService {
     public void sendShipmentNotice(Long purchaseId, String purchaseNo, String logisticsCompany, String logisticsNo) {
         String content = "【供应商发货】\n采购单号：" + purchaseNo + "\n物流公司：" + logisticsCompany + "\n物流单号：" + logisticsNo + "\n\n请及时确认到货。";
 
-        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse");
         if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
             for (Long managerId : warehouseManagerIds) {
                 SysNotice notice = new SysNotice();

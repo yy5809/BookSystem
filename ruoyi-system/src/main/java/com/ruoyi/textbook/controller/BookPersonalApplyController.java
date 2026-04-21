@@ -48,7 +48,8 @@ public class BookPersonalApplyController extends BaseController {
             return error("申请记录不存在");
         }
         Long currentUserId = SecurityUtils.getUserId();
-        if (!currentUserId.equals(apply.getTeacherId())) {
+        boolean isAdminOrWarehouse = SecurityUtils.hasRole("admin") || SecurityUtils.hasRole("warehouse");
+        if (!currentUserId.equals(apply.getTeacherId()) && !isAdminOrWarehouse) {
             return error("无权查看他人的申请记录");
         }
         return success(apply);
@@ -85,7 +86,7 @@ public class BookPersonalApplyController extends BaseController {
         return toAjax(bookPersonalApplyService.updateBookPersonalApply(apply));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:personalApply:audit')")
+    @PreAuthorize("@ss.hasPermi('textbook:personalApply:audit') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "Personal Apply Audit", businessType = BusinessType.UPDATE)
     @PutMapping("/audit")
     public AjaxResult audit(@RequestBody BookPersonalApply bookPersonalApply) {
@@ -95,7 +96,7 @@ public class BookPersonalApplyController extends BaseController {
         return toAjax(bookPersonalApplyService.auditApply(bookPersonalApply));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:personalApply:issue')")
+    @PreAuthorize("@ss.hasPermi('textbook:personalApply:issue') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "Personal Apply Issue", businessType = BusinessType.UPDATE)
     @PutMapping("/issue/{applyId}")
     public AjaxResult issue(@PathVariable Long applyId) {
@@ -106,6 +107,16 @@ public class BookPersonalApplyController extends BaseController {
     @Log(title = "Personal Apply", businessType = BusinessType.DELETE)
     @DeleteMapping("/{applyIds}")
     public AjaxResult remove(@PathVariable Long[] applyIds) {
+        Long currentUserId = SecurityUtils.getUserId();
+        boolean isAdminOrWarehouse = SecurityUtils.hasRole("admin") || SecurityUtils.hasRole("warehouse");
+        if (!isAdminOrWarehouse) {
+            for (Long applyId : applyIds) {
+                BookPersonalApply apply = bookPersonalApplyService.selectBookPersonalApplyById(applyId);
+                if (apply != null && !currentUserId.equals(apply.getTeacherId())) {
+                    return error("无权删除他人的申请记录");
+                }
+            }
+        }
         return toAjax(bookPersonalApplyService.deleteBookPersonalApplyByIds(applyIds));
     }
 }

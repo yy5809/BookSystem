@@ -103,7 +103,8 @@
 </template>
 
 <script>
-import { listPurchase, updatePurchase } from "@/api/textbook/purchase";
+import { listPurchase } from "@/api/textbook/purchase";
+import { processInbound } from "@/api/textbook/inbound";
 
 export default {
   name: "TbInbound",
@@ -163,8 +164,13 @@ export default {
         this.$modal.msgError("请输入有效的实收数量");
         return;
       }
-      const data = { ...this.inboundForm, status: '3' };
-      updatePurchase(data).then(response => {
+      const data = {
+        buyId: this.inboundForm.buyId || this.inboundForm.id,
+        actualQty: this.inboundForm.actualQty,
+        qualityCheck: this.inboundForm.qualityCheck,
+        remark: this.inboundForm.remark
+      };
+      processInbound(data).then(response => {
         this.$modal.msgSuccess("入库成功！库存已增加，流水已生成");
         this.inboundOpen = false;
         this.getList();

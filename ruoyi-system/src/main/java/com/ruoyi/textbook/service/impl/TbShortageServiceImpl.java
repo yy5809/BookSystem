@@ -418,6 +418,6 @@ public class TbShortageServiceImpl implements ITbShortageService
         List<String> roles = SecurityUtils.getLoginUser().getUser().getRoles().stream()
             .map(role -> role.getRoleKey())
             .collect(Collectors.toList());
-        return roles.contains("warehouse_manager");
+        return roles.contains("warehouse");
     }
 }

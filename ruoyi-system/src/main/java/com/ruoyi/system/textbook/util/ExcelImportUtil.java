@@ -29,41 +29,39 @@ public class ExcelImportUtil {
 
     public static List<TbPurchaseImportDTO> parsePurchaseExcel(org.springframework.web.multipart.MultipartFile file) throws IOException {
         List<TbPurchaseImportDTO> result = new ArrayList<>();
-        Workbook workbook = WorkbookFactory.create(file.getInputStream());
-        Sheet sheet = workbook.getSheetAt(0);
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
 
-        if (sheet == null || sheet.getPhysicalNumberOfRows() <= DATA_START_ROW) {
-            workbook.close();
-            return result;
-        }
+            if (sheet == null || sheet.getPhysicalNumberOfRows() <= DATA_START_ROW) {
+                return result;
+            }
 
-        for (int i = DATA_START_ROW; i <= sheet.getLastRowNum(); i++) {
-            Row row = sheet.getRow(i);
-            if (row == null || isEmptyRow(row)) continue;
+            for (int i = DATA_START_ROW; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (row == null || isEmptyRow(row)) continue;
 
-            try {
-                TbPurchaseImportDTO dto = new TbPurchaseImportDTO();
-                dto.setIsbn(getCellStringValue(row, COL_ISBN));
-                dto.setBookName(getCellStringValue(row, COL_BOOK_NAME));
-                dto.setQuantity(parseQuantity(row, COL_QUANTITY));
-                dto.setCollege(getCellStringValue(row, COL_COLLEGE));
-                dto.setMajor(getCellStringValue(row, COL_MAJOR));
-                dto.setClassName(getCellStringValue(row, COL_CLASS));
-                dto.setRemark(getCellStringValue(row, COL_REMARK));
+                try {
+                    TbPurchaseImportDTO dto = new TbPurchaseImportDTO();
+                    dto.setIsbn(getCellStringValue(row, COL_ISBN));
+                    dto.setBookName(getCellStringValue(row, COL_BOOK_NAME));
+                    dto.setQuantity(parseQuantity(row, COL_QUANTITY));
+                    dto.setCollege(getCellStringValue(row, COL_COLLEGE));
+                    dto.setMajor(getCellStringValue(row, COL_MAJOR));
+                    dto.setClassName(getCellStringValue(row, COL_CLASS));
+                    dto.setRemark(getCellStringValue(row, COL_REMARK));
 
-                if (dto.getIsbn() != null && !dto.getIsbn().trim().isEmpty()) {
-                    result.add(dto);
+                    if (dto.getIsbn() != null && !dto.getIsbn().trim().isEmpty()) {
+                        result.add(dto);
+                    }
+                } catch (Exception e) {
+                    log.warn("解析第{}行数据异常: {}", i + 1, e.getMessage());
+                    TbPurchaseImportDTO errorDto = new TbPurchaseImportDTO();
+                    errorDto.setErrorMsg("行数据解析异常: " + e.getMessage());
+                    errorDto.setRowIndex(i + 1);
+                    result.add(errorDto);
                 }
-            } catch (Exception e) {
-                log.warn("解析第{}行数据异常: {}", i + 1, e.getMessage());
-                TbPurchaseImportDTO errorDto = new TbPurchaseImportDTO();
-                errorDto.setErrorMsg("行数据解析异常: " + e.getMessage());
-                errorDto.setRowIndex(i + 1);
-                result.add(errorDto);
             }
         }
-
-        workbook.close();
         return result;
     }
 
@@ -170,7 +168,10 @@ public class ExcelImportUtil {
         if (value == null || value.trim().isEmpty()) return null;
         try {
             double d = Double.parseDouble(value);
-            return (int) d;
+            if (d <= 0 || d > 9999) {
+                throw new ServiceException("采购数量必须在1-9999之间: " + value);
+            }
+            return (int) Math.round(d);
         } catch (NumberFormatException e) {
             throw new ServiceException("采购数量格式错误: " + value);
         }

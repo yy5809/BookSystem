@@ -39,7 +39,7 @@
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
           <el-button size="mini" type="text" icon="el-icon-sell" @click="handleOutbound(scope.row)" v-if="scope.row.status !== '2'" v-hasPermi='["textbook:claimForm:outbound"]'>确认出库</el-button>
-          <el-button size="mini" type="text" icon="el-icon-printer" @click="handlePrint(scope.row)" v-hasPermi='["textbook:claimForm:print"]'>打印</el-button>
+          <el-button size="mini" type="text" icon="el-icon-printer" @click="handlePrint(scope.row)" v-hasPermi='["textbook:claimForm:query"]'>打印</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -106,7 +106,7 @@
 </template>
 
 <script>
-import { listClaimForm, getClaimForm, updateClaimForm, listClaimFormDetail } from "@/api/textbook/claimForm";
+import { listClaimForm, getClaimForm, confirmOutbound, listClaimFormDetail } from "@/api/textbook/claimForm";
 import { getToken } from "@/utils/auth";
 
 export default {
@@ -153,8 +153,8 @@ export default {
     async handleView(row) {
       this.viewData = row;
       try {
-        const res = await listClaimFormDetail({ formId: row.formId });
-        this.detailList = res.rows || [];
+        const res = await listClaimFormDetail(row.formId);
+        this.detailList = res.data || [];
       } catch (e) {
         this.detailList = [];
       }
@@ -173,22 +173,20 @@ export default {
         this.$modal.msgError("请填写领书人姓名");
         return;
       }
-      const newIssued = (this.outboundForm.oldIssued || 0) + this.outboundForm.issuedQty;
       const data = {
         formId: this.outboundForm.formId,
-        issuedQty: newIssued,
-        receiverName: this.outboundForm.receiverName,
-        status: newIssued >= (this.outboundForm.plannedQty || 9999) ? '2' : '1'
+        issuedQty: this.outboundForm.issuedQty,
+        receiverName: this.outboundForm.receiverName
       };
-      updateClaimForm(data).then(response => {
+      confirmOutbound(data).then(response => {
         this.$modal.msgSuccess("出库成功！库存已扣减，流水已生成");
         this.outboundOpen = false;
         this.getList();
       });
     },
     handlePrint(row) {
-      const token = getToken()
-      window.open(process.env.VUE_APP_BASE_API + '/textbook/claimForm/pdf/' + row.formId + '?token=' + token)
+      const token = getToken();
+      window.open(process.env.VUE_APP_BASE_API + '/textbook/claimForm/pdf/' + row.formId + '?token=' + token);
     }
   }
 };

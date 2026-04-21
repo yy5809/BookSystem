@@ -132,6 +132,7 @@ public class TbInventoryServiceImpl implements ITbInventoryService
      * 减少库存数量（带校验）
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int decreaseStock(Long bookId, Integer quantity)
     {
         if (bookId == null || quantity == null || quantity <= 0) {
@@ -160,8 +161,8 @@ public class TbInventoryServiceImpl implements ITbInventoryService
      * 安全扣减库存（带乐观锁）
      */
     @Override
-    @Transactional
-    public int safeDecreaseStock(Long bookId, Integer quantity) throws Exception
+    @Transactional(rollbackFor = Exception.class)
+    public int safeDecreaseStock(Long bookId, Integer quantity)
     {
         if (bookId == null || quantity == null || quantity <= 0) {
             throw new ServiceException("参数无效：bookId和quantity必须大于0");
@@ -180,7 +181,7 @@ public class TbInventoryServiceImpl implements ITbInventoryService
                 currentVersion
         );
         if (rowsAffected <= 0) {
-            throw new Exception("库存扣减失败，可能存在并发操作，请重试");
+            throw new ServiceException("库存扣减失败，可能存在并发操作，请重试");
         }
         return rowsAffected;
     }

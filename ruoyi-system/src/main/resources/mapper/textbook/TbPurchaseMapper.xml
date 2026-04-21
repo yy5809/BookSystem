@@ -9,7 +9,7 @@
         <result property="userType" column="user_type"/>
         <result property="deptName" column="dept_name"/>
         <result property="buyNum" column="buy_num"/>
-        <result property="status" column="status"/>
+        <result property="status" column="audit_status"/>
         <result property="auditUserId" column="audit_user_id"/>
         <result property="auditTime" column="audit_time"/>
         <result property="rejectReason" column="reject_reason"/>
@@ -27,7 +27,7 @@
 
     <sql id="selectTbPurchaseVo">
         SELECT t.buy_id, t.purchase_no, t.user_id, t.user_name, t.user_type, t.dept_name,
-               t.buy_num, t.status, t.audit_user_id, t.audit_time,
+               t.buy_num, t.audit_status, t.audit_user_id, t.audit_time,
                t.reject_reason, t.audit_opinion, t.receive_time,
                t.submit_time, t.del_flag, t.funding_source, t.file_hash
         FROM textbook_buy t WHERE t.del_flag = '0'
@@ -42,7 +42,7 @@
         <if test="userId != null">AND t.user_id = #{userId}</if>
         <if test="userName != null and userName != ''">AND t.user_name LIKE CONCAT('%',#{userName},'%')</if>
         <if test="userType != null and userType != ''">AND t.user_type = #{userType}</if>
-        <if test="status != null and status != ''">AND t.status = #{status}</if>
+        <if test="status != null and status != ''">AND t.audit_status = #{status}</if>
         <!-- 数据权限过滤 -->
         ${params.dataScope}
         ORDER BY t.submit_time DESC
@@ -59,7 +59,7 @@
             <if test="deptName != null and deptName != ''">dept_name,</if>
             <if test="buyNum != null">buy_num,</if>
             <if test="submitTime != null">submit_time,</if>
-            <if test="status != null and status != ''">status,</if>
+            <if test="status != null and status != ''">audit_status,</if>
             <if test="auditUserId != null">audit_user_id,</if>
             <if test="auditTime != null">audit_time,</if>
             <if test="rejectReason != null and rejectReason != ''">reject_reason,</if>
@@ -97,7 +97,7 @@
     <update id="updateTbPurchase" parameterType="com.ruoyi.textbook.domain.TbPurchase">
         UPDATE textbook_buy
         <set>
-            <if test="status != null">status=#{status},</if>
+            <if test="status != null">audit_status=#{status},</if>
             <if test="auditUserId != null">audit_user_id=#{auditUserId},</if>
             <if test="status == '2' and rejectReason != null">reject_reason=#{rejectReason},</if>
             <if test="auditOpinion != null">audit_opinion=#{auditOpinion},</if>
@@ -118,7 +118,7 @@
     </delete>
 
     <update id="updateTbPurchaseStatus">
-        UPDATE textbook_buy SET status=#{arg1} WHERE buy_id=#{arg0} AND del_flag='0'
+        UPDATE textbook_buy SET audit_status=#{arg1} WHERE buy_id=#{arg0} AND del_flag='0'
     </update>
     <select id="selectTbPurchaseListByUserId" parameterType="Long" resultMap="TbPurchaseResult">
         <include refid="selectTbPurchaseVo"/> AND t.user_id = #{userId} ORDER BY t.submit_time DESC
@@ -164,14 +164,14 @@
         <include refid="selectTbPurchaseVo"/>
         <if test="supplierId != null">AND t.supplier_id = #{supplierId}</if>
         <if test="purchaseNo != null and purchaseNo != ''">AND t.purchase_no LIKE CONCAT('%',#{purchaseNo},'%')</if>
-        <if test="status != null and status != ''">AND t.status = #{status}</if>
+        <if test="status != null and status != ''">AND t.audit_status = #{status}</if>
         ORDER BY t.submit_time DESC
     </select>
 
     <select id="countPendingShipmentBySupplierId" parameterType="Long" resultType="Integer">
         SELECT COUNT(*) FROM textbook_buy 
         WHERE supplier_id = #{supplierId} 
-        AND status = '1' 
+        AND audit_status = '1' 
         AND del_flag = '0'
     </select>
 </mapper>

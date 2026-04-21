@@ -28,34 +28,34 @@ public class BookNoticeController extends BaseController {
     @Autowired
     private SysDictDataMapper dictDataMapper;
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:list')")
     @GetMapping("/list")
     public TableDataInfo list(BookNotice bookNotice) {
         startPage();
         return getDataTable(bookNoticeService.selectBookNoticeList(bookNotice));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:query')")
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:query')")
     @GetMapping(value = "/{noticeId}")
     public AjaxResult getInfo(@PathVariable("noticeId") Long noticeId) {
         return AjaxResult.success(bookNoticeService.selectBookNoticeById(noticeId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:add') and @ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:add') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书通知", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody BookNotice bookNotice) {
         return toAjax(bookNoticeService.insertBookNotice(bookNotice));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:edit') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书通知", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody BookNotice bookNotice) {
         return toAjax(bookNoticeService.updateBookNotice(bookNotice));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:publish') and @ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:publish') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "发布领书通知", businessType = BusinessType.UPDATE)
     @PutMapping("/publish/{noticeId}")
     public AjaxResult publish(@PathVariable Long noticeId) {
@@ -67,7 +67,7 @@ public class BookNoticeController extends BaseController {
         }
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:notice:remove') and @ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:remove') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书通知", businessType = BusinessType.DELETE)
     @DeleteMapping("/{noticeIds}")
     public AjaxResult remove(@PathVariable Long[] noticeIds) {

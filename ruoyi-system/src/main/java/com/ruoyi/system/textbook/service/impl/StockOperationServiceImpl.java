@@ -26,6 +26,9 @@ public class StockOperationServiceImpl implements IStockOperationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deductStock(Long bookId, int deductQty, String businessType, String businessNo, String operator) {
+        if (deductQty <= 0) {
+            throw new ServiceException("扣减数量必须为正数");
+        }
         int currentStock = inventoryMapper.selectStockNumByBookId(bookId);
         if (currentStock < deductQty) {
             throw new ServiceException("库存不足！当前库存: " + currentStock + ", 需要扣减: " + deductQty);
@@ -37,15 +40,18 @@ public class StockOperationServiceImpl implements IStockOperationService {
             throw new ServiceException("库存数据已被其他操作修改，请重试（并发冲突）");
         }
 
-        int newStock = currentStock - deductQty;
-        recordFlow(bookId, businessType, businessNo, -deductQty, currentStock, newStock, operator);
-        log.info("[库存扣减] bookId={}, 扣减数量={}, 剩余库存={}, 操作人={}", bookId, deductQty, newStock, operator);
+        int actualStock = inventoryMapper.selectStockNumByBookId(bookId);
+        recordFlow(bookId, businessType, businessNo, -deductQty, currentStock, actualStock, operator);
+        log.info("[库存扣减] bookId={}, 扣减数量={}, 剩余库存={}, 操作人={}", bookId, deductQty, actualStock, operator);
         return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean addStock(Long bookId, int addQty, String businessType, String businessNo, String operator) {
+        if (addQty <= 0) {
+            throw new ServiceException("入库数量必须为正数");
+        }
         int currentStock = inventoryMapper.selectStockNumByBookId(bookId);
         int currentVersion = inventoryMapper.selectVersionByBookId(bookId);
 
@@ -54,9 +60,9 @@ public class StockOperationServiceImpl implements IStockOperationService {
             throw new ServiceException("库存数据已被其他操作修改，请重试（并发冲突）");
         }
 
-        int newStock = currentStock + addQty;
-        recordFlow(bookId, businessType, businessNo, addQty, currentStock, newStock, operator);
-        log.info("[库存增加] bookId={}, 增加数量={}, 新库存={}, 操作人={}", bookId, addQty, newStock, operator);
+        int actualStock = inventoryMapper.selectStockNumByBookId(bookId);
+        recordFlow(bookId, businessType, businessNo, addQty, currentStock, actualStock, operator);
+        log.info("[库存增加] bookId={}, 增加数量={}, 新库存={}, 操作人={}", bookId, addQty, actualStock, operator);
         return true;
     }
 
