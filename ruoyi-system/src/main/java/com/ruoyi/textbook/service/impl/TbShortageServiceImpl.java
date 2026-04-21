@@ -1,9 +1,12 @@
 package com.ruoyi.textbook.service.impl;
 
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
+import java.util.List;
+import java.util.stream.Collectors;
 import com.ruoyi.textbook.domain.TbBook;
 import com.ruoyi.textbook.domain.TbPending;
 import com.ruoyi.textbook.domain.TbPurchase;
@@ -134,6 +137,10 @@ public class TbShortageServiceImpl implements ITbShortageService
             if (user != null) {
                 tbShortage.setRegisterName(user.getNickName());
             }
+        }
+        // 设置source字段，教师登记的缺书设置为"1"（领书缺货）
+        if (StringUtils.isEmpty(tbShortage.getSource())) {
+            tbShortage.setSource("1");
         }
         int rows = tbShortageMapper.insertTbShortage(tbShortage);
         if (rows > 0) {
@@ -358,5 +365,59 @@ public class TbShortageServiceImpl implements ITbShortageService
                  purchaseNo, allShortages.size(), detailList.size(), aggregatedCount);
 
         return result;
+    }
+
+    @Override
+    public int cancelShortage(Long shortageId) {
+        TbShortage shortage = tbShortageMapper.selectTbShortageById(shortageId);
+        if (shortage == null) {
+            throw new ServiceException("缺书记录不存在");
+        }
+
+        if (!"0".equals(shortage.getHandleStatus())) {
+            throw new ServiceException("只有未处理的缺书记录才能取消");
+        }
+
+        // 权限检查：教师只能取消自己的缺书登记
+        Long currentUserId = SecurityUtils.getUserId();
+        if (!isAdmin() && !isWarehouseManager() && !currentUserId.equals(shortage.getRegisterId())) {
+            throw new ServiceException("无权取消他人的缺书登记");
+        }
+
+        shortage.setHandleStatus("4"); // 已取消
+        shortage.setUpdateTime(DateUtils.getNowDate());
+        int result = tbShortageMapper.updateTbShortage(shortage);
+
+        if (result > 0) {
+            try {
+                Long registerId = shortage.getRegisterId();
+                if (registerId != null) {
+                    noticeService.sendNoticeToUser(registerId, "缺书登记已取消", 
+                        "您的《" + shortage.getBookName() + "》缺书登记已被取消。", 
+                        "shortage_cancel", shortageId);
+                }
+            } catch (Exception e) {
+                log.warn("发送取消通知失败: {}", e.getMessage());
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 检查当前用户是否为管理员
+     */
+    private boolean isAdmin() {
+        return SecurityUtils.getUsername().equals("admin");
+    }
+
+    /**
+     * 检查当前用户是否为仓库管理员
+     */
+    private boolean isWarehouseManager() {
+        List<String> roles = SecurityUtils.getLoginUser().getUser().getRoles().stream()
+            .map(role -> role.getRoleKey())
+            .collect(Collectors.toList());
+        return roles.contains("warehouse_manager");
     }
 }

@@ -123,4 +123,15 @@ public class TbShortageController extends BaseController
         }
         return AjaxResult.success((String) result.get("msg"), result);
     }
+
+    /**
+     * 取消缺书登记
+     */
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:list') and @ss.hasAnyRoles('admin,warehouse_manager,teacher')")
+    @Log(title = "取消缺书登记", businessType = BusinessType.UPDATE)
+    @PutMapping("/cancel/{shortageId}")
+    public AjaxResult cancel(@PathVariable Long shortageId)
+    {
+        return toAjax(tbShortageService.cancelShortage(shortageId));
+    }
 }

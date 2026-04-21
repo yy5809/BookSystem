@@ -44,6 +44,9 @@ public class TbShortage extends BaseEntity {
     @Excel(name = "来源记录ID")
     private Long sourceId;
 
+    @Excel(name = "备注")
+    private String remark;
+
     private String delFlag;
 
     public Long getLackId() { return lackId; }
@@ -74,6 +77,8 @@ public class TbShortage extends BaseEntity {
     public void setSource(String source) { this.source = source; }
     public Long getSourceId() { return sourceId; }
     public void setSourceId(Long sourceId) { this.sourceId = sourceId; }
+    public String getRemark() { return remark; }
+    public void setRemark(String remark) { this.remark = remark; }
     public String getDelFlag() { return delFlag; }
     public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
 

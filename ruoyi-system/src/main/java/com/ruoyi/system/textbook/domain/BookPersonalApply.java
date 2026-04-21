@@ -42,6 +42,14 @@ public class BookPersonalApply extends BaseEntity {
 
     private String remark;
 
+    private Boolean registerShortage;
+
+    private Integer shortageQty;
+
+    private String shortageUrgency;
+
+    private String shortageRemark;
+
     public Long getApplyId() {
         return applyId;
     }
@@ -168,6 +176,38 @@ public class BookPersonalApply extends BaseEntity {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public Boolean getRegisterShortage() {
+        return registerShortage;
+    }
+
+    public void setRegisterShortage(Boolean registerShortage) {
+        this.registerShortage = registerShortage;
+    }
+
+    public Integer getShortageQty() {
+        return shortageQty;
+    }
+
+    public void setShortageQty(Integer shortageQty) {
+        this.shortageQty = shortageQty;
+    }
+
+    public String getShortageUrgency() {
+        return shortageUrgency;
+    }
+
+    public void setShortageUrgency(String shortageUrgency) {
+        this.shortageUrgency = shortageUrgency;
+    }
+
+    public String getShortageRemark() {
+        return shortageRemark;
+    }
+
+    public void setShortageRemark(String shortageRemark) {
+        this.shortageRemark = shortageRemark;
     }
 
     @Override

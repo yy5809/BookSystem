@@ -108,7 +108,7 @@ export default {
       })
     },
     goBack() {
-      this.$router.push('/textbook/supplier/purchase')
+      this.$router.push('/textbook/supplierPurchase')
     },
     getStatusType(status) {
       const typeMap = {

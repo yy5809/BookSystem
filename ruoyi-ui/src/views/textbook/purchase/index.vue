@@ -177,7 +177,7 @@ export default {
     },
 
     handleView(row) {
-      this.$router.push({ path: '/textbook/purchase/detail', query: { id: row.buyId } })
+      this.$router.push({ path: '/textbook/purchase', query: { id: row.buyId } })
     },
 
     statusText(status) {

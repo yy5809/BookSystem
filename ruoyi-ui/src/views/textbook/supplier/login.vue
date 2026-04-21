@@ -45,7 +45,7 @@ export default {
         if (valid) {
           // 登录逻辑
           this.$store.dispatch('user/login', this.loginForm).then(() => {
-            this.$router.push({ path: '/textbook/supplier' })
+            this.$router.push({ path: '/textbook/supplierHome' })
           }).catch(() => {
             this.$message.error('登录失败，请检查用户名和密码')
           })

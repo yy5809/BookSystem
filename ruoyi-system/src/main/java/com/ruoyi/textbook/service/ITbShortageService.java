@@ -77,4 +77,12 @@ public interface ITbShortageService
     public int processShortage(Long shortageId, String status);
 
     public Map<String, Object> batchConvertToPurchase(Long[] shortageIds);
+
+    /**
+     * 取消缺书登记
+     * 
+     * @param shortageId 缺书ID
+     * @return 结果
+     */
+    public int cancelShortage(Long shortageId);
 }

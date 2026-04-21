@@ -35,8 +35,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="shortageList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
+    <el-table v-loading="loading" :data="shortageList">
       <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="180" />
       <el-table-column label="缺书数量" align="center" prop="lackNum" width="90" />
@@ -51,12 +50,11 @@
         </template>
       </el-table-column>
       <el-table-column label="登记人" align="center" prop="createBy" width="90" />
-      <el-table-column label="登记时间" align="center" prop="createTime" width="160" />
+      <el-table-column label="登记时间" align="center" prop="registerTime" width="160" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:registerShortage:add']">编辑</el-button>
-          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:registerShortage:add']">删除</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:list']">取消</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -103,7 +101,7 @@
           <el-tag :type="getStatusType(viewData.handleStatus)">{{ getStatusLabel(viewData.handleStatus) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="登记人">{{ viewData.createBy }}</el-descriptions-item>
-        <el-descriptions-item label="登记时间">{{ viewData.createTime }}</el-descriptions-item>
+        <el-descriptions-item label="登记时间">{{ viewData.registerTime }}</el-descriptions-item>
         <el-descriptions-item label="备注" :span="2">{{ viewData.remark || '-' }}</el-descriptions-item>
       </el-descriptions>
       <div slot="footer" class="dialog-footer">
@@ -114,7 +112,7 @@
 </template>
 
 <script>
-import { getShortageList, addShortage, updateShortage, deleteShortage } from "@/api/textbook/shortage";
+import { getShortageList, addShortage, updateShortage, deleteShortage, cancelShortage } from "@/api/textbook/shortage";
 
 export default {
   name: "RegisterShortage",
@@ -122,9 +120,6 @@ export default {
   data() {
     return {
       loading: true,
-      ids: [],
-      single: true,
-      multiple: true,
       total: 0,
       shortageList: [],
       title: "登记缺书",
@@ -169,11 +164,6 @@ export default {
       this.resetForm("queryForm");
       this.handleQuery();
     },
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.shortageId);
-      this.single = selection.length !== 1;
-      this.multiple = !selection.length;
-    },
     handleAdd() {
       this.reset();
       this.title = "登记缺书";
@@ -217,23 +207,34 @@ export default {
       this.viewData = row;
       this.viewOpen = true;
     },
-    handleDelete(row) {
-      const shortageIds = row.lackId || this.ids;
-      this.$confirm('是否确认删除选中的数据项?', "警告", {
+    handleCancel(row) {
+      if (!row || !row.lackId) {
+        this.$modal.msgError("缺少缺书ID");
+        return;
+      }
+      console.log('取消缺书，ID:', row.lackId);
+      const shortageId = row.lackId;
+      this.$confirm('是否确认取消该缺书申请?', "确认取消", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
-      }).then(function() {
-        return deleteShortage(shortageIds);
       }).then(() => {
+        console.log('调用cancelShortage API:', shortageId);
+        return cancelShortage(shortageId);
+      }).then(response => {
+        console.log('取消成功:', response);
         this.getList();
-        this.$modal.msgSuccess("删除成功");
+        this.$modal.msgSuccess("取消成功");
+      }).catch(error => {
+        console.error('取消缺书失败:', error);
+        console.error('错误详情:', error.response);
+        this.$modal.msgError("取消失败，请稍后重试");
       });
     },
     getUrgencyType(level) { return level === '2' ? 'danger' : level === '1' ? 'warning' : 'info'; },
     getUrgencyLabel(level) { return level === '2' ? '特急' : level === '1' ? '紧急' : '普通'; },
-    getStatusType(status) { return status === '3' ? 'success' : status === '2' ? 'info' : status === '1' ? 'warning' : 'danger'; },
-    getStatusLabel(status) { return status === '3' ? '已完成' : status === '2' ? '已到货' : status === '1' ? '已纳入采购' : '未处理'; }
+    getStatusType(status) { return status === '3' ? 'success' : status === '2' ? 'info' : status === '1' ? 'warning' : status === '4' ? 'info' : 'danger'; },
+    getStatusLabel(status) { return status === '3' ? '已完成' : status === '2' ? '已到货' : status === '1' ? '已纳入采购' : status === '4' ? '已取消' : '未处理'; }
   }
 };
 </script>

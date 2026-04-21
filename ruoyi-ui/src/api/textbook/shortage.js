@@ -60,3 +60,11 @@ export function processShortage(id, status) {
     params: { status: status }
   })
 }
+
+// 取消缺书
+export function cancelShortage(id) {
+  return request({
+    url: '/textbook/shortage/cancel/' + id,
+    method: 'put'
+  })
+}

@@ -101,8 +101,8 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="审核申请" :visible.sync="auditOpen" width="500px" append-to-body>
-      <el-form ref="auditForm" :model="auditForm" :rules="auditRules" label-width="80px">
+    <el-dialog title="审核申请" :visible.sync="auditOpen" width="550px" append-to-body>
+      <el-form ref="auditForm" :model="auditForm" :rules="auditRules" label-width="100px">
         <el-form-item label="申请信息">
           <div style="padding: 10px; background: #f5f7fa; border-radius: 4px; margin-bottom: 15px;">
             <p>申请人：{{ currentApply.teacherName }}</p>
@@ -118,8 +118,30 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="审核意见" prop="auditOpinion">
-          <el-input v-model="auditForm.auditOpinion" type="textarea" placeholder="请输入审核意见" :rows="3" />
+          <el-input v-model="auditForm.auditOpinion" type="textarea" placeholder="请输入审核意见" :rows="2" />
         </el-form-item>
+        <el-divider v-if="auditForm.status === '2'" />
+        <template v-if="auditForm.status === '2'">
+          <el-form-item label="同时登记缺书">
+            <el-switch v-model="auditForm.registerShortage" active-text="是" inactive-text="否" />
+          </el-form-item>
+          <template v-if="auditForm.registerShortage">
+            <el-form-item label="缺书数量" prop="shortageQty">
+              <el-input-number v-model="auditForm.shortageQty" :min="1" :max="9999" />
+              <span style="color: #909399; font-size: 12px; margin-left: 8px;">默认取申请数量，可修改</span>
+            </el-form-item>
+            <el-form-item label="紧急程度" prop="shortageUrgency">
+              <el-radio-group v-model="auditForm.shortageUrgency">
+                <el-radio label="0">普通</el-radio>
+                <el-radio label="1">紧急</el-radio>
+                <el-radio label="2">特急</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="缺书备注">
+              <el-input v-model="auditForm.shortageRemark" type="textarea" placeholder="请输入缺书备注（选填）" :rows="2" />
+            </el-form-item>
+          </template>
+        </template>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitAudit">确 定</el-button>
@@ -271,7 +293,11 @@ export default {
       this.auditForm = {
         applyId: row.applyId,
         status: null,
-        auditOpinion: ''
+        auditOpinion: '',
+        registerShortage: true,
+        shortageQty: row.applyQty,
+        shortageUrgency: '0',
+        shortageRemark: ''
       };
       this.auditOpen = true;
     },

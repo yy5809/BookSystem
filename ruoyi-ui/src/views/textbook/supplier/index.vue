@@ -101,10 +101,10 @@ export default {
       return textMap[status] || '未知'
     },
     viewPurchase(purchase) {
-      this.$router.push(`/textbook/supplier/purchase/${purchase.buyId}`)
+      this.$router.push(`/textbook/supplierPurchase/${purchase.buyId}`)
     },
     goToPurchaseList() {
-      this.$router.push('/textbook/supplier/purchase')
+      this.$router.push('/textbook/supplierPurchase')
     }
   }
 }

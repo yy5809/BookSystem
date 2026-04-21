@@ -3,12 +3,17 @@ package com.ruoyi.system.textbook.service.impl;
 import java.util.Date;
 import java.util.List;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.system.textbook.domain.BookPersonalApply;
 import com.ruoyi.system.textbook.mapper.BookPersonalApplyMapper;
 import com.ruoyi.system.textbook.service.IBookPersonalApplyService;
 import com.ruoyi.system.textbook.service.IStockOperationService;
+import com.ruoyi.textbook.domain.TbShortage;
+import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.service.NoticeService;
+import com.ruoyi.common.core.domain.entity.SysUser;
+import com.ruoyi.system.mapper.SysUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +29,12 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
 
     @Autowired
     private NoticeService noticeService;
+
+    @Autowired
+    private TbShortageMapper tbShortageMapper;
+
+    @Autowired
+    private SysUserMapper sysUserMapper;
 
     @Override
     public BookPersonalApply selectBookPersonalApplyById(Long applyId) {
@@ -114,11 +125,62 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
             if ("3".equals(status)) {
                 noticeService.sendNoticeToUser(teacherId, "个人领书申请审核通过", "您的《" + bookName + "》领书申请已审核通过并完成出库，请前往书库领取。", "personal_apply_audit", bookPersonalApply.getApplyId());
             } else if ("2".equals(status)) {
-                noticeService.sendNoticeToUser(teacherId, "个人领书申请审核驳回", "您的《" + bookName + "》领书申请已被驳回，原因：" + (auditOpinion != null ? auditOpinion : "审核未通过"), "personal_apply_audit", bookPersonalApply.getApplyId());
+                Long shortageId = null;
+                if (Boolean.TRUE.equals(bookPersonalApply.getRegisterShortage())) {
+                    shortageId = createShortageFromReject(existingApply, bookPersonalApply);
+                }
+
+                StringBuilder notifyContent = new StringBuilder();
+                notifyContent.append("您的《").append(bookName).append("》领书申请已被驳回");
+                if (auditOpinion != null && !auditOpinion.isEmpty()) {
+                    notifyContent.append("，原因：").append(auditOpinion);
+                }
+                if (shortageId != null) {
+                    String urgencyLabel = "普通";
+                    if ("1".equals(bookPersonalApply.getShortageUrgency())) urgencyLabel = "紧急";
+                    else if ("2".equals(bookPersonalApply.getShortageUrgency())) urgencyLabel = "特急";
+                    notifyContent.append("。已为您登记缺书（").append(urgencyLabel).append("），到货后将通知您重新申请。");
+                }
+                noticeService.sendNoticeToUser(teacherId, "个人领书申请审核驳回", notifyContent.toString(), "personal_apply_audit", bookPersonalApply.getApplyId());
             }
         }
 
         return result;
+    }
+
+    private Long createShortageFromReject(BookPersonalApply apply, BookPersonalApply auditData) {
+        TbShortage shortage = new TbShortage();
+        shortage.setBookId(apply.getTextbookId());
+        shortage.setBookName(apply.getBookName());
+        shortage.setIsbn(apply.getIsbn());
+        shortage.setLackNum(auditData.getShortageQty() != null ? auditData.getShortageQty() : apply.getApplyQty());
+        shortage.setUrgency(auditData.getShortageUrgency() != null ? auditData.getShortageUrgency() : "0");
+        shortage.setRegisterId(SecurityUtils.getUserId());
+        SysUser currentUser = sysUserMapper.selectUserById(SecurityUtils.getUserId());
+        if (currentUser != null) {
+            shortage.setRegisterName(currentUser.getNickName());
+        }
+        shortage.setHandleStatus("0");
+        shortage.setSource("1");
+        shortage.setSourceId(apply.getApplyId());
+        shortage.setRemark(auditData.getShortageRemark() != null ? auditData.getShortageRemark() : "由教师领书申请驳回转入，申请人：" + apply.getTeacherName());
+        shortage.setCreateTime(DateUtils.getNowDate());
+        shortage.setUpdateTime(DateUtils.getNowDate());
+        tbShortageMapper.insertTbShortage(shortage);
+
+        try {
+            noticeService.sendLackNotice(
+                    shortage.getBookId(),
+                    shortage.getBookName(),
+                    shortage.getIsbn(),
+                    shortage.getLackNum(),
+                    0,
+                    shortage.getLackId()
+            );
+        } catch (Exception e) {
+        }
+
+        return shortage.getLackId();
     }
 
     @Override

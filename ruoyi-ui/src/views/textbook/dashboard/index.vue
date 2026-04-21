@@ -74,7 +74,7 @@
         <el-card shadow="hover">
           <div slot="header"><span>快捷操作</span></div>
           <div class="quick-actions">
-            <div class="action-item" @click="$router.push('/textbook/personalApply')">
+            <div class="action-item" @click="$router.push('/textbook/myApply')">
               <i class="el-icon-plus"></i>
               <span>提交领书申请</span>
             </div>
@@ -86,11 +86,8 @@
               <i class="el-icon-edit-outline"></i>
               <span>登记缺书</span>
             </div>
-            <div class="action-item" @click="$router.push('/textbook/inventory')">
-              <i class="el-icon-s-operation"></i>
-              <span>库存查询</span>
-            </div>
-            <div class="action-item" @click="$router.push('/textbook/notice')">
+
+            <div class="action-item" @click="$router.push('/textbook/myNotice')">
               <i class="el-icon-bell"></i>
               <span>查看通知</span>
             </div>
@@ -142,7 +139,7 @@ export default {
       return map[status] || 'info';
     },
     getStatusLabel(status) {
-      const map = { '0': '待审核', '1': '已通过', '2': '已驳回', '3': '已出库' };
+      const map = { '0': '待审核', '1': '已通过', '2': '已驳回', '3': '已出库', '4': '已取消' };
       return map[status] || status;
     }
   }

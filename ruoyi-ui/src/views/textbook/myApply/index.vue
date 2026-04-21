@@ -126,6 +126,22 @@ export default {
   created() {
     this.getList();
     this.getBookList();
+    if (this.$route.query.textbookId || this.$route.query.isbn) {
+      this.$nextTick(() => {
+        this.handleAdd();
+        this.$nextTick(() => {
+          if (this.$route.query.textbookId) {
+            this.form.textbookId = parseInt(this.$route.query.textbookId);
+          }
+          if (this.$route.query.isbn) {
+            this.form.isbn = this.$route.query.isbn;
+          }
+          if (this.$route.query.bookName) {
+            this.form.bookName = this.$route.query.bookName;
+          }
+        });
+      });
+    }
   },
   methods: {
     getList() {

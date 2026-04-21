@@ -13,6 +13,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="bizId"        column="biz_id"      />
         <result property="bizType"      column="biz_type"    />
         <result property="readStatus"   column="read_status" />
+        <result property="targetUserId" column="target_user_id" />
+        <result property="userType"     column="user_type"     />
         <result property="createBy"     column="create_by"   />
         <result property="createTime"   column="create_time" />
         <result property="updateBy"     column="update_by"   />
@@ -21,7 +23,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
     
     <sql id="selectNoticeVo">
-        select notice_id, notice_title, notice_type, cast(notice_content as char) as notice_content, status, biz_id, biz_type, read_status, create_by, create_time, update_by, update_time, remark 
+        select notice_id, notice_title, notice_type, cast(notice_content as char) as notice_content, status, biz_id, biz_type, read_status, target_user_id, user_type, create_by, create_time, update_by, update_time, remark
 		from sys_notice
     </sql>
     
@@ -42,6 +44,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="createBy != null and createBy != ''">
 				AND create_by like concat('%', #{createBy}, '%')
 			</if>
+			<if test="targetUserId != null">
+				AND target_user_id = #{targetUserId}
+			</if>
 		</where>
     </select>
     
@@ -54,6 +59,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="bizId != null ">biz_id, </if>
 			<if test="bizType != null and bizType != '' ">biz_type, </if>
 			<if test="readStatus != null and readStatus != '' ">read_status, </if>
+			<if test="targetUserId != null ">target_user_id, </if>
+			<if test="userType != null and userType != ''">user_type, </if>
 			<if test="remark != null and remark != ''">remark,</if>
  			<if test="createBy != null and createBy != ''">create_by,</if>
  			create_time
@@ -65,6 +72,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="bizId != null ">#{bizId}, </if>
 			<if test="bizType != null and bizType != ''">#{bizType}, </if>
 			<if test="readStatus != null and readStatus != ''">#{readStatus}, </if>
+			<if test="targetUserId != null ">#{targetUserId}, </if>
+			<if test="userType != null and userType != ''">#{userType}, </if>
 			<if test="remark != null and remark != ''">#{remark},</if>
  			<if test="createBy != null and createBy != ''">#{createBy},</if>
  			sysdate()

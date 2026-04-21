@@ -1,6 +1,7 @@
 package com.ruoyi.textbook.service;
 
 import com.ruoyi.system.domain.SysNotice;
+import com.ruoyi.system.mapper.SysUserMapper;
 import com.ruoyi.system.service.ISysNoticeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,9 @@ public class NoticeService {
 
     @Autowired
     private ISysNoticeService sysNoticeService;
+
+    @Autowired
+    private SysUserMapper sysUserMapper;
 
     public void sendOrderApproveNotice(Long userId, String bookName, String status, String reason, Long orderId) {
         SysNotice notice = new SysNotice();
@@ -37,15 +41,6 @@ public class NoticeService {
     }
 
     public void sendLackNotice(Long bookId, String bookName, String isbn, Integer lackNum, Integer currentStock, Long lackId) {
-        SysNotice notice = new SysNotice();
-        notice.setNoticeTitle("教材缺货通知");
-        notice.setNoticeType("1");
-        notice.setStatus("0");
-        notice.setBizId(lackId);
-        notice.setBizType("4");
-        notice.setReadStatus("0");
-        notice.setUserType("2");
-
         StringBuilder content = new StringBuilder();
         content.append("【缺书预警】\n");
         content.append("教材：《").append(bookName).append("》\n");
@@ -55,24 +50,42 @@ public class NoticeService {
         content.append("当前库存：").append(currentStock).append("本\n");
         content.append("需采购数量：").append(lackNum).append("本\n");
         content.append("\n请及时处理采购事宜！");
-        notice.setNoticeContent(content.toString());
 
-        sysNoticeService.insertNotice(notice);
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
+            for (Long managerId : warehouseManagerIds) {
+                SysNotice notice = new SysNotice();
+                notice.setNoticeTitle("教材缺货通知");
+                notice.setNoticeType("1");
+                notice.setStatus("0");
+                notice.setBizId(lackId);
+                notice.setBizType("4");
+                notice.setReadStatus("0");
+                notice.setTargetUserId(managerId);
+                notice.setNoticeContent(content.toString());
+                sysNoticeService.insertNotice(notice);
+            }
+        }
     }
 
     public void sendInboundNotice(Long bookId, String bookName, Long inboundId) {
-        SysNotice notice = new SysNotice();
-        notice.setNoticeTitle("教材入库通知");
-        notice.setNoticeType("1");
-        notice.setStatus("0");
-        notice.setBizId(inboundId);
-        notice.setBizType("3");
-        notice.setReadStatus("0");
-
         String content = "【新书到货】\n《" + bookName + "》已成功入库，库存已更新。\n\n相关待处理事项已自动更新，请查看。";
-        notice.setNoticeContent(content);
 
-        sysNoticeService.insertNotice(notice);
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
+            for (Long managerId : warehouseManagerIds) {
+                SysNotice notice = new SysNotice();
+                notice.setNoticeTitle("教材入库通知");
+                notice.setNoticeType("1");
+                notice.setStatus("0");
+                notice.setBizId(inboundId);
+                notice.setBizType("3");
+                notice.setReadStatus("0");
+                notice.setTargetUserId(managerId);
+                notice.setNoticeContent(content);
+                sysNoticeService.insertNotice(notice);
+            }
+        }
     }
 
     public void sendSupplierInboundNotice(Long supplierId, String bookName, Integer quantity, String inboundNo) {
@@ -91,49 +104,61 @@ public class NoticeService {
     }
 
     public void sendStockWarningNotice(Long bookId, String bookName, Integer currentStock, Integer warningThreshold) {
-        SysNotice notice = new SysNotice();
-        notice.setNoticeTitle("库存预警通知");
-        notice.setNoticeType("1");
-        notice.setStatus("0");
-        notice.setBizId(bookId);
-        notice.setBizType("6");
-        notice.setReadStatus("0");
-        notice.setUserType("2");
-
         String content = "【库存预警】\n《" + bookName + "》库存低于预警阈值！\n当前库存：" + currentStock + "本\n预警阈值：" + warningThreshold + "本\n\n请及时安排采购补货。";
-        notice.setNoticeContent(content);
 
-        sysNoticeService.insertNotice(notice);
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
+            for (Long managerId : warehouseManagerIds) {
+                SysNotice notice = new SysNotice();
+                notice.setNoticeTitle("库存预警通知");
+                notice.setNoticeType("1");
+                notice.setStatus("0");
+                notice.setBizId(bookId);
+                notice.setBizType("6");
+                notice.setReadStatus("0");
+                notice.setTargetUserId(managerId);
+                notice.setNoticeContent(content);
+                sysNoticeService.insertNotice(notice);
+            }
+        }
     }
 
     public void sendPurchaseCreateNotice(Long purchaseId, String purchaseNo, int itemCount) {
-        SysNotice notice = new SysNotice();
-        notice.setNoticeTitle("新采购单生成通知");
-        notice.setNoticeType("1");
-        notice.setStatus("0");
-        notice.setBizId(purchaseId);
-        notice.setBizType("2");
-        notice.setReadStatus("0");
-        notice.setUserType("2");
-
         String content = "【新采购单】\n采购单号：" + purchaseNo + "\n包含教材：" + itemCount + "种\n\n请及时审核并安排采购流程。";
-        notice.setNoticeContent(content);
 
-        sysNoticeService.insertNotice(notice);
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
+            for (Long managerId : warehouseManagerIds) {
+                SysNotice notice = new SysNotice();
+                notice.setNoticeTitle("新采购单生成通知");
+                notice.setNoticeType("1");
+                notice.setStatus("0");
+                notice.setBizId(purchaseId);
+                notice.setBizType("2");
+                notice.setReadStatus("0");
+                notice.setTargetUserId(managerId);
+                notice.setNoticeContent(content);
+                sysNoticeService.insertNotice(notice);
+            }
+        }
     }
 
-    public void sendNoticeToRole(String userType, String title, String content, String bizType, Long bizId) {
-        SysNotice notice = new SysNotice();
-        notice.setNoticeTitle(title);
-        notice.setNoticeType("1");
-        notice.setStatus("0");
-        notice.setBizId(bizId);
-        notice.setBizType(bizType);
-        notice.setReadStatus("0");
-        notice.setUserType(userType);
-        notice.setNoticeContent(content);
-
-        sysNoticeService.insertNotice(notice);
+    public void sendNoticeToRole(String roleKey, String title, String content, String bizType, Long bizId) {
+        List<Long> userIds = sysUserMapper.selectUserIdsByRoleKey(roleKey);
+        if (userIds != null && !userIds.isEmpty()) {
+            for (Long userId : userIds) {
+                SysNotice notice = new SysNotice();
+                notice.setNoticeTitle(title);
+                notice.setNoticeType("1");
+                notice.setStatus("0");
+                notice.setBizId(bizId);
+                notice.setBizType(bizType);
+                notice.setReadStatus("0");
+                notice.setTargetUserId(userId);
+                notice.setNoticeContent(content);
+                sysNoticeService.insertNotice(notice);
+            }
+        }
     }
 
     public void sendNoticeToUser(Long userId, String title, String content, String bizType, Long bizId) {
@@ -166,36 +191,44 @@ public class NoticeService {
     }
 
     public void sendNoticePublishNotice(Long noticeId, String semester, Integer classCount) {
-        SysNotice notice = new SysNotice();
-        notice.setNoticeTitle("领书通知已发布");
-        notice.setNoticeType("1");
-        notice.setStatus("0");
-        notice.setBizId(noticeId);
-        notice.setBizType("8");
-        notice.setReadStatus("0");
-        notice.setUserType("2");
-
         String content = "【领书通知发布】\n学期：" + semester + "\n涉及班级：" + classCount + "个\n\n请通知各班委按时领取。";
-        notice.setNoticeContent(content);
 
-        sysNoticeService.insertNotice(notice);
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
+            for (Long managerId : warehouseManagerIds) {
+                SysNotice notice = new SysNotice();
+                notice.setNoticeTitle("领书通知已发布");
+                notice.setNoticeType("1");
+                notice.setStatus("0");
+                notice.setBizId(noticeId);
+                notice.setBizType("8");
+                notice.setReadStatus("0");
+                notice.setTargetUserId(managerId);
+                notice.setNoticeContent(content);
+                sysNoticeService.insertNotice(notice);
+            }
+        }
     }
 
     // 发送发货通知给库管员
     public void sendShipmentNotice(Long purchaseId, String purchaseNo, String logisticsCompany, String logisticsNo) {
-        SysNotice notice = new SysNotice();
-        notice.setNoticeTitle("供应商发货通知");
-        notice.setNoticeType("1");
-        notice.setStatus("0");
-        notice.setBizId(purchaseId);
-        notice.setBizType("9");
-        notice.setReadStatus("0");
-        notice.setUserType("2");
-
         String content = "【供应商发货】\n采购单号：" + purchaseNo + "\n物流公司：" + logisticsCompany + "\n物流单号：" + logisticsNo + "\n\n请及时确认到货。";
-        notice.setNoticeContent(content);
 
-        sysNoticeService.insertNotice(notice);
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse_manager");
+        if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
+            for (Long managerId : warehouseManagerIds) {
+                SysNotice notice = new SysNotice();
+                notice.setNoticeTitle("供应商发货通知");
+                notice.setNoticeType("1");
+                notice.setStatus("0");
+                notice.setBizId(purchaseId);
+                notice.setBizType("9");
+                notice.setReadStatus("0");
+                notice.setTargetUserId(managerId);
+                notice.setNoticeContent(content);
+                sysNoticeService.insertNotice(notice);
+            }
+        }
     }
 
     // 获取供应商通知列表

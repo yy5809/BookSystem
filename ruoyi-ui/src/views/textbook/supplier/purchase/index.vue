@@ -168,7 +168,7 @@ export default {
       return textMap[status] || '未知'
     },
     viewPurchaseDetail(purchase) {
-      this.$router.push(`/textbook/supplier/purchase/${purchase.buyId}`)
+      this.$router.push(`/textbook/supplierPurchase/${purchase.buyId}`)
     },
     confirmShipment(purchase) {
       this.shipmentForm = {

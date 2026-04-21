@@ -124,4 +124,12 @@ public interface SysUserMapper
      * @return 结果
      */
     public SysUser checkEmailUnique(String email);
+
+    /**
+     * 根据角色标识查询用户ID列表
+     *
+     * @param roleKey 角色标识
+     * @return 用户ID列表
+     */
+    List<Long> selectUserIdsByRoleKey(String roleKey);
 }
