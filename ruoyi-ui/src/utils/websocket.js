@@ -2,15 +2,17 @@ let ws = null
 let reconnectTimer = null
 let heartbeatTimer = null
 let listeners = []
+let lastRole = null
 
 const WS_BASE_URL = process.env.VUE_APP_WS_BASE_URL || (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host
 
-export function connectWebSocket(userId) {
+export function connectWebSocket(userId, role) {
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
     return
   }
 
-  const url = `${WS_BASE_URL}/ws/notice/${userId}`
+  lastRole = role || lastRole || 'common'
+  const url = `${WS_BASE_URL}/ws/notice/${userId}/${lastRole}`
   
   try {
     ws = new WebSocket(url)
@@ -29,7 +31,7 @@ export function connectWebSocket(userId) {
     ws.onclose = () => {
       console.log('[WebSocket] 连接关闭')
       stopHeartbeat()
-      scheduleReconnect(userId)
+      scheduleReconnect(userId, lastRole)
     }
 
     ws.onerror = (error) => {
@@ -42,11 +44,11 @@ export function connectWebSocket(userId) {
   }
 }
 
-function scheduleReconnect(userId) {
+function scheduleReconnect(userId, role) {
   if (reconnectTimer) return
   reconnectTimer = setTimeout(() => {
     reconnectTimer = null
-    connectWebSocket(userId)
+    connectWebSocket(userId, role)
   }, 5000)
 }
 

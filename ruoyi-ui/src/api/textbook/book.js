@@ -51,3 +51,34 @@ export function exportBook(query) {
     params: query
   })
 }
+
+export function quickAddBook(data) {
+  return request({
+    url: '/textbook/book/quickAdd',
+    method: 'post',
+    data: data
+  })
+}
+
+export function completeBookInfo(data) {
+  return request({
+    url: '/textbook/book/completeInfo',
+    method: 'put',
+    data: data
+  })
+}
+
+export function searchBookList(query) {
+  return request({
+    url: '/textbook/book/searchList',
+    method: 'get',
+    params: { query }
+  })
+}
+
+export function countIncompleteBook() {
+  return request({
+    url: '/textbook/book/countIncomplete',
+    method: 'get'
+  })
+}

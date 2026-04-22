@@ -109,7 +109,9 @@ public class TbPurchaseOrderServiceImpl implements ITbPurchaseOrderService
                 shortage.setBookName(order.getBookName());
                 shortage.setLackNum(order.getQuantity());
                 shortage.setHandleStatus("0");
-                shortage.setCreateTime(DateUtils.getNowDate());
+                shortage.setRegisterId(order.getUserId());
+                shortage.setSource("2");
+                shortage.setSourceId(order.getOrderId());
                 shortage.setUpdateTime(DateUtils.getNowDate());
                 tbShortageMapper.insertTbShortage(shortage);
 

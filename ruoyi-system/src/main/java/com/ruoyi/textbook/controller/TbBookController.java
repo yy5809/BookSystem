@@ -85,4 +85,32 @@ public class TbBookController extends BaseController {
     public AjaxResult remove(@PathVariable Long bookId) {
         return toAjax(tbBookService.deleteTbBookByBookId(bookId));
     }
+
+    @PreAuthorize("@ss.hasPermi('textbook:book:quickAdd')")
+    @Log(title = "教材快速新增", businessType = BusinessType.INSERT)
+    @PostMapping("/quickAdd")
+    public AjaxResult quickAdd(@RequestBody TbBook tbBook) {
+        TbBook result = tbBookService.quickAdd(tbBook);
+        return AjaxResult.success(result);
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:book:edit')")
+    @Log(title = "补充完善教材信息", businessType = BusinessType.UPDATE)
+    @PutMapping("/completeInfo")
+    public AjaxResult completeInfo(@RequestBody TbBook tbBook) {
+        tbBookService.completeInfo(tbBook);
+        return AjaxResult.success();
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:book:query')")
+    @GetMapping("/searchList")
+    public AjaxResult searchList(@RequestParam String query) {
+        return AjaxResult.success(tbBookService.searchBookList(query));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:book:query')")
+    @GetMapping("/countIncomplete")
+    public AjaxResult countIncomplete() {
+        return AjaxResult.success(tbBookService.countIncompleteBook());
+    }
 }

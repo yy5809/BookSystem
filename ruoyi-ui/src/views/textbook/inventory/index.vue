@@ -36,7 +36,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="inventoryList" :row-class-name="tableRowClassName">
+    <el-table v-loading="loading" :data="inventoryList" :row-class-name="tableRowClassName" border stripe>
       <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="180" />
       <el-table-column label="作者" align="center" prop="author" width="90" show-overflow-tooltip />
@@ -95,7 +95,7 @@
         <span style="font-weight: bold; font-size: 15px; margin-right: 16px;">{{ logBookName }}</span>
         <span style="color: #909399; font-family: monospace; font-size: 13px;">ISBN: {{ logIsbn }}</span>
       </div>
-      <el-table :data="logList" size="small" border max-height="400" v-loading="logLoading">
+      <el-table :data="logList" size="small" border stripe max-height="400" v-loading="logLoading">
         <el-table-column type="index" label="#" width="45" align="center" />
         <el-table-column label="业务类型" width="110" align="center">
           <template slot-scope="scope">

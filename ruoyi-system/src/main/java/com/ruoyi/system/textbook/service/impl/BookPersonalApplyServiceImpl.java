@@ -102,16 +102,6 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
             if (currentStock < existingApply.getApplyQty()) {
                 throw new ServiceException("库存不足，无法通过审核（当前库存：" + currentStock + "，需求：" + existingApply.getApplyQty() + "）");
             }
-            stockOperationService.deductStock(
-                    existingApply.getTextbookId(),
-                    existingApply.getApplyQty(),
-                    "3",
-                    existingApply.getApplyNo(),
-                    SecurityUtils.getUsername()
-            );
-
-            bookPersonalApply.setStatus("3");
-            bookPersonalApply.setIssueTime(new Date());
         }
 
         int result = bookPersonalApplyMapper.updateBookPersonalApply(bookPersonalApply);
@@ -122,8 +112,10 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
             String auditOpinion = bookPersonalApply.getAuditOpinion();
             Long teacherId = existingApply.getTeacherId();
 
-            if ("3".equals(status)) {
-                noticeService.sendNoticeToUser(teacherId, "个人领书申请审核通过", "您的《" + bookName + "》领书申请已审核通过并完成出库，请前往书库领取。", "personal_apply_audit", bookPersonalApply.getApplyId());
+            if ("1".equals(status)) {
+                noticeService.sendNoticeToUser(teacherId, "个人领书申请审核通过", "您的《" + bookName + "》领书申请已审核通过，请等待出库通知。", "10", bookPersonalApply.getApplyId());
+            } else if ("3".equals(status)) {
+                noticeService.sendNoticeToUser(teacherId, "个人领书出库完成", "您的《" + bookName + "》领书申请已完成出库，请前往领取。", "10", bookPersonalApply.getApplyId());
             } else if ("2".equals(status)) {
                 Long shortageId = null;
                 if (Boolean.TRUE.equals(bookPersonalApply.getRegisterShortage())) {
@@ -141,7 +133,7 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
                     else if ("2".equals(bookPersonalApply.getShortageUrgency())) urgencyLabel = "特急";
                     notifyContent.append("。已为您登记缺书（").append(urgencyLabel).append("），到货后将通知您重新申请。");
                 }
-                noticeService.sendNoticeToUser(teacherId, "个人领书申请审核驳回", notifyContent.toString(), "personal_apply_audit", bookPersonalApply.getApplyId());
+                noticeService.sendNoticeToUser(teacherId, "个人领书申请审核驳回", notifyContent.toString(), "10", bookPersonalApply.getApplyId());
             }
         }
 

@@ -71,10 +71,6 @@
         <foreach item="stockId" collection="array" open="(" separator="," close=")">#{stockId}</foreach>
     </delete>
 
-    <update id="updateInventoryQuantity">
-        UPDATE textbook_stock SET stock_num=stock_num+#{arg1}, version=version+1 WHERE book_id=#{arg0} AND del_flag='0' AND stock_num+#{arg1} >= 0
-    </update>
-
     <select id="selectStockNumByBookId" resultType="int">
         SELECT COALESCE(stock_num, 0) FROM textbook_stock WHERE book_id = #{bookId} AND del_flag = '0'
     </select>
@@ -104,16 +100,6 @@
         WHERE book_id = #{bookId}
           AND version = #{version}
           AND del_flag = '0'
-    </update>
-
-    <update id="updateInventoryQuantityWithCheck">
-        UPDATE textbook_stock
-        SET stock_num = stock_num + #{changeNum},
-            version = version + 1,
-            update_time = NOW()
-        WHERE book_id = #{bookId}
-          AND del_flag = '0'
-          AND stock_num = #{expectedStock}
     </update>
 
     <select id="selectWarningList" resultMap="TbInventoryResult">

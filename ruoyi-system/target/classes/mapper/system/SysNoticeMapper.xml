@@ -47,6 +47,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			<if test="targetUserId != null">
 				AND target_user_id = #{targetUserId}
 			</if>
+			<if test="userType != null and userType != ''">
+				AND user_type = #{userType}
+			</if>
 		</where>
     </select>
     

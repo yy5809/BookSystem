@@ -54,7 +54,7 @@ public class TbPurchaseController extends BaseController {
         return toAjax(tbBuyService.submit(buy));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:purchase:audit')")
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:audit') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "购书单审核", businessType = BusinessType.UPDATE)
     @PutMapping("/audit")
     public AjaxResult audit(@Valid @RequestBody AuditRequest request) {
@@ -92,10 +92,10 @@ public class TbPurchaseController extends BaseController {
     public AjaxResult remove(@PathVariable("id") Long buyId) {
         TbPurchase order = tbBuyService.getById(buyId);
         if (order == null) { return AjaxResult.error("订单不存在"); }
-        if ("3".equals(order.getStatus())) {
+        if ("5".equals(order.getStatus())) {
             return AjaxResult.error("该采购单已入库，禁止删除。已入库的单据不可删除以保证数据完整性。");
         }
-        if ("2".equals(order.getStatus())) {
+        if ("4".equals(order.getStatus())) {
             return AjaxResult.error("该采购单已到货，禁止删除。请先完成入库流程。");
         }
         if ("3".equals(order.getStatus())) {

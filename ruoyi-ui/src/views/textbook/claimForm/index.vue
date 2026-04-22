@@ -18,7 +18,7 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="claimFormList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="claimFormList" @selection-change="handleSelectionChange" border stripe>
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="领书单号" align="center" prop="formNo" width="200" />
       <el-table-column label="班级" align="center" prop="className" width="120" />
@@ -46,7 +46,7 @@
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <el-dialog title="确认出库" :visible.sync="outboundOpen" width="550px" append-to-body>
+    <el-dialog title="确认出库" :visible.sync="outboundOpen" width="550px" append-to-body :close-on-click-modal="false">
       <el-alert title="班委已到仓库领取教材并在纸质领书单上签名，请确认以下信息后完成出库操作" type="info" :closable="false" show-icon style="margin-bottom: 15px;" />
       <el-descriptions :column="1" border>
         <el-descriptions-item label="领书单号">{{ outboundForm.formNo }}</el-descriptions-item>
@@ -85,7 +85,7 @@
 
       <el-divider content-position="left">教材明细</el-divider>
 
-      <el-table :data="detailList" size="small" border>
+      <el-table :data="detailList" size="small" border stripe>
         <el-table-column label="ISBN" prop="isbn" width="140" />
         <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip />
         <el-table-column label="作者" prop="author" width="80" />

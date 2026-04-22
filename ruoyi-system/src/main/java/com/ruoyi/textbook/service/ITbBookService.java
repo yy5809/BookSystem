@@ -39,4 +39,12 @@ public interface ITbBookService
      * 删除教材基础信息信息
      */
     public int deleteTbBookByBookId(Long bookId);
+
+    public TbBook quickAdd(TbBook tbBook);
+
+    public void completeInfo(TbBook tbBook);
+
+    public List<TbBook> searchBookList(String query);
+
+    public int countIncompleteBook();
 }

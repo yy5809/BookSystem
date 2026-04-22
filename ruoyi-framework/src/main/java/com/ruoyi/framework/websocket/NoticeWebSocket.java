@@ -7,12 +7,13 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 
-@ServerEndpoint("/ws/notice/{userId}")
+@ServerEndpoint("/ws/notice/{userId}/{role}")
 @Component
 public class NoticeWebSocket {
 
@@ -20,15 +21,21 @@ public class NoticeWebSocket {
 
     private static ConcurrentHashMap<Long, Session> sessionMap = new ConcurrentHashMap<>();
 
+    private static ConcurrentHashMap<Long, String> userRoleMap = new ConcurrentHashMap<>();
+
     @OnOpen
-    public void onOpen(Session session, @PathParam("userId") Long userId) {
+    public void onOpen(Session session, @PathParam("userId") Long userId, @PathParam("role") String role) {
         sessionMap.put(userId, session);
-        log.info("[WebSocket] 用户 {} 已建立连接, 当前在线: {}", userId, sessionMap.size());
+        if (role != null && !role.isEmpty()) {
+            registerUserRole(userId, role);
+        }
+        log.info("[WebSocket] 用户 {} 已建立连接, 角色={}, 当前在线: {}", userId, role, sessionMap.size());
     }
 
     @OnClose
     public void onClose(@PathParam("userId") Long userId) {
         sessionMap.remove(userId);
+        userRoleMap.remove(userId);
         log.info("[WebSocket] 用户 {} 断开连接, 当前在线: {}", userId, sessionMap.size());
     }
 
@@ -60,7 +67,8 @@ public class NoticeWebSocket {
 
     public static void sendToRole(String roleKey, JSONObject noticeData) {
         sessionMap.forEach((userId, session) -> {
-            if (session.isOpen()) {
+            String userRole = userRoleMap.get(userId);
+            if (userRole != null && matchRole(userRole, roleKey) && session.isOpen()) {
                 try {
                     synchronized (session) {
                         session.getBasicRemote().sendText(noticeData.toJSONString());
@@ -70,6 +78,15 @@ public class NoticeWebSocket {
                 }
             }
         });
+    }
+
+    private static boolean matchRole(String userRole, String targetRole) {
+        if (userRole.equals(targetRole)) return true;
+        return Arrays.asList(userRole.split(",")).contains(targetRole);
+    }
+
+    public static void registerUserRole(Long userId, String roleKey) {
+        userRoleMap.put(userId, roleKey);
     }
 
     public static int getOnlineCount() {

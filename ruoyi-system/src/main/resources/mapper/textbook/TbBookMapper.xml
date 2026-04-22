@@ -28,13 +28,16 @@
         <result property="updateBy" column="update_by"/>
         <result property="updateTime" column="update_time"/>
         <result property="delFlag" column="del_flag"/>
+        <result property="infoStatus" column="info_status"/>
+        <result property="infoSource" column="info_source"/>
     </resultMap>
 
     <sql id="selectTbBookVo">
         select book_id, book_name, isbn, author, publisher, publish_date, edition, print_times,
                format, binding, price, word_count, page_count, course_name, major, grade,
                textbook_type, category, description, cover_image, status,
-               create_by, create_time, update_by, update_time, del_flag
+               create_by, create_time, update_by, update_time, del_flag,
+               info_status, info_source
         from textbook_info
     </sql>
 
@@ -49,6 +52,8 @@
         <if test="grade != null and grade != ''">and grade = #{grade}</if>
         <if test="textbookType != null and textbookType != ''">and textbook_type = #{textbookType}</if>
         <if test="category != null and category != ''">and category = #{category}</if>
+        <if test="infoStatus != null and infoStatus != ''">and info_status = #{infoStatus}</if>
+        <if test="infoSource != null and infoSource != ''">and info_source = #{infoSource}</if>
         order by create_time desc
     </select>
 
@@ -79,6 +84,8 @@
                 <if test="description != null">description,</if>
                 <if test="coverImage != null">cover_image,</if>
                 <if test="status != null">status,</if>
+                <if test="infoStatus != null">info_status,</if>
+                <if test="infoSource != null">info_source,</if>
                 <if test="createBy != null">create_by,</if>create_time
             </trim>
         ) values (
@@ -103,6 +110,8 @@
                 <if test="description != null">#{description},</if>
                 <if test="coverImage != null">#{coverImage},</if>
                 <if test="status != null">#{status},</if>
+                <if test="infoStatus != null">#{infoStatus},</if>
+                <if test="infoSource != null">#{infoSource},</if>
                 <if test="createBy != null">#{createBy},</if>sysdate()
             </trim>
         )
@@ -131,9 +140,11 @@
             <if test="description != null">description=#{description},</if>
             <if test="coverImage != null">cover_image=#{coverImage},</if>
             <if test="status != null">status=#{status},</if>
+            <if test="infoStatus != null">info_status=#{infoStatus},</if>
+            <if test="infoSource != null">info_source=#{infoSource},</if>
             <if test="updateBy != null">update_by=#{updateBy},</if>update_time=sysdate()
         </set>
-        where book_id=#{bookId}
+        where book_id=#{bookId} and del_flag='0'
     </update>
 
     <delete id="deleteTbBookByBookId" parameterType="Long">
@@ -151,5 +162,15 @@
 
     <select id="selectTbBookListByName" parameterType="String" resultMap="TbBookResult">
         <include refid="selectTbBookVo"/> where book_name like concat('%',#{bookName},'%') and del_flag = '0' limit 10
+    </select>
+
+    <select id="searchTbBookList" parameterType="String" resultMap="TbBookResult">
+        <include refid="selectTbBookVo"/> where del_flag = '0'
+        and (isbn like concat('%',#{query},'%') or book_name like concat('%',#{query},'%'))
+        order by create_time desc limit 20
+    </select>
+
+    <select id="countIncompleteBook" resultType="int">
+        SELECT COUNT(*) FROM textbook_info WHERE del_flag = '0' AND info_status = '0'
     </select>
 </mapper>

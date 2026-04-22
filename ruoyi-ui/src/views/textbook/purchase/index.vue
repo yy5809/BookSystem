@@ -86,25 +86,45 @@
         </el-result>
 
         <el-row :gutter="20" style="margin-top: 20px;" v-if="importResult.totalRows > 0">
-          <el-col :span="8">
+          <el-col :span="6">
             <el-card shadow="hover" class="stat-card stat-total">
               <div class="stat-number">{{ importResult.totalRows }}</div>
               <div class="stat-label">总数据量</div>
             </el-card>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-card shadow="hover" class="stat-card stat-success">
               <div class="stat-number">{{ importResult.successCount }}</div>
               <div class="stat-label">成功导入</div>
             </el-card>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-card shadow="hover" class="stat-card stat-fail">
               <div class="stat-number">{{ importResult.failCount }}</div>
               <div class="stat-label">失败数量</div>
             </el-card>
           </el-col>
+          <el-col :span="6">
+            <el-card shadow="hover" class="stat-card stat-auto">
+              <div class="stat-number">{{ importResult.autoCreatedCount || 0 }}</div>
+              <div class="stat-label">自动新增教材</div>
+            </el-card>
+          </el-col>
         </el-row>
+
+        <div v-if="importResult.autoCreatedList && importResult.autoCreatedList.length > 0" style="margin-top: 15px;">
+          <el-divider content-position="left"><i class="el-icon-plus"></i> 自动新增教材（{{ importResult.autoCreatedCount }}本，请到教材管理中补充完善）</el-divider>
+          <el-table :data="importResult.autoCreatedList" border stripe max-height="200" size="small">
+            <el-table-column label="行号" prop="rowIndex" width="70" align="center">
+              <template slot-scope="scope"><el-tag size="mini" type="warning">第{{ scope.row.rowIndex }}行</el-tag></template>
+            </el-table-column>
+            <el-table-column label="ISBN" prop="isbn" width="140" align="center" />
+            <el-table-column label="教材名称" prop="bookName" min-width="200" show-overflow-tooltip />
+            <el-table-column label="状态" width="100" align="center">
+              <template slot-scope="scope"><el-tag size="mini" type="warning">自动新增</el-tag></template>
+            </el-table-column>
+          </el-table>
+        </div>
 
         <!-- 失败明细表格 -->
         <div v-if="importResult.errorList && importResult.errorList.length > 0" style="margin-top: 20px;">
@@ -262,11 +282,14 @@ export default {
             totalRows: data.totalRows || (data.successCount + data.failCount),
             successCount: data.successCount || 0,
             failCount: data.failCount || 0,
+            autoCreatedCount: data.autoCreatedCount || 0,
+            autoCreatedList: data.autoCreatedList || [],
             errorList: data.errorList || []
           }
 
           if (this.importResult.failCount === 0 && this.importResult.successCount > 0) {
-            this.$message.success(`✅ 导入成功！共 ${this.importResult.successCount} 条`)
+            const autoMsg = this.importResult.autoCreatedCount > 0 ? `，自动新增${this.importResult.autoCreatedCount}本教材` : ''
+            this.$message.success(`导入成功！共 ${this.importResult.successCount} 条${autoMsg}，请到教材信息管理中补充完善。`)
           } else if (this.importResult.failCount > 0) {
             this.$message.warning(`⚠️ 部分数据导入失败，请查看错误明细`)
           }
@@ -305,6 +328,7 @@ export default {
 .stat-success .stat-number { color: #67c23a; }
 .stat-fail .stat-number { color: #f56c6c; }
 .stat-total .stat-number { color: #409eff; }
+.stat-auto .stat-number { color: #e6a23c; }
 
 .import-result-area { max-height: 70vh; overflow-y: auto; }
 </style>

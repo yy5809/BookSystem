@@ -22,7 +22,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="applyList">
+    <el-table v-loading="loading" :data="applyList" border stripe>
       <el-table-column label="申请编号" align="center" prop="applyNo" width="180" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip />
       <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
@@ -41,19 +41,73 @@
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
           <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.status === '0'" v-hasPermi="['textbook:myApply:cancel']">取消</el-button>
+          <el-button size="mini" type="text" icon="el-icon-refresh-right" @click="handleReapply(scope.row)" v-if="scope.row.status === '2'" v-hasPermi="['textbook:myApply:add']">重新申请</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <el-dialog title="提交领书申请" :visible.sync="open" width="600px" append-to-body>
+    <el-dialog title="提交领书申请" :visible.sync="open" width="700px" append-to-body :close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="选择教材" prop="textbookId">
-          <el-select v-model="form.textbookId" filterable placeholder="请选择或搜索教材" style="width: 100%" @change="handleBookSelect">
-            <el-option v-for="book in bookList" :key="book.bookId" :label="book.bookName + ' - ' + book.isbn" :value="book.bookId" />
+          <el-select v-model="form.textbookId" filterable remote reserve-keyword :remote-method="searchBook" :loading="bookSearching" placeholder="输入ISBN或书名搜索" style="width: 100%" @change="handleBookSelect">
+            <el-option v-for="book in bookOptions" :key="book.bookId" :label="book.isbn + ' - ' + book.bookName + (book.author ? ' - ' + book.author : '')" :value="book.bookId" />
           </el-select>
         </el-form-item>
+        <div v-if="bookOptions.length === 0 && searchKeyword && !bookSearching" style="margin: -10px 0 10px 100px;">
+          <el-button type="text" icon="el-icon-plus" @click="showQuickAdd = true" style="color: #E6A23C;">该教材不存在，点击快速新增</el-button>
+        </div>
+
+        <el-card v-if="showQuickAdd" shadow="hover" style="margin-bottom: 15px;">
+          <div slot="header"><span>快速新增教材</span></div>
+          <el-form ref="quickAddForm" :model="quickAddForm" :rules="quickAddRules" label-width="80px" size="small">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="ISBN" prop="isbn">
+                  <el-input v-model="quickAddForm.isbn" placeholder="10位或13位数字" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="书名" prop="bookName">
+                  <el-input v-model="quickAddForm.bookName" placeholder="请输入书名" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="作者" prop="author">
+                  <el-input v-model="quickAddForm.author" placeholder="请输入作者" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="出版社">
+                  <el-input v-model="quickAddForm.publisher" placeholder="选填" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="定价">
+                  <el-input-number v-model="quickAddForm.price" :precision="2" :min="0" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="适用课程">
+                  <el-input v-model="quickAddForm.courseName" placeholder="选填" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </el-form>
+          <el-alert type="info" :closable="false" style="margin-top: 10px;">
+            <template slot="default">快速新增的教材信息不完整，库管员后续会补充完善。</template>
+          </el-alert>
+          <div style="text-align: right; margin-top: 10px;">
+            <el-button size="small" @click="showQuickAdd = false">取消新增</el-button>
+            <el-button type="primary" size="small" @click="handleQuickAdd" :loading="quickAddLoading">确认新增并继续</el-button>
+          </div>
+        </el-card>
+
         <el-form-item label="ISBN">
           <el-input v-model="form.isbn" disabled />
         </el-form-item>
@@ -65,7 +119,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">提 交</el-button>
+        <el-button type="primary" @click="submitForm" :loading="submitLoading">提 交</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -94,7 +148,7 @@
 
 <script>
 import { listMyApply, addPersonalApply, cancelApply, getPersonalApply } from "@/api/textbook/personalApply";
-import { listBook } from "@/api/textbook/book";
+import { searchBookList, quickAddBook } from "@/api/textbook/book";
 
 export default {
   name: "MyApply",
@@ -102,14 +156,27 @@ export default {
   data() {
     return {
       loading: true,
+      submitLoading: false,
+      quickAddLoading: false,
+      bookSearching: false,
       total: 0,
       applyList: [],
-      bookList: [],
-      showSearch: true,
+      bookOptions: [],
+      searchKeyword: '',
+      showQuickAdd: false,
       open: false,
       viewOpen: false,
       form: {},
       viewData: {},
+      quickAddForm: {
+        isbn: '',
+        bookName: '',
+        author: '',
+        publisher: '',
+        price: null,
+        courseName: '',
+        infoSource: '1'
+      },
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -120,12 +187,19 @@ export default {
         textbookId: [{ required: true, message: "请选择教材", trigger: "change" }],
         applyQty: [{ required: true, message: "请输入申请数量", trigger: "blur" }],
         purpose: [{ required: true, message: "请输入用途说明", trigger: "blur" }]
+      },
+      quickAddRules: {
+        isbn: [
+          { required: true, message: '请输入ISBN', trigger: 'blur' },
+          { pattern: /^(\d{10}|\d{13})$/, message: 'ISBN格式不正确（10或13位数字）', trigger: 'blur' }
+        ],
+        bookName: [{ required: true, message: '请输入书名', trigger: 'blur' }],
+        author: [{ required: true, message: '请输入作者', trigger: 'blur' }]
       }
     };
   },
   created() {
     this.getList();
-    this.getBookList();
     if (this.$route.query.textbookId || this.$route.query.isbn) {
       this.$nextTick(() => {
         this.handleAdd();
@@ -152,17 +226,44 @@ export default {
         this.loading = false;
       });
     },
-    getBookList() {
-      listBook({}).then(response => {
-        this.bookList = response.rows || [];
-      });
+    searchBook(query) {
+      this.searchKeyword = query;
+      if (query) {
+        this.bookSearching = true;
+        searchBookList(query).then(response => {
+          this.bookOptions = response.data || [];
+        }).finally(() => {
+          this.bookSearching = false;
+        });
+      } else {
+        this.bookOptions = [];
+      }
     },
     handleBookSelect(val) {
-      const book = this.bookList.find(b => b.bookId === val);
+      const book = this.bookOptions.find(b => b.bookId === val);
       if (book) {
         this.form.isbn = book.isbn;
         this.form.bookName = book.bookName;
       }
+    },
+    handleQuickAdd() {
+      this.$refs["quickAddForm"].validate(valid => {
+        if (valid) {
+          this.quickAddLoading = true;
+          quickAddBook(this.quickAddForm).then(res => {
+            this.$modal.msgSuccess("教材快速新增成功");
+            this.showQuickAdd = false;
+            const newBook = res.data;
+            this.bookOptions.push(newBook);
+            this.form.textbookId = newBook.bookId;
+            this.form.isbn = newBook.isbn;
+            this.form.bookName = newBook.bookName;
+            this.quickAddForm = { isbn: '', bookName: '', author: '', publisher: '', price: null, courseName: '', infoSource: '1' };
+          }).finally(() => {
+            this.quickAddLoading = false;
+          });
+        }
+      });
     },
     handleQuery() {
       this.queryParams.pageNum = 1;
@@ -184,6 +285,10 @@ export default {
         applyQty: 1,
         purpose: null
       };
+      this.bookOptions = [];
+      this.searchKeyword = '';
+      this.showQuickAdd = false;
+      this.quickAddForm = { isbn: '', bookName: '', author: '', publisher: '', price: null, courseName: '', infoSource: '1' };
       this.resetForm("form");
     },
     cancel() {
@@ -193,10 +298,13 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          this.submitLoading = true;
           addPersonalApply(this.form).then(response => {
             this.$modal.msgSuccess("申请提交成功，等待库管员审核");
             this.open = false;
             this.getList();
+          }).finally(() => {
+            this.submitLoading = false;
           });
         }
       });
@@ -215,6 +323,18 @@ export default {
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("已取消");
+      });
+    },
+    handleReapply(row) {
+      this.reset();
+      this.open = true;
+      this.$nextTick(() => {
+        this.form.textbookId = row.textbookId;
+        this.form.isbn = row.isbn;
+        this.form.bookName = row.bookName;
+        this.form.applyQty = row.applyQty;
+        this.form.purpose = row.purpose;
+        this.bookOptions = row.isbn ? [{ bookId: row.textbookId, isbn: row.isbn, bookName: row.bookName }] : [];
       });
     }
   }

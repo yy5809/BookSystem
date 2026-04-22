@@ -16,6 +16,11 @@
       <el-form-item label="适用课程" prop="courseName">
         <el-input v-model="queryParams.courseName" placeholder="请输入适用课程" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
+      <el-form-item label="信息状态" prop="infoStatus">
+        <el-select v-model="queryParams.infoStatus" placeholder="全部" clearable>
+          <el-option v-for="dict in dict.type.textbook_info_status" :key="dict.value" :label="dict.label" :value="dict.value" />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -38,7 +43,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="bookList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="bookList" @selection-change="handleSelectionChange" border stripe>
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="180" />
@@ -58,14 +63,22 @@
           </el-tag>
         </template>
       </el-table-column>
+      <el-table-column label="信息状态" align="center" prop="infoStatus" width="90">
+        <template slot-scope="scope">
+          <el-tag size="mini" :type="scope.row.infoStatus === '0' ? 'warning' : 'success'">
+            {{ scope.row.infoStatus === '0' ? '待完善' : '已完善' }}
+          </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" align="center" prop="status" width="70">
         <template slot-scope="scope">
           <el-tag size="mini" :type="scope.row.status === '0' ? 'success' : 'danger'">{{ scope.row.status === '0' ? '正常' : '停用' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="160">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['textbook:book:edit']">修改</el-button>
+          <el-button v-if="scope.row.infoStatus === '0'" size="mini" type="text" icon="el-icon-finished" @click="handleComplete(scope.row)" v-hasPermi="['textbook:book:edit']" style="color: #E6A23C;">补充完善</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)" v-hasPermi="['textbook:book:remove']">删除</el-button>
         </template>
       </el-table-column>
@@ -73,7 +86,7 @@
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <el-dialog :title="title" :visible.sync="open" width="700px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="700px" append-to-body :close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-row>
           <el-col :span="12">
@@ -163,21 +176,109 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button type="primary" @click="submitForm" :loading="submitLoading">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="补充完善教材信息" :visible.sync="completeOpen" width="700px" append-to-body :close-on-click-modal="false">
+      <el-alert type="warning" :closable="false" style="margin-bottom: 15px;">
+        <template slot="default">
+          该教材信息不完整，请补充完善。{{ completeForm.infoSource === '1' ? '（来源：教师快速新增）' : completeForm.infoSource === '2' ? '（来源：缺书快速新增）' : completeForm.infoSource === '3' ? '（来源：导入自动新增）' : '' }}
+        </template>
+      </el-alert>
+      <el-form ref="completeForm" :model="completeForm" :rules="completeRules" label-width="100px">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="ISBN">
+              <el-input v-model="completeForm.isbn" disabled />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="教材名称" prop="bookName">
+              <el-input v-model="completeForm.bookName" placeholder="请输入教材名称" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="作者" prop="author">
+              <el-input v-model="completeForm.author" placeholder="请输入作者" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="出版社" prop="publisher">
+              <el-input v-model="completeForm.publisher" placeholder="请输入出版社" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="出版日期" prop="publishDate">
+              <el-date-picker v-model="completeForm.publishDate" type="date" value-format="yyyy-MM-dd" placeholder="选择出版日期" style="width: 100%"></el-date-picker>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="版次" prop="edition">
+              <el-input v-model="completeForm.edition" placeholder="请输入版次" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="定价" prop="price">
+              <el-input-number v-model="completeForm.price" :precision="2" :min="0" :max="9999" style="width: 100%" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="教材类型" prop="textbookType">
+              <el-select v-model="completeForm.textbookType" placeholder="请选择教材类型" style="width: 100%">
+                <el-option label="必修" value="1" />
+                <el-option label="选修" value="2" />
+                <el-option label="参考" value="3" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="适用课程" prop="courseName">
+              <el-input v-model="completeForm.courseName" placeholder="请输入适用课程" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="适用专业" prop="major">
+              <el-input v-model="completeForm.major" placeholder="请输入适用专业" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="适用年级" prop="grade">
+              <el-input v-model="completeForm.grade" placeholder="请输入适用年级" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitComplete" :loading="completeLoading">确认完善</el-button>
+        <el-button @click="completeOpen = false">取 消</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listBook, getBook, addBook, updateBook, delBook } from "@/api/textbook/book";
+import { listBook, getBook, addBook, updateBook, delBook, completeBookInfo } from "@/api/textbook/book";
 
 export default {
   name: "BookManage",
+  dicts: ['textbook_info_status'],
   data() {
     return {
       loading: true,
+      submitLoading: false,
+      completeLoading: false,
       ids: [],
       single: true,
       multiple: true,
@@ -186,6 +287,7 @@ export default {
       bookList: [],
       title: "",
       open: false,
+      completeOpen: false,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -193,11 +295,19 @@ export default {
         bookName: null,
         author: null,
         publisher: null,
-        courseName: null
+        courseName: null,
+        infoStatus: null
       },
       form: {},
+      completeForm: {},
       rules: {
         isbn: [{ required: true, message: "ISBN不能为空", trigger: "blur" }],
+        bookName: [{ required: true, message: "教材名称不能为空", trigger: "blur" }],
+        author: [{ required: true, message: "作者不能为空", trigger: "blur" }],
+        publisher: [{ required: true, message: "出版社不能为空", trigger: "blur" }],
+        textbookType: [{ required: true, message: "请选择教材类型", trigger: "change" }]
+      },
+      completeRules: {
         bookName: [{ required: true, message: "教材名称不能为空", trigger: "blur" }],
         author: [{ required: true, message: "作者不能为空", trigger: "blur" }],
         publisher: [{ required: true, message: "出版社不能为空", trigger: "blur" }],
@@ -206,6 +316,9 @@ export default {
     };
   },
   created() {
+    if (this.$route.query.infoStatus) {
+      this.queryParams.infoStatus = this.$route.query.infoStatus;
+    }
     this.getList();
   },
   methods: {
@@ -256,20 +369,45 @@ export default {
         this.title = "修改教材";
       });
     },
+    handleComplete(row) {
+      getBook(row.bookId).then(response => {
+        this.completeForm = response.data;
+        this.completeOpen = true;
+      });
+    },
+    submitComplete() {
+      this.$refs["completeForm"].validate(valid => {
+        if (valid) {
+          this.completeLoading = true;
+          completeBookInfo(this.completeForm).then(response => {
+            this.$modal.msgSuccess("教材信息补充完善成功");
+            this.completeOpen = false;
+            this.getList();
+          }).finally(() => {
+            this.completeLoading = false;
+          });
+        }
+      });
+    },
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          this.submitLoading = true;
           if (this.form.bookId != null) {
             updateBook(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
+            }).finally(() => {
+              this.submitLoading = false;
             });
           } else {
             addBook(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
+            }).finally(() => {
+              this.submitLoading = false;
             });
           }
         }
@@ -290,3 +428,9 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.el-table .warning-row {
+  background-color: #fdf6ec;
+}
+</style>

@@ -4,12 +4,14 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
+import com.ruoyi.textbook.domain.TbBook;
 import com.ruoyi.textbook.domain.TbInbound;
 import com.ruoyi.textbook.domain.TbInventory;
 import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbStockLog;
+import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbInboundMapper;
 import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
@@ -36,6 +38,9 @@ public class TbInboundServiceImpl implements ITbInboundService {
 
     @Autowired
     private TbInboundMapper tbInboundMapper;
+
+    @Autowired
+    private TbBookMapper tbBookMapper;
 
     @Autowired
     private TbInventoryMapper tbInventoryMapper;
@@ -125,6 +130,17 @@ public class TbInboundServiceImpl implements ITbInboundService {
             stockLog.setRemark("采购入库，入库单号：" + tbInbound.getInboundNo());
             stockLogService.insert(stockLog);
             log.info("【入库处理】已生成库存流水记录");
+
+            if (tbInbound.getBookId() != null) {
+                TbBook bookInfo = tbBookMapper.selectTbBookByBookId(tbInbound.getBookId());
+                if (bookInfo != null && "0".equals(bookInfo.getInfoStatus())) {
+                    bookInfo.setInfoStatus("1");
+                    bookInfo.setUpdateBy(tbInbound.getOperatorName());
+                    bookInfo.setUpdateTime(DateUtils.getNowDate());
+                    tbBookMapper.updateTbBook(bookInfo);
+                    log.info("【入库处理】自动更新教材info_status为已完善, bookId={}", tbInbound.getBookId());
+                }
+            }
         }
         
         log.info("【入库处理】完成! 入库单号={}, 教材={}, 数量={}", tbInbound.getInboundNo(), tbInbound.getBookName(), tbInbound.getInNum());
@@ -138,6 +154,7 @@ public class TbInboundServiceImpl implements ITbInboundService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbInboundById(Long inboundId) {
         TbInbound inbound = tbInboundMapper.selectTbInboundByInboundId(inboundId);
         if (inbound == null) {
@@ -282,6 +299,17 @@ public class TbInboundServiceImpl implements ITbInboundService {
         stockLogService.insert(stockLog);
         log.info("【入库处理】已生成库存流水记录");
 
+        if (tbInbound.getBookId() != null) {
+            TbBook bookInfo = tbBookMapper.selectTbBookByBookId(tbInbound.getBookId());
+            if (bookInfo != null && "0".equals(bookInfo.getInfoStatus())) {
+                bookInfo.setInfoStatus("1");
+                bookInfo.setUpdateBy(operatorName);
+                bookInfo.setUpdateTime(DateUtils.getNowDate());
+                tbBookMapper.updateTbBook(bookInfo);
+                log.info("【入库处理】自动更新教材info_status为已完善, bookId={}", tbInbound.getBookId());
+            }
+        }
+
         if (tbInbound.getPendingId() != null) {
             tbPendingMapper.updateTbPendingStatus(tbInbound.getPendingId(), "2");
         }
@@ -333,6 +361,24 @@ public class TbInboundServiceImpl implements ITbInboundService {
                     }
                 } catch (Exception e) {
                     log.warn("【入库处理】重新开放领书单时异常: {}", e.getMessage());
+                }
+            }
+
+            if (shortage.getRegisterId() != null) {
+                try {
+                    String arrivalMsg = remainingLack <= 0
+                            ? "您登记的缺书《" + tbInbound.getBookName() + "》已全部到货补齐"
+                            : "您登记的缺书《" + tbInbound.getBookName() + "》已部分到货，本次补齐" + allocateQty + "本，剩余缺" + remainingLack + "本";
+                    noticeService.sendNoticeToUser(
+                            shortage.getRegisterId(),
+                            "缺书到货通知",
+                            arrivalMsg,
+                            "4",
+                            shortage.getLackId()
+                    );
+                    log.info("【入库处理】已通知缺书登记人, registerId={}", shortage.getRegisterId());
+                } catch (Exception e) {
+                    log.warn("【入库处理】通知缺书登记人时异常: {}", e.getMessage());
                 }
             }
         }

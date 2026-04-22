@@ -33,7 +33,7 @@
         <template slot="header">
           <span>采购明细</span>
         </template>
-        <el-table :data="purchaseDetails" style="width: 100%">
+        <el-table :data="purchaseDetails" style="width: 100%" border stripe>
           <el-table-column prop="bookName" label="教材名称"></el-table-column>
           <el-table-column prop="isbn" label="ISBN" width="150"></el-table-column>
           <el-table-column prop="quantity" label="数量" width="100"></el-table-column>
@@ -46,7 +46,7 @@
     </el-card>
     
     <!-- 确认发货对话框 -->
-    <el-dialog title="确认发货" :visible.sync="shipmentDialogVisible" width="500px">
+    <el-dialog title="确认发货" :visible.sync="shipmentDialogVisible" width="500px" :close-on-click-modal="false">
       <el-form :model="shipmentForm" :rules="shipmentRules" ref="shipmentForm">
         <el-form-item label="采购单号" prop="purchaseNo">
           <el-input v-model="shipmentForm.purchaseNo" disabled></el-input>

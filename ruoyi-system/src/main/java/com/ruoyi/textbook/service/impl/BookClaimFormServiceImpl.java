@@ -10,6 +10,7 @@ import com.ruoyi.textbook.domain.*;
 import com.ruoyi.textbook.mapper.*;
 import com.ruoyi.textbook.service.IBookClaimFormService;
 import com.ruoyi.textbook.service.ITbStockLogService;
+import com.ruoyi.textbook.service.NoticeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,9 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
 
     @Autowired
     private BookNoticeMapper bookNoticeMapper;
+
+    @Autowired
+    private NoticeService noticeService;
 
     @Override
     public BookClaimForm selectBookClaimFormById(Long formId) {
@@ -194,6 +198,16 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
         bookClaimFormMapper.updateBookClaimForm(form);
 
         updateNoticeProgress(form.getNoticeId());
+
+        try {
+            String bookNames = details.stream()
+                    .map(BookClaimFormDetail::getBookName)
+                    .reduce((a, b) -> a + "、" + b)
+                    .orElse("");
+            noticeService.sendClaimFormOutboundNotice(formId, form.getClassName(), bookNames, totalIssuedQtyParam);
+        } catch (Exception e) {
+            log.warn("【班级领书出库】发送出库通知失败: {}", e.getMessage());
+        }
 
         log.info("【班级领书出库】完成! 领书单号={}, 班级={}, 实发数量={}, 状态={}",
                 form.getFormNo(), form.getClassName(), totalIssuedQtyParam, newStatus);

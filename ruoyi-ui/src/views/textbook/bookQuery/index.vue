@@ -19,7 +19,7 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="bookList" @row-click="handleRowClick" highlight-current-row>
+    <el-table v-loading="loading" :data="bookList" @row-click="handleRowClick" highlight-current-row border stripe>
       <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="200" />
       <el-table-column label="作者" align="center" prop="author" width="100" show-overflow-tooltip />

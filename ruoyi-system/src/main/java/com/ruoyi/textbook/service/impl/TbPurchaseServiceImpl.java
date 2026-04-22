@@ -2,6 +2,7 @@ package com.ruoyi.textbook.service.impl;
 
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
@@ -12,6 +13,8 @@ import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.service.ITbPurchaseService;
 import com.ruoyi.textbook.service.NoticeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,8 @@ import java.util.List;
 @Service
 public class TbPurchaseServiceImpl implements ITbPurchaseService
 {
+    private static final Logger log = LoggerFactory.getLogger(TbPurchaseServiceImpl.class);
+
     @Autowired
     private TbPurchaseMapper tbPurchaseMapper;
 
@@ -80,11 +85,14 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
         if (existing == null) {
             throw new ServiceException("采购单不存在");
         }
-        if ("3".equals(existing.getStatus())) {
+        if ("5".equals(existing.getStatus())) {
             throw new ServiceException("该采购单已入库，禁止修改");
         }
-        if ("2".equals(existing.getStatus())) {
+        if ("4".equals(existing.getStatus())) {
             throw new ServiceException("该采购单已到货，禁止修改");
+        }
+        if ("3".equals(existing.getStatus())) {
+            throw new ServiceException("该订单已出库，禁止修改");
         }
         if ("1".equals(existing.getStatus())) {
             throw new ServiceException("该订单已审核通过，禁止修改");
@@ -94,29 +102,57 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbPurchaseById(Long purchaseId)
     {
         TbPurchase existing = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
         if (existing != null && ("1".equals(existing.getStatus())
                 || "2".equals(existing.getStatus())
-                || "3".equals(existing.getStatus()))) {
-            throw new ServiceException("采购单[" + existing.getPurchaseNo() + "]已审核/已到货/已入库，禁止删除");
+                || "3".equals(existing.getStatus())
+                || "4".equals(existing.getStatus())
+                || "5".equals(existing.getStatus()))) {
+            throw new ServiceException("采购单[" + existing.getPurchaseNo() + "]已审核/已驳回/已出库/已到货/已入库，禁止删除");
         }
+
+        revertShortageStatusOnPurchaseDelete(purchaseId);
+
         return tbPurchaseMapper.deleteTbPurchaseById(purchaseId);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbPurchaseByIds(Long[] purchaseIds)
     {
         for (Long purchaseId : purchaseIds) {
             TbPurchase existing = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
             if (existing != null && ("1".equals(existing.getStatus())
                     || "2".equals(existing.getStatus())
-                    || "3".equals(existing.getStatus()))) {
-                throw new ServiceException("采购单[" + existing.getPurchaseNo() + "]已审核/已到货/已入库，禁止删除");
+                    || "3".equals(existing.getStatus())
+                    || "4".equals(existing.getStatus())
+                    || "5".equals(existing.getStatus()))) {
+                throw new ServiceException("采购单[" + existing.getPurchaseNo() + "]已审核/已驳回/已出库/已到货/已入库，禁止删除");
             }
+            revertShortageStatusOnPurchaseDelete(purchaseId);
         }
         return tbPurchaseMapper.deleteTbPurchaseByIds(purchaseIds);
+    }
+
+    private void revertShortageStatusOnPurchaseDelete(Long purchaseId) {
+        try {
+            List<TbShortage> shortageList = tbShortageMapper.selectTbShortageListByPurchaseId(purchaseId);
+            if (shortageList != null) {
+                for (TbShortage shortage : shortageList) {
+                    if ("1".equals(shortage.getHandleStatus())) {
+                        shortage.setHandleStatus("0");
+                        shortage.setPurchaseId(null);
+                        shortage.setUpdateTime(DateUtils.getNowDate());
+                        tbShortageMapper.updateTbShortage(shortage);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("回退缺书单状态异常: {}", e.getMessage());
+        }
     }
 
     @Override
@@ -180,7 +216,9 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
                     shortage.setIsbn(detail.getIsbn());
                     shortage.setLackNum(shortageQuantity);
                     shortage.setHandleStatus("0");
-                    shortage.setCreateTime(DateUtils.getNowDate());
+                    shortage.setRegisterId(SecurityUtils.getUserId());
+                    shortage.setSource("1");
+                    shortage.setSourceId(purchaseId);
                     shortage.setUpdateTime(DateUtils.getNowDate());
                     tbShortageMapper.insertTbShortage(shortage);
 
@@ -206,9 +244,12 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
         if (purchase == null) {
             throw new ServiceException("采购单不存在");
         }
+        if (!"1".equals(purchase.getStatus()) && !"4".equals(purchase.getStatus())) {
+            throw new ServiceException("采购单状态不允许开票操作，当前状态：" + purchase.getStatus());
+        }
 
         purchase.setRejectReason(invoiceNo);
-        purchase.setStatus("3");
+        purchase.setStatus("5");
         purchase.setUpdateTime(DateUtils.getNowDate());
         return tbPurchaseMapper.updateTbPurchase(purchase);
     }

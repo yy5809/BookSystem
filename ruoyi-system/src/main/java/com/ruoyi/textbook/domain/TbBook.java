@@ -56,6 +56,11 @@ public class TbBook extends BaseEntity {
     private String status;
     private String delFlag;
 
+    @Excel(name = "信息状态", readConverterExp = "0=待完善,1=已完善")
+    private String infoStatus;
+
+    private String infoSource;
+
     public Long getBookId() { return bookId; }
     public void setBookId(Long bookId) { this.bookId = bookId; }
     public String getBookName() { return bookName; }
@@ -100,6 +105,10 @@ public class TbBook extends BaseEntity {
     public void setStatus(String status) { this.status = status; }
     public String getDelFlag() { return delFlag; }
     public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
+    public String getInfoStatus() { return infoStatus; }
+    public void setInfoStatus(String infoStatus) { this.infoStatus = infoStatus; }
+    public String getInfoSource() { return infoSource; }
+    public void setInfoSource(String infoSource) { this.infoSource = infoSource; }
 
     @Override
     public String toString() {

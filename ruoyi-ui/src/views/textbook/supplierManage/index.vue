@@ -23,7 +23,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="supplierList">
+    <el-table v-loading="loading" :data="supplierList" border stripe>
       <el-table-column label="供应商编码" align="center" prop="supplierCode" width="130" />
       <el-table-column label="供应商名称" align="center" prop="supplierName" min-width="180" show-overflow-tooltip />
       <el-table-column label="联系人" align="center" prop="contactPerson" width="100" />
@@ -47,7 +47,7 @@
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <el-dialog :title="title" :visible.sync="open" width="550px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="550px" append-to-body :close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="供应商编码" prop="supplierCode">
           <el-input v-model="form.supplierCode" placeholder="请输入供应商编码" />

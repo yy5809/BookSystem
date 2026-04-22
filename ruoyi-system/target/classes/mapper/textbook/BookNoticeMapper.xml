@@ -89,12 +89,12 @@
             update_time = sysdate(),
             <if test="remark != null">remark = #{remark},</if>
         </set>
-        where notice_id = #{noticeId}
+        where notice_id = #{noticeId} and del_flag = '0'
     </update>
 
     <update id="updateNoticeStatus">
         update textbook_notice set status = #{status}, update_time = sysdate()
-        where notice_id = #{noticeId}
+        where notice_id = #{noticeId} and del_flag = '0'
     </update>
 
     <update id="updateIssuedClasses">
@@ -104,7 +104,7 @@
                 <when test="issuedClasses >= total_classes and total_classes > 0">status = '3'</when>
             </choose>,
             update_time = sysdate()
-        where notice_id = #{noticeId}
+        where notice_id = #{noticeId} and del_flag = '0'
     </update>
 
     <delete id="deleteBookNoticeById" parameterType="Long">

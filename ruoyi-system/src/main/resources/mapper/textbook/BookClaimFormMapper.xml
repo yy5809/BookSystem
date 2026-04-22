@@ -96,12 +96,12 @@
             update_time = sysdate(),
             <if test="remark != null">remark = #{remark},</if>
         </set>
-        where form_id = #{formId}
+        where form_id = #{formId} and del_flag = '0'
     </update>
 
     <update id="updateFormStatus">
         update textbook_claim_form set status = #{status}, update_time = sysdate()
-        where form_id = #{formId}
+        where form_id = #{formId} and del_flag = '0'
     </update>
 
     <delete id="deleteBookClaimFormById" parameterType="Long">

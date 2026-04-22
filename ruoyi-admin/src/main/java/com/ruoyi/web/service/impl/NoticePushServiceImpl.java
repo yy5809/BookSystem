@@ -57,6 +57,20 @@ public class NoticePushServiceImpl implements INoticePushService {
         NoticeWebSocket.sendToRole("warehouse_manager", notice);
     }
 
+    @Override
+    public void pushToUser(Long userId, String title, String content, String bizType, Long bizId) {
+        JSONObject notice = buildNotice(title, "primary", bizType, content);
+        notice.put("bizId", bizId);
+        NoticeWebSocket.sendToUser(userId, notice);
+    }
+
+    @Override
+    public void pushToRole(String roleKey, String title, String content, String bizType, Long bizId) {
+        JSONObject notice = buildNotice(title, "primary", bizType, content);
+        notice.put("bizId", bizId);
+        NoticeWebSocket.sendToRole(roleKey, notice);
+    }
+
     private JSONObject buildNotice(String title, String type, String bizType, String content) {
         JSONObject notice = new JSONObject();
         notice.put("noticeId", UUID.randomUUID().toString());

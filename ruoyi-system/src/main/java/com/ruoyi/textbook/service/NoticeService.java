@@ -18,6 +18,9 @@ public class NoticeService {
     @Autowired
     private SysUserMapper sysUserMapper;
 
+    @Autowired(required = false)
+    private INoticePushService noticePushService;
+
     public void sendOrderApproveNotice(Long userId, String bookName, String status, String reason, Long orderId) {
         SysNotice notice = new SysNotice();
         notice.setNoticeTitle("领书单审核通知");
@@ -27,6 +30,7 @@ public class NoticeService {
         notice.setBizType("1");
         notice.setReadStatus("0");
         notice.setTargetUserId(userId);
+        notice.setUserType("1");
 
         String content = "你的《" + bookName + "》领书单已" + ("1".equals(status) ? "通过" : "驳回");
         if (!"1".equals(status) && reason != null && !reason.isEmpty()) {
@@ -62,6 +66,7 @@ public class NoticeService {
                 notice.setBizType("4");
                 notice.setReadStatus("0");
                 notice.setTargetUserId(managerId);
+                notice.setUserType("2");
                 notice.setNoticeContent(content.toString());
                 sysNoticeService.insertNotice(notice);
             }
@@ -82,6 +87,7 @@ public class NoticeService {
                 notice.setBizType("3");
                 notice.setReadStatus("0");
                 notice.setTargetUserId(managerId);
+                notice.setUserType("2");
                 notice.setNoticeContent(content);
                 sysNoticeService.insertNotice(notice);
             }
@@ -96,6 +102,7 @@ public class NoticeService {
         notice.setTargetUserId(supplierId);
         notice.setBizType("5");
         notice.setReadStatus("0");
+        notice.setUserType("3");
 
         String content = "【进书确认】\n您的供货《" + bookName + "》" + quantity + "本已完成入库。\n入库单号：" + inboundNo + "\n\n感谢您的配合！";
         notice.setNoticeContent(content);
@@ -117,6 +124,7 @@ public class NoticeService {
                 notice.setBizType("6");
                 notice.setReadStatus("0");
                 notice.setTargetUserId(managerId);
+                notice.setUserType("2");
                 notice.setNoticeContent(content);
                 sysNoticeService.insertNotice(notice);
             }
@@ -137,6 +145,7 @@ public class NoticeService {
                 notice.setBizType("2");
                 notice.setReadStatus("0");
                 notice.setTargetUserId(managerId);
+                notice.setUserType("2");
                 notice.setNoticeContent(content);
                 sysNoticeService.insertNotice(notice);
             }
@@ -144,6 +153,7 @@ public class NoticeService {
     }
 
     public void sendNoticeToRole(String roleKey, String title, String content, String bizType, Long bizId) {
+        String userType = "warehouse".equals(roleKey) ? "2" : "1";
         List<Long> userIds = sysUserMapper.selectUserIdsByRoleKey(roleKey);
         if (userIds != null && !userIds.isEmpty()) {
             for (Long userId : userIds) {
@@ -155,10 +165,13 @@ public class NoticeService {
                 notice.setBizType(bizType);
                 notice.setReadStatus("0");
                 notice.setTargetUserId(userId);
+                notice.setUserType(userType);
                 notice.setNoticeContent(content);
                 sysNoticeService.insertNotice(notice);
             }
         }
+
+        pushToRoleViaWebSocket(roleKey, title, content, bizType, bizId);
     }
 
     public void sendNoticeToUser(Long userId, String title, String content, String bizType, Long bizId) {
@@ -170,24 +183,33 @@ public class NoticeService {
         notice.setBizType(bizType);
         notice.setReadStatus("0");
         notice.setTargetUserId(userId);
+        notice.setUserType("1");
         notice.setNoticeContent(content);
 
         sysNoticeService.insertNotice(notice);
+
+        pushToUserViaWebSocket(userId, title, content, bizType, bizId);
     }
 
     public void sendClaimFormOutboundNotice(Long formId, String className, String bookNames, Integer qty) {
-        SysNotice notice = new SysNotice();
-        notice.setNoticeTitle("班级领书出库通知");
-        notice.setNoticeType("1");
-        notice.setStatus("0");
-        notice.setBizId(formId);
-        notice.setBizType("7");
-        notice.setReadStatus("0");
-
         String content = "【班级领书出库】\n班级：" + className + "\n教材：" + bookNames + "\n数量：" + qty + "本\n\n领书单已确认出库，请核对库存。";
-        notice.setNoticeContent(content);
 
-        sysNoticeService.insertNotice(notice);
+        List<Long> warehouseManagerIds = sysUserMapper.selectUserIdsByRoleKey("warehouse");
+        if (warehouseManagerIds != null && !warehouseManagerIds.isEmpty()) {
+            for (Long managerId : warehouseManagerIds) {
+                SysNotice notice = new SysNotice();
+                notice.setNoticeTitle("班级领书出库通知");
+                notice.setNoticeType("1");
+                notice.setStatus("0");
+                notice.setBizId(formId);
+                notice.setBizType("7");
+                notice.setReadStatus("0");
+                notice.setTargetUserId(managerId);
+                notice.setUserType("2");
+                notice.setNoticeContent(content);
+                sysNoticeService.insertNotice(notice);
+            }
+        }
     }
 
     public void sendNoticePublishNotice(Long noticeId, String semester, Integer classCount) {
@@ -204,6 +226,7 @@ public class NoticeService {
                 notice.setBizType("8");
                 notice.setReadStatus("0");
                 notice.setTargetUserId(managerId);
+                notice.setUserType("2");
                 notice.setNoticeContent(content);
                 sysNoticeService.insertNotice(notice);
             }
@@ -225,6 +248,7 @@ public class NoticeService {
                 notice.setBizType("9");
                 notice.setReadStatus("0");
                 notice.setTargetUserId(managerId);
+                notice.setUserType("2");
                 notice.setNoticeContent(content);
                 sysNoticeService.insertNotice(notice);
             }
@@ -254,5 +278,25 @@ public class NoticeService {
     // 统计未读通知数
     public int countUnreadNoticesBySupplierId(Long supplierId) {
         return sysNoticeService.countUnreadNoticesBySupplierId(supplierId);
+    }
+
+    private void pushToUserViaWebSocket(Long userId, String title, String content, String bizType, Long bizId) {
+        if (noticePushService == null) return;
+        try {
+            noticePushService.pushToUser(userId, title, content, bizType, bizId);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(NoticeService.class)
+                    .warn("WebSocket推送失败(userId={}): {}", userId, e.getMessage());
+        }
+    }
+
+    private void pushToRoleViaWebSocket(String roleKey, String title, String content, String bizType, Long bizId) {
+        if (noticePushService == null) return;
+        try {
+            noticePushService.pushToRole(roleKey, title, content, bizType, bizId);
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(NoticeService.class)
+                    .warn("WebSocket推送失败(roleKey={}): {}", roleKey, e.getMessage());
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.service.ITbShortageService;
@@ -35,6 +36,9 @@ public class TbShortageController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(TbShortage tbShortage)
     {
+        if (SecurityUtils.hasRole("teacher")) {
+            tbShortage.setRegisterId(SecurityUtils.getUserId());
+        }
         startPage();
         List<TbShortage> list = tbShortageService.selectTbShortageList(tbShortage);
         return getDataTable(list);
@@ -69,6 +73,7 @@ public class TbShortageController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody TbShortage tbShortage)
     {
+        tbShortage.setRegisterId(SecurityUtils.getUserId());
         return toAjax(tbShortageService.insertTbShortage(tbShortage));
     }
 

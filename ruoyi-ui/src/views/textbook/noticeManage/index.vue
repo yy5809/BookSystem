@@ -55,10 +55,10 @@
         <el-table-column label="创建时间" prop="createTime" width="160" align="center"/>
         <el-table-column label="操作" fixed="right" align="center" width="280">
           <template slot-scope="scope">
-            <el-button v-if="scope.row.status === '0'" size="mini" type="success" icon="el-icon-upload2" @click="handlePublish(scope.row)">发布</el-button>
-            <el-button v-if="scope.row.status !== '0'" size="mini" type="warning" icon="el-icon-document" @click="handleViewForms(scope.row)">查看领书单</el-button>
-            <el-button v-if="scope.row.status === '0'" size="mini" type="primary" icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
-            <el-button v-if="scope.row.status === '0'" size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
+            <el-button v-if="scope.row.status === '0'" v-hasPermi="['textbook:noticeManage:edit']" size="mini" type="success" icon="el-icon-upload2" @click="handlePublish(scope.row)">发布</el-button>
+            <el-button v-if="scope.row.status !== '0'" v-hasPermi="['textbook:noticeManage:list']" size="mini" type="warning" icon="el-icon-document" @click="handleViewForms(scope.row)">查看领书单</el-button>
+            <el-button v-if="scope.row.status === '0'" v-hasPermi="['textbook:noticeManage:edit']" size="mini" type="primary" icon="el-icon-edit" @click="handleUpdate(scope.row)">编辑</el-button>
+            <el-button v-if="scope.row.status === '0'" v-hasPermi="['textbook:noticeManage:remove']" size="mini" type="danger" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -133,7 +133,7 @@
     </el-dialog>
     
     <!-- 添加领书明细弹窗 -->
-    <el-dialog title="添加领书明细" :visible.sync="detailDialogVisible" width="700px" append-to-body>
+    <el-dialog title="添加领书明细" :visible.sync="detailDialogVisible" width="700px" append-to-body :close-on-click-modal="false">
       <el-form ref="detailForm" :model="detailForm" :rules="detailRules" label-width="100px">
         <el-form-item label="学院" prop="collegeId">
           <el-select v-model="detailForm.collegeId" placeholder="选择学院" style="width: 100%" @change="handleCollegeChange">

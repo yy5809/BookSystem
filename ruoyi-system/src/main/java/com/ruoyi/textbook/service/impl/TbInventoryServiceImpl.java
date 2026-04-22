@@ -59,17 +59,14 @@ public class TbInventoryServiceImpl implements ITbInventoryService
     @Override
     public List<TbInventory> selectWarningList()
     {
-        TbInventory inventory = new TbInventory();
-        inventory.setStockStatus("warning");
-        List<TbInventory> list = tbInventoryMapper.selectTbInventoryList(inventory);
-        // 确保返回的列表包含所有预警和短缺的库存
-        List<TbInventory> allInventory = tbInventoryMapper.selectTbInventoryList(new TbInventory());
+        TbInventory query = new TbInventory();
+        List<TbInventory> allInventory = tbInventoryMapper.selectTbInventoryList(query);
         List<TbInventory> warningList = new java.util.ArrayList<>();
         for (TbInventory item : allInventory) {
             if (item.getStockNum() <= 0) {
                 item.setStockStatus("shortage");
                 warningList.add(item);
-            } else if (item.getStockNum() <= item.getWarningNum()) {
+            } else if (item.getWarningNum() != null && item.getStockNum() <= item.getWarningNum()) {
                 item.setStockStatus("warning");
                 warningList.add(item);
             }
@@ -104,6 +101,7 @@ public class TbInventoryServiceImpl implements ITbInventoryService
      * 增加库存数量（带校验）
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int increaseStock(Long bookId, Integer quantity)
     {
         if (bookId == null || quantity == null || quantity <= 0) {

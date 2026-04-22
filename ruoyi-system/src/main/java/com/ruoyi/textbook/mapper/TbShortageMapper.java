@@ -69,4 +69,6 @@ public interface TbShortageMapper
     public List<TbShortage> selectTbShortageListByBookId(Long bookId);
 
     public List<TbShortage> selectTbShortageListByIsbn(String isbn);
+
+    public List<TbShortage> selectTbShortageListByPurchaseId(Long purchaseId);
 }

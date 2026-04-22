@@ -55,12 +55,11 @@ public class ResourcesConfig implements WebMvcConfigurer
     public CorsFilter corsFilter()
     {
         CorsConfiguration config = new CorsConfiguration();
-        // 设置访问源地址
-        config.addAllowedOriginPattern("*");
-        // 设置访问源请求头
+        config.addAllowedOriginPattern("http://localhost:*");
+        config.addAllowedOriginPattern("http://127.0.0.1:*");
         config.addAllowedHeader("*");
-        // 设置访问源请求方法
         config.addAllowedMethod("*");
+        config.setAllowCredentials(true);
         // 有效期 1800秒
         config.setMaxAge(1800L);
         // 添加映射路径，拦截一切请求

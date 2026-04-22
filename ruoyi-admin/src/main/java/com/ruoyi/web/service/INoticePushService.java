@@ -10,4 +10,8 @@ public interface INoticePushService {
     void pushInboundNotice(Long supplierId, String purchaseNo, String bookName);
 
     void pushShortageToManager(String isbn, int qty);
+
+    void pushToUser(Long userId, String title, String content, String bizType, Long bizId);
+
+    void pushToRole(String roleKey, String title, String content, String bizType, Long bizId);
 }

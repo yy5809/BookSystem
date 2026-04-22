@@ -49,4 +49,8 @@ public interface TbBookMapper
      * 根据教材名称模糊查询教材列表
      */
     public List<TbBook> selectTbBookListByName(String bookName);
+
+    public List<TbBook> searchTbBookList(String query);
+
+    public int countIncompleteBook();
 }

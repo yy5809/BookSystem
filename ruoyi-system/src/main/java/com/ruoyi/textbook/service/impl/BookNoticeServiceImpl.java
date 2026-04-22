@@ -116,7 +116,7 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int publishNotice(Long noticeId) {
+    public synchronized int publishNotice(Long noticeId) {
         BookNotice notice = bookNoticeMapper.selectBookNoticeById(noticeId);
         if (notice == null) {
             throw new ServiceException("领书通知不存在");
@@ -162,7 +162,6 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
     }
     
     // 按班级生成领书单
-    @Transactional(rollbackFor = Exception.class)
     private List<BookClaimForm> generateClaimFormsByClass(BookNotice notice) {
         // 先检查是否已存在领书单
         List<BookClaimForm> existingForms = bookClaimFormMapper.selectBookClaimFormsByNoticeId(notice.getNoticeId());

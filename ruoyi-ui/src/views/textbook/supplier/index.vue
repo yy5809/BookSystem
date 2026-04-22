@@ -29,7 +29,7 @@
         <span>最近采购单</span>
         <el-button type="primary" size="small" @click="goToPurchaseList">查看全部</el-button>
       </template>
-      <el-table :data="recentPurchases" style="width: 100%">
+      <el-table :data="recentPurchases" style="width: 100%" border stripe>
         <el-table-column prop="purchaseNo" label="采购单号" width="180"></el-table-column>
         <el-table-column prop="purchaseStatus" label="状态">
           <template slot-scope="scope">

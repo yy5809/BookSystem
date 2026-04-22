@@ -67,6 +67,7 @@ public class TbSupplierController extends BaseController {
         return toAjax(tbSupplierService.deleteTbSupplierByIds(supplierIds));
     }
 
+    @PreAuthorize("@ss.hasPermi('textbook:supplier:list')")
     @GetMapping("/options")
     public AjaxResult options() {
         TbSupplier query = new TbSupplier();

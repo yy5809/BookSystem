@@ -60,7 +60,7 @@
         UPDATE textbook_inventory_check SET 
             check_status = #{param2},
             actual_end_time = #{param3}
-        WHERE check_id = #{param1}
+        WHERE check_id = #{param1} AND del_flag = '0'
     </update>
 
     <delete id="deleteTbInventoryCheckByIds" parameterType="Long">

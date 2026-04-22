@@ -31,7 +31,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="applyList" :row-key="row => row.applyId">
+    <el-table v-loading="loading" :data="applyList" :row-key="row => row.applyId" border stripe>
       <el-table-column label="申请编号" align="center" prop="applyNo" width="180" />
       <el-table-column label="申请人" align="center" prop="teacherName" width="100" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip />
@@ -57,7 +57,7 @@
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <el-dialog title="提交领书申请" :visible.sync="open" width="600px" append-to-body>
+    <el-dialog title="提交领书申请" :visible.sync="open" width="600px" append-to-body :close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-row>
           <el-col :span="24">
@@ -101,7 +101,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="审核申请" :visible.sync="auditOpen" width="550px" append-to-body>
+    <el-dialog title="审核申请" :visible.sync="auditOpen" width="550px" append-to-body :close-on-click-modal="false">
       <el-form ref="auditForm" :model="auditForm" :rules="auditRules" label-width="100px">
         <el-form-item label="申请信息">
           <div style="padding: 10px; background: #f5f7fa; border-radius: 4px; margin-bottom: 15px;">

@@ -44,7 +44,7 @@ public class PurchaseImportController extends BaseController {
         return sb.toString();
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:import:excel')")
+    @PreAuthorize("@ss.hasPermi('textbook:import:excel') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "采购单Excel导入", businessType = BusinessType.IMPORT)
     @PostMapping("/excel")
     public AjaxResult importExcel(@RequestParam("file") MultipartFile file) throws Exception {

@@ -1,8 +1,8 @@
 <template>
   <div class="dashboard-container">
-    <el-row :gutter="20">
-      <el-col :span="6" :xs="24">
-        <div class="dashboard-card">
+    <el-row :gutter="20" type="flex" justify="space-between">
+      <el-col :span="4" :xs="12">
+        <div class="dashboard-card" @click="$router.push({ path: '/textbook/bookManage', query: { infoStatus: '0' } })" style="cursor: pointer;">
           <div class="card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
             <i class="el-icon-warning-outline"></i>
           </div>
@@ -13,7 +13,19 @@
           </div>
         </div>
       </el-col>
-      <el-col :span="6" :xs="24">
+      <el-col :span="4" :xs="12">
+        <div class="dashboard-card" @click="$router.push({ path: '/textbook/bookManage', query: { infoStatus: '0' } })" style="cursor: pointer;">
+          <div class="card-icon" style="background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);">
+            <i class="el-icon-edit-outline"></i>
+          </div>
+          <div class="card-info">
+            <div class="card-title">待完善教材</div>
+            <div class="card-number">{{ stats.incompleteBookCount }}</div>
+            <div class="card-desc">信息不完整</div>
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="4" :xs="12">
         <div class="dashboard-card">
           <div class="card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
             <i class="el-icon-s-check"></i>
@@ -25,7 +37,7 @@
           </div>
         </div>
       </el-col>
-      <el-col :span="6" :xs="24">
+      <el-col :span="4" :xs="12">
         <div class="dashboard-card">
           <div class="card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
             <i class="el-icon-box"></i>
@@ -37,15 +49,15 @@
           </div>
         </div>
       </el-col>
-      <el-col :span="6" :xs="24">
-        <div class="dashboard-card">
-          <div class="card-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-            <i class="el-icon-bell"></i>
+      <el-col :span="4" :xs="12">
+        <div class="dashboard-card" @click="$router.push('/textbook/shortage')" style="cursor: pointer;">
+          <div class="card-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <i class="el-icon-warning-outline"></i>
           </div>
           <div class="card-info">
-            <div class="card-title">未读通知</div>
-            <div class="card-number">{{ stats.unreadNotice }}</div>
-            <div class="card-desc">条新通知</div>
+            <div class="card-title">待处理缺书</div>
+            <div class="card-number">{{ stats.pendingShortageCount }}</div>
+            <div class="card-desc">未处理登记</div>
           </div>
         </div>
       </el-col>
@@ -58,7 +70,7 @@
             <span>库存预警列表</span>
             <el-button style="float: right; padding: 3px 0" type="text" @click="$router.push('/textbook/inventory')">查看全部</el-button>
           </div>
-          <el-table :data="warningList" size="small" v-loading="loading" max-height="300">
+          <el-table :data="warningList" size="small" v-loading="loading" max-height="300" border stripe>
             <el-table-column label="ISBN" prop="isbn" width="140" />
             <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip />
             <el-table-column label="当前库存" prop="stockNum" width="90" align="center">
@@ -110,6 +122,8 @@
 import { getInventoryWarningList } from "@/api/textbook/inventory";
 import { listPersonalApply } from "@/api/textbook/personalApply";
 import { listNotice } from "@/api/textbook/notice";
+import { countIncompleteBook } from "@/api/textbook/book";
+import { getShortageList } from "@/api/textbook/shortage";
 
 export default {
   name: "WarehouseDashboard",
@@ -118,8 +132,10 @@ export default {
       loading: false,
       stats: {
         warningCount: 0,
+        incompleteBookCount: 0,
         pendingApplyCount: 0,
         pendingPurchaseCount: 0,
+        pendingShortageCount: 0,
         unreadNotice: 0
       },
       warningList: []
@@ -141,6 +157,14 @@ export default {
 
       listNotice({ readStatus: '0', pageNum: 1, pageSize: 1 }).then(response => {
         this.stats.unreadNotice = response.total || 0;
+      }).catch(() => {});
+
+      countIncompleteBook().then(response => {
+        this.stats.incompleteBookCount = response.data || 0;
+      }).catch(() => {});
+
+      getShortageList({ handleStatus: '0', pageNum: 1, pageSize: 1 }).then(response => {
+        this.stats.pendingShortageCount = response.total || 0;
       }).catch(() => {});
     }
   }

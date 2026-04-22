@@ -323,18 +323,20 @@ export default {
     },
     handlePrintOutbound() {
       const d = this.detailData
+      const e = this.$options.filters?.escapeHtml || (s => s || '-')
+      const esc = (v) => { const div = document.createElement('div'); div.textContent = v || '-'; return div.innerHTML }
       const printContent = `
         <div style="font-family: 'Microsoft YaHei', sans-serif; padding: 30px; max-width: 600px; margin: 0 auto;">
           <h2 style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px;">教材出库单（领书确认单）</h2>
           <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-            <tr><td style="border:1px solid #ddd; padding:8px; width:120px; background:#f5f5f5;">出库单号</td><td style="border:1px solid #ddd; padding:8px;">${d.outboundNo || '-'}</td></tr>
-            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">出库时间</td><td style="border:1px solid #ddd; padding:8px;">${d.outTime || '-'}</td></tr>
-            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">教材名称</td><td style="border:1px solid #ddd; padding:8px;"><strong>${d.bookName || '-'}</strong></td></tr>
-            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">ISBN</td><td style="border:1px solid #ddd; padding:8px;">${d.isbn || '-'}</td></tr>
+            <tr><td style="border:1px solid #ddd; padding:8px; width:120px; background:#f5f5f5;">出库单号</td><td style="border:1px solid #ddd; padding:8px;">${esc(d.outboundNo)}</td></tr>
+            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">出库时间</td><td style="border:1px solid #ddd; padding:8px;">${esc(d.outTime)}</td></tr>
+            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">教材名称</td><td style="border:1px solid #ddd; padding:8px;"><strong>${esc(d.bookName)}</strong></td></tr>
+            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">ISBN</td><td style="border:1px solid #ddd; padding:8px;">${esc(d.isbn)}</td></tr>
             <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">出库数量</td><td style="border:1px solid #ddd; padding:8px;"><strong>${d.outNum || 0} 本</strong></td></tr>
-            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">领书人</td><td style="border:1px solid #ddd; padding:8px;">${d.userName || '-'}</td></tr>
-            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">部门/班级</td><td style="border:1px solid #ddd; padding:8px;">${d.deptName || '-'}</td></tr>
-            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">操作人</td><td style="border:1px solid #ddd; padding:8px;">${d.operatorName || '-'}</td></tr>
+            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">领书人</td><td style="border:1px solid #ddd; padding:8px;">${esc(d.userName)}</td></tr>
+            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">部门/班级</td><td style="border:1px solid #ddd; padding:8px;">${esc(d.deptName)}</td></tr>
+            <tr><td style="border:1px solid #ddd; padding:8px; background:#f5f5f5;">操作人</td><td style="border:1px solid #ddd; padding:8px;">${esc(d.operatorName)}</td></tr>
           </table>
           <div style="margin-top: 40px;">
             <p>领书人签字：_______________________ &nbsp;&nbsp;&nbsp;&nbsp; 日期：${new Date().toLocaleDateString()}</p>

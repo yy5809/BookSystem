@@ -19,10 +19,6 @@ public interface TbInventoryMapper
 
     public int deleteTbInventoryByIds(Long[] inventoryIds);
 
-    public int updateInventoryQuantity(Long bookId, Integer quantity);
-
-    public int updateInventoryQuantityWithCheck(Long bookId, Integer expectedStock, Integer changeNum);
-
     public int selectStockNumByBookId(Long bookId);
 
     public int selectVersionByBookId(Long bookId);

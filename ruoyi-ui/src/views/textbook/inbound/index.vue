@@ -20,7 +20,7 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="inboundList">
+    <el-table v-loading="loading" :data="inboundList" border stripe>
       <el-table-column type="index" label="序号" align="center" width="55" />
       <el-table-column label="采购单号" align="center" prop="purchaseNo" width="200" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="180" />
@@ -50,7 +50,7 @@
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <el-dialog title="确认入库" :visible.sync="inboundOpen" width="550px" append-to-body>
+    <el-dialog title="确认入库" :visible.sync="inboundOpen" width="550px" append-to-body :close-on-click-modal="false">
       <el-alert title="请核对实物后确认入库，系统将自动增加库存并生成流水记录" type="warning" :closable="false" show-icon style="margin-bottom: 15px;" />
       <el-descriptions :column="1" border>
         <el-descriptions-item label="采购单号">{{ inboundForm.purchaseNo }}</el-descriptions-item>

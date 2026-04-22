@@ -33,7 +33,7 @@
         </el-form-item>
       </el-form>
       
-      <el-table v-loading="loading" :data="purchaseList" style="width: 100%">
+      <el-table v-loading="loading" :data="purchaseList" style="width: 100%" border stripe>
         <el-table-column prop="purchaseNo" label="采购单号" width="180"></el-table-column>
         <el-table-column prop="deptName" label="申请部门" width="150"></el-table-column>
         <el-table-column prop="purchaseStatus" label="状态">
@@ -46,7 +46,7 @@
         <el-table-column prop="createTime" label="创建时间" width="180"></el-table-column>
         <el-table-column label="操作" width="150">
           <template slot-scope="scope">
-            <el-button type="primary" size="small" @click="confirmShipment(scope.row)" v-if="scope.row.purchaseStatus === '1'">
+            <el-button type="primary" size="small" @click="confirmShipment(scope.row)" v-if="scope.row.purchaseStatus === '1'" v-hasPermi="['textbook:supplier:ship']">
               确认发货
             </el-button>
             <el-button type="info" size="small" @click="viewPurchaseDetail(scope.row)">
@@ -66,7 +66,7 @@
     </el-card>
     
     <!-- 确认发货对话框 -->
-    <el-dialog title="确认发货" :visible.sync="shipmentDialogVisible" width="500px">
+    <el-dialog title="确认发货" :visible.sync="shipmentDialogVisible" width="500px" :close-on-click-modal="false">
       <el-form :model="shipmentForm" :rules="shipmentRules" ref="shipmentForm">
         <el-form-item label="采购单号" prop="purchaseNo">
           <el-input v-model="shipmentForm.purchaseNo" disabled></el-input>
@@ -83,7 +83,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="shipmentDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitShipment">确认发货</el-button>
+        <el-button type="primary" @click="submitShipment" :loading="submitLoading">确认发货</el-button>
       </div>
     </el-dialog>
   </div>
@@ -107,6 +107,7 @@ export default {
         purchaseStatus: undefined
       },
       shipmentDialogVisible: false,
+      submitLoading: false,
       shipmentForm: {
         purchaseId: '',
         purchaseNo: '',
@@ -183,12 +184,15 @@ export default {
     submitShipment() {
       this.$refs.shipmentForm.validate((valid) => {
         if (valid) {
+          this.submitLoading = true
           confirmShipment(this.shipmentForm).then(response => {
             this.$message.success('发货确认成功')
             this.shipmentDialogVisible = false
             this.getList()
           }).catch(() => {
             this.$message.error('发货确认失败')
+          }).finally(() => {
+            this.submitLoading = false
           })
         }
       })

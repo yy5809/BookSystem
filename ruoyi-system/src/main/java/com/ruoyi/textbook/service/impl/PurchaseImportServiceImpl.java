@@ -9,7 +9,9 @@ import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.domain.dto.TbPurchaseImportDTO;
+import com.ruoyi.textbook.domain.TbInventory;
 import com.ruoyi.textbook.mapper.TbBookMapper;
+import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.system.mapper.SysDictDataMapper;
@@ -32,6 +34,9 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
 
     @Autowired
     private TbBookMapper tbBookMapper;
+
+    @Autowired
+    private TbInventoryMapper tbInventoryMapper;
 
     @Autowired
     private TbPurchaseMapper tbPurchaseMapper;
@@ -62,6 +67,8 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
 
         List<TbPurchaseImportDTO> successList = new ArrayList<>();
         List<TbPurchaseImportDTO> failList = new ArrayList<>();
+        List<TbPurchaseImportDTO> autoCreatedList = new ArrayList<>();
+        AtomicInteger autoCreatedCount = new AtomicInteger(0);
 
         // 数据校验阶段
         log.info("【Excel导入】开始数据校验阶段");
@@ -117,10 +124,25 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
                 // 检查教材是否存在
                 TbBook book = tbBookMapper.selectTbBookByIsbn(dto.getIsbn());
                 if (book == null) {
-                    dto.setErrorMsg("ISBN对应的教材不存在于系统中");
-                    failList.add(dto);
-                    log.warn("【Excel导入】第{}行教材不存在: ISBN={}", dto.getRowIndex(), dto.getIsbn());
-                    continue;
+                    book = new TbBook();
+                    book.setIsbn(dto.getIsbn());
+                    book.setBookName(dto.getBookName());
+                    book.setInfoStatus("0");
+                    book.setInfoSource("3");
+                    book.setStatus("0");
+                    book.setCreateBy(operatorName);
+                    book.setCreateTime(DateUtils.getNowDate());
+                    tbBookMapper.insertTbBook(book);
+
+                    TbInventory stock = new TbInventory();
+                    stock.setBookId(book.getBookId());
+                    stock.setStockNum(0);
+                    stock.setWarningNum(10);
+                    tbInventoryMapper.insertTbInventory(stock);
+
+                    autoCreatedCount.incrementAndGet();
+                    autoCreatedList.add(dto);
+                    log.info("【Excel导入】自动创建教材: ISBN={}, 书名={}", dto.getIsbn(), dto.getBookName());
                 }
 
                 // 创建采购明细
@@ -169,8 +191,8 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         }
 
         // 构建结果
-        log.info("【Excel导入】完成! 总记录数={}, 成功={}, 失败={}, 采购单号={}", dataList.size(), detailSuccessCount, failList.size(), purchaseNo);
-        return buildResult(dataList.size(), detailSuccessCount, failList, purchaseNo);
+        log.info("【Excel导入】完成! 总记录数={}, 成功={}, 失败={}, 自动新增={}, 采购单号={}", dataList.size(), detailSuccessCount, failList.size(), autoCreatedCount.get(), purchaseNo);
+        return buildResult(dataList.size(), detailSuccessCount, failList, purchaseNo, autoCreatedCount.get(), autoCreatedList);
     }
 
     private void validateRow(TbPurchaseImportDTO dto) {
@@ -235,13 +257,15 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         return null;
     }
 
-    private Map<String, Object> buildResult(int totalRows, int successCount, List<TbPurchaseImportDTO> failList, String message) {
+    private Map<String, Object> buildResult(int totalRows, int successCount, List<TbPurchaseImportDTO> failList, String message, int autoCreatedCount, List<TbPurchaseImportDTO> autoCreatedList) {
         Map<String, Object> result = new HashMap<>();
         result.put("totalRows", totalRows);
         result.put("successCount", successCount);
         result.put("failCount", failList.size());
         result.put("failList", failList);
         result.put("message", message);
+        result.put("autoCreatedCount", autoCreatedCount);
+        result.put("autoCreatedList", autoCreatedList);
         return result;
     }
 

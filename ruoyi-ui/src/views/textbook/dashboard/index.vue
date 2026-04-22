@@ -58,7 +58,7 @@
             <span>我的最近申请</span>
             <el-button style="float: right; padding: 3px 0" type="text" @click="$router.push('/textbook/myApply')">查看全部</el-button>
           </div>
-          <el-table :data="recentApplies" size="small" v-loading="loading">
+          <el-table :data="recentApplies" size="small" v-loading="loading" border stripe>
             <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip />
             <el-table-column label="数量" prop="applyQty" width="60" align="center" />
             <el-table-column label="状态" width="90" align="center">

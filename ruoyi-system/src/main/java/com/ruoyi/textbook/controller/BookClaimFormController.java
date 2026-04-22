@@ -55,7 +55,7 @@ public class BookClaimFormController extends BaseController {
         return toAjax(bookClaimFormService.updateBookClaimForm(bookClaimForm));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:claimForm:outbound')")
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:outbound') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "确认出库", businessType = BusinessType.UPDATE)
     @PutMapping("/confirmOutbound")
     public AjaxResult confirmOutbound(@RequestBody BookClaimForm bookClaimForm) {

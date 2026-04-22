@@ -21,7 +21,7 @@
         SELECT f.flow_id, f.textbook_id, f.isbn, i.book_name, f.business_type, f.change_qty,
                f.stock_before, f.stock_after, f.operator, f.business_no,
                f.remark, f.operate_time, f.create_time
-        FROM book_stock_flow f
+        FROM textbook_stock_flow f
         LEFT JOIN textbook_info i ON f.textbook_id = i.book_id
     </sql>
 
@@ -41,12 +41,12 @@
     </select>
 
     <insert id="insert" parameterType="com.ruoyi.textbook.domain.TbStockLog" useGeneratedKeys="true" keyProperty="logId">
-        INSERT INTO book_stock_flow(textbook_id, isbn, business_type, business_no, change_qty, stock_before, stock_after, operator, operate_time, remark)
+        INSERT INTO textbook_stock_flow(textbook_id, isbn, business_type, business_no, change_qty, stock_before, stock_after, operator, operate_time, remark)
         VALUES(#{bookId}, #{isbn}, #{bizType}, #{refBizId}, #{changeNum}, #{beforeStock}, #{afterStock}, #{operatorName}, NOW(), #{remark})
     </insert>
 
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO book_stock_flow(textbook_id, isbn, business_type, business_no, change_qty, stock_before, stock_after, operator, operate_time, remark, create_time)
+        INSERT INTO textbook_stock_flow(textbook_id, isbn, business_type, business_no, change_qty, stock_before, stock_after, operator, operate_time, remark, create_time)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (#{item.bookId}, #{item.isbn}, #{item.bizType}, #{item.refBizId}, #{item.changeNum}, #{item.beforeStock}, #{item.afterStock},

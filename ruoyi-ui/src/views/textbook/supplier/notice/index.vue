@@ -3,10 +3,10 @@
     <el-card>
       <template slot="header">
         <span>通知中心</span>
-        <el-button type="primary" size="small" @click="markAllAsRead" style="margin-left: 20px">全部标记为已读</el-button>
+        <el-button type="primary" size="small" @click="markAllAsRead" style="margin-left: 20px" v-hasPermi="['textbook:supplierNotice:read']">全部标记为已读</el-button>
       </template>
       
-      <el-table v-loading="loading" :data="noticeList" style="width: 100%">
+      <el-table v-loading="loading" :data="noticeList" style="width: 100%" border stripe>
         <el-table-column label="状态" width="80">
           <template slot-scope="scope">
             <el-tag type="danger" v-if="scope.row.status === '0'">未读</el-tag>
@@ -38,11 +38,16 @@
     </el-card>
     
     <!-- 通知详情对话框 -->
-    <el-dialog title="通知详情" :visible.sync="noticeDialogVisible" width="600px">
+    <el-dialog title="通知详情" :visible.sync="noticeDialogVisible" width="600px" :close-on-click-modal="false">
       <div class="notice-detail">
         <h3>{{ currentNotice.title }}</h3>
         <p class="notice-time">{{ currentNotice.createTime }}</p>
-        <div class="notice-content">{{ escapeHtml(currentNotice.content) }}</div>
+        <div v-if="currentNotice.bizType === '5'" class="notice-biz-info">
+          <el-descriptions :column="1" border size="small">
+            <el-descriptions-item label="业务类型">进书确认</el-descriptions-item>
+          </el-descriptions>
+        </div>
+        <div class="notice-content" style="white-space: pre-wrap;">{{ escapeHtml(currentNotice.content) }}</div>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="noticeDialogVisible = false">关闭</el-button>

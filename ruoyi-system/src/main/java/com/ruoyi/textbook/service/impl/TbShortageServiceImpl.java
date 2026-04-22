@@ -85,6 +85,7 @@ public class TbShortageServiceImpl implements ITbShortageService
      * @return 结果
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertTbShortage(TbShortage tbShortage)
     {
         // 根据ISBN查询教材信息获取book_id
@@ -127,11 +128,8 @@ public class TbShortageServiceImpl implements ITbShortageService
             }
         }
 
-        tbShortage.setCreateTime(DateUtils.getNowDate());
         tbShortage.setUpdateTime(DateUtils.getNowDate());
-        if (tbShortage.getRegisterId() == null) {
-            tbShortage.setRegisterId(SecurityUtils.getUserId());
-        }
+        tbShortage.setRegisterId(SecurityUtils.getUserId());
         if (StringUtils.isEmpty(tbShortage.getRegisterName())) {
             SysUser user = sysUserMapper.selectUserById(tbShortage.getRegisterId());
             if (user != null) {
@@ -394,7 +392,7 @@ public class TbShortageServiceImpl implements ITbShortageService
                 if (registerId != null) {
                     noticeService.sendNoticeToUser(registerId, "缺书登记已取消", 
                         "您的《" + shortage.getBookName() + "》缺书登记已被取消。", 
-                        "shortage_cancel", shortageId);
+                        "4", shortageId);
                 }
             } catch (Exception e) {
                 log.warn("发送取消通知失败: {}", e.getMessage());

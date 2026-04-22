@@ -238,12 +238,14 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
             TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(detail.getBookId());
             if (inventory == null) {
                 failMessages.add("教材《" + detail.getBookName() + "》库存记录不存在");
+                failCount++;
                 continue;
             }
 
             int currentStock = inventory.getStockNum();
             if (currentStock < detail.getQuantity()) {
                 failMessages.add("教材《" + detail.getBookName() + "》库存不足（当前:" + currentStock + ",需求:" + detail.getQuantity() + "）");
+                failCount++;
                 continue;
             }
 
@@ -299,7 +301,12 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
             log.info("【出库处理】已生成{}条库存流水记录", stockLogList.size());
         }
 
-        purchase.setStatus("3");
+        if (failCount == 0) {
+            purchase.setStatus("3");
+        } else if (successCount > 0) {
+            purchase.setStatus("3");
+            log.warn("【出库处理】部分出库完成! 成功={}条, 失败={}条(库存不足): {}", successCount, failCount, String.join("；", failMessages));
+        }
         tbPurchaseMapper.updateTbPurchase(purchase);
 
         if (successCount > 0 && purchase.getUserId() != null) {

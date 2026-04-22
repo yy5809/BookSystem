@@ -221,6 +221,10 @@ public class TokenService
         if (StringUtils.isEmpty(token))
         {
             token = request.getParameter("token");
+            if (StringUtils.isNotEmpty(token))
+            {
+                log.warn("通过URL参数传递Token存在安全风险，建议使用Header方式");
+            }
         }
         if (StringUtils.isNotEmpty(token) && token.startsWith(Constants.TOKEN_PREFIX))
         {

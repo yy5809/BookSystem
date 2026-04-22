@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.constraints.*;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ruoyi.common.annotation.Excel;
 import com.ruoyi.common.annotation.Excel.ColumnType;
 import com.ruoyi.common.annotation.Excel.Type;
@@ -53,6 +54,7 @@ public class SysUser extends BaseEntity
     private String avatar;
 
     /** 密码 */
+    @JsonIgnore
     private String password;
 
     /** 账号状态（0正常 1停用） */

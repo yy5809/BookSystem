@@ -38,7 +38,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="shortageList">
+    <el-table v-loading="loading" :data="shortageList" border stripe>
       <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="180" />
       <el-table-column label="缺书数量" align="center" prop="lackNum" width="90" />
@@ -73,7 +73,7 @@
 
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize" @pagination="getList" />
 
-    <el-dialog :title="title" :visible.sync="open" width="550px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="550px" append-to-body :close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="教材" prop="bookId">
           <el-select v-model="form.bookId" filterable remote reserve-keyword placeholder="请搜索选择教材" :remote-method="searchBooks" :loading="bookLoading" style="width: 100%" @change="onBookSelect">
@@ -127,7 +127,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="转采购确认" :visible.sync="processOpen" width="420px" append-to-body>
+    <el-dialog title="转采购确认" :visible.sync="processOpen" width="420px" append-to-body :close-on-click-modal="false">
       <div style="text-align: center; padding: 10px 0;">
         <i class="el-icon-warning-outline" style="font-size: 40px; color: #E6A23C; margin-bottom: 12px;"></i>
         <p>确定将以下缺书记录转为采购需求？</p>

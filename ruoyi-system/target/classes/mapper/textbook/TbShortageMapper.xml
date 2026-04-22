@@ -38,6 +38,7 @@
         <if test="isbn != null and isbn != ''">AND i.isbn = #{isbn}</if>
         <if test="handleStatus != null and handleStatus != ''">AND t.handle_status = #{handleStatus}</if>
         <if test="urgency != null and urgency != ''">AND t.urgency = #{urgency}</if>
+        <if test="registerId != null">AND t.register_id = #{registerId}</if>
     </select>
 
     <insert id="insertTbShortage" useGeneratedKeys="true" keyProperty="lackId">
@@ -53,7 +54,10 @@
             <if test="handleStatus != null">handle_status=#{handleStatus},</if>
             <if test="handleTime != null">handle_time=#{handleTime},</if>
             <if test="purchaseId != null">purchase_id=#{purchaseId},</if>
+            <if test="source != null">source=#{source},</if>
+            <if test="sourceId != null">source_id=#{sourceId},</if>
             <if test="remark != null">remark=#{remark},</if>
+            update_time=NOW(),
         </set> WHERE lack_id=#{lackId} AND del_flag='0'
     </update>
 
@@ -71,11 +75,16 @@
     
     <select id="selectTbShortageListByBookId" parameterType="Long" resultMap="TbShortageResult">
         <include refid="selectTbShortageVo"/> AND t.book_id = #{bookId} AND t.handle_status IN ('0', '1')
-        ORDER BY t.create_time DESC
+        ORDER BY t.register_time DESC
     </select>
 
     <select id="selectTbShortageListByIsbn" parameterType="String" resultMap="TbShortageResult">
         <include refid="selectTbShortageVo"/> AND i.isbn = #{isbn} AND t.handle_status = '0'
-        ORDER BY t.create_time DESC
+        ORDER BY t.register_time DESC
+    </select>
+
+    <select id="selectTbShortageListByPurchaseId" parameterType="Long" resultMap="TbShortageResult">
+        <include refid="selectTbShortageVo"/> AND t.purchase_id = #{purchaseId}
+        ORDER BY t.register_time DESC
     </select>
 </mapper>

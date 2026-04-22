@@ -52,7 +52,7 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="noticeList" @row-click="handleRowClick" highlight-current-row>
+    <el-table v-loading="loading" :data="noticeList" @row-click="handleRowClick" highlight-current-row border stripe>
       <el-table-column width="50">
         <template slot-scope="scope">
           <el-badge :is-dot="scope.row.readStatus === '0'" />

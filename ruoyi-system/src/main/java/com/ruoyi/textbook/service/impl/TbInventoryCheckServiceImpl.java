@@ -5,6 +5,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.textbook.domain.TbInventoryCheck;
 import com.ruoyi.textbook.mapper.TbInventoryCheckMapper;
@@ -33,6 +35,7 @@ public class TbInventoryCheckServiceImpl implements ITbInventoryCheckService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int createCheckTask(TbInventoryCheck check) {
         String checkNo = "CK" + System.currentTimeMillis();
         check.setCheckNo(checkNo);
@@ -71,6 +74,7 @@ public class TbInventoryCheckServiceImpl implements ITbInventoryCheckService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int completeCheck(Long checkId) {
         TbInventoryCheck check = selectTbInventoryCheckById(checkId);
         if (check == null) throw new ServiceException("盘点任务不存在");
@@ -98,6 +102,7 @@ public class TbInventoryCheckServiceImpl implements ITbInventoryCheckService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbInventoryCheckByIds(Long[] checkIds) {
         for (Long id : checkIds) {
             inventoryCheckMapper.deleteTbInventoryCheckById(id);
