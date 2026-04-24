@@ -5,11 +5,12 @@ import java.util.List;
 
 public enum PurchaseStatusEnum {
     PENDING("0", "待审核", Arrays.asList("1", "2")),
-    APPROVED("1", "已通过", Arrays.asList("3", "2")),
+    APPROVED("1", "已通过", Arrays.asList("3", "2", "6")),
     REJECTED("2", "已驳回", Arrays.asList("0")),
     RECEIVED("3", "已领书", Arrays.asList()),
-    ARRIVED("4", "已到货", Arrays.asList("3", "5")),
-    INBOUND("5", "已入库", Arrays.asList());
+    ARRIVED("4", "已到货", Arrays.asList("5")),
+    INBOUND("5", "已入库", Arrays.asList()),
+    SHIPPED("6", "已发货", Arrays.asList("4"));
 
     private final String code;
     private final String desc;
@@ -52,6 +53,11 @@ public enum PurchaseStatusEnum {
             return false;
         }
         return fromStatus.canTransitionTo(to);
+    }
+
+    public static String getDescByCode(String code) {
+        PurchaseStatusEnum status = fromCode(code);
+        return status != null ? status.getDesc() : "未知状态";
     }
 
     public static String getTransitionErrorMsg(String from, String to) {

@@ -124,8 +124,8 @@ export default {
         const rows = response.rows || [];
         this.stats.total = response.total;
         this.stats.unread = rows.filter(n => n.readStatus === '0').length;
-        this.stats.approved = rows.filter(n => n.noticeTitle && n.noticeTitle.includes('通过')).length;
-        this.stats.rejected = rows.filter(n => n.noticeTitle && n.noticeTitle.includes('驳回')).length;
+        this.stats.approved = rows.filter(n => n.bizType === '1' && n.noticeTitle && n.noticeTitle.includes('通过')).length;
+        this.stats.rejected = rows.filter(n => n.bizType === '1' && n.noticeTitle && n.noticeTitle.includes('驳回')).length;
         this.loading = false;
       });
     },

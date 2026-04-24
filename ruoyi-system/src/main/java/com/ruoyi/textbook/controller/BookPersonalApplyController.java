@@ -9,8 +9,8 @@ import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
-import com.ruoyi.system.textbook.domain.BookPersonalApply;
-import com.ruoyi.system.textbook.service.IBookPersonalApplyService;
+import com.ruoyi.textbook.domain.BookPersonalApply;
+import com.ruoyi.textbook.service.IBookPersonalApplyService;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
@@ -68,22 +68,8 @@ public class BookPersonalApplyController extends BaseController {
     @Log(title = "Personal Apply", businessType = BusinessType.UPDATE)
     @PutMapping("/cancel/{applyId}")
     public AjaxResult cancel(@PathVariable Long applyId) {
-        BookPersonalApply existingApply = bookPersonalApplyService.selectBookPersonalApplyById(applyId);
-        if (existingApply == null) {
-            return error("申请记录不存在");
-        }
         Long currentUserId = SecurityUtils.getUserId();
-        if (!currentUserId.equals(existingApply.getTeacherId())) {
-            return error("无权取消他人的申请记录");
-        }
-        if (!"0".equals(existingApply.getStatus())) {
-            return error("只有待审核状态的申请才能取消");
-        }
-        BookPersonalApply apply = new BookPersonalApply();
-        apply.setApplyId(applyId);
-        apply.setStatus("4");
-        apply.setAuditOpinion("申请人主动取消");
-        return toAjax(bookPersonalApplyService.updateBookPersonalApply(apply));
+        return toAjax(bookPersonalApplyService.cancelApply(applyId, currentUserId));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:personalApply:audit') and @ss.hasAnyRoles('admin,warehouse')")

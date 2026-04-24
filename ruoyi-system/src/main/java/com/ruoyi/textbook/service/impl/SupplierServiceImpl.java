@@ -5,12 +5,14 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbSupplier;
+import com.ruoyi.textbook.enums.PurchaseStatusEnum;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.mapper.TbSupplierMapper;
 import com.ruoyi.textbook.service.ISupplierService;
 import com.ruoyi.textbook.service.NoticeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,13 +63,22 @@ public class SupplierServiceImpl implements ISupplierService {
         
         purchase.setSupplierId(supplier.getSupplierId());
         List<TbPurchase> purchaseList = tbPurchaseMapper.selectSupplierPurchases(purchase);
-        
-        // 加载采购明细
-        for (TbPurchase p : purchaseList) {
-            List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(p.getBuyId());
-            p.setDetails(details);
+
+        if (!purchaseList.isEmpty()) {
+            List<Long> purchaseIds = new java.util.ArrayList<>();
+            for (TbPurchase p : purchaseList) {
+                purchaseIds.add(p.getBuyId());
+            }
+            List<TbPurchaseDetail> allDetails = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseIds(purchaseIds);
+            java.util.Map<Long, List<TbPurchaseDetail>> detailMap = new java.util.HashMap<>();
+            for (TbPurchaseDetail detail : allDetails) {
+                detailMap.computeIfAbsent(detail.getPurchaseId(), k -> new java.util.ArrayList<>()).add(detail);
+            }
+            for (TbPurchase p : purchaseList) {
+                p.setDetails(detailMap.getOrDefault(p.getBuyId(), java.util.Collections.emptyList()));
+            }
         }
-        
+
         return purchaseList;
     }
 
@@ -88,6 +99,7 @@ public class SupplierServiceImpl implements ISupplierService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void confirmShipment(Long purchaseId, String logisticsCompany, String logisticsNo, String remark) {
         TbSupplier supplier = getCurrentSupplier();
         if (supplier == null) {
@@ -102,9 +114,12 @@ public class SupplierServiceImpl implements ISupplierService {
         if (!"1".equals(purchase.getStatus())) {
             throw new ServiceException("采购单状态不是采购中，无法确认发货");
         }
-        
-        // 更新采购单状态和物流信息
-        purchase.setStatus("2"); // 已发货
+
+        if (!PurchaseStatusEnum.canTransition(purchase.getStatus(), "6")) {
+            throw new ServiceException(PurchaseStatusEnum.getTransitionErrorMsg(purchase.getStatus(), "6"));
+        }
+
+        purchase.setStatus("6");
         purchase.setLogisticsCompany(logisticsCompany);
         purchase.setLogisticsNo(logisticsNo);
         tbPurchaseMapper.updateTbPurchase(purchase);

@@ -15,15 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.domain.TbBook;
 import com.ruoyi.textbook.service.ITbBookService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * 教材基础信息Service业务层处理
- * 
- * @author ruoyi
- */
 @Service
 public class TbBookServiceImpl implements ITbBookService 
 {
+    private static final Logger log = LoggerFactory.getLogger(TbBookServiceImpl.class);
+
     @Autowired
     private TbBookMapper tbBookMapper;
 
@@ -52,8 +51,13 @@ public class TbBookServiceImpl implements ITbBookService
      * 新增教材基础信息
      */
     @Override
-    public int insertTbBook(TbBook tbBook)
-    {
+    public int insertTbBook(TbBook tbBook) {
+        if (tbBook.getIsbn() != null && !tbBook.getIsbn().isEmpty()) {
+            TbBook existBook = tbBookMapper.selectTbBookByIsbn(tbBook.getIsbn());
+            if (existBook != null) {
+                throw new ServiceException("ISBN已存在，教材：" + existBook.getBookName());
+            }
+        }
         tbBook.setCreateTime(DateUtils.getNowDate());
         return tbBookMapper.insertTbBook(tbBook);
     }
@@ -114,22 +118,26 @@ public class TbBookServiceImpl implements ITbBookService
         try {
             tbBookMapper.insertTbBook(tbBook);
         } catch (DuplicateKeyException e) {
-            TbBook existBook = tbBookMapper.selectTbBookByIsbn(tbBook.getIsbn());
-            throw new ServiceException("ISBN已存在，教材：" + (existBook != null ? existBook.getBookName() : tbBook.getIsbn()));
+            TbBook duplicateBook = tbBookMapper.selectTbBookByIsbn(tbBook.getIsbn());
+            throw new ServiceException("ISBN已存在，教材：" + (duplicateBook != null ? duplicateBook.getBookName() : tbBook.getIsbn()));
         }
 
         TbInventory stock = new TbInventory();
         stock.setBookId(tbBook.getBookId());
         stock.setStockNum(0);
         stock.setWarningNum(10);
-        tbInventoryMapper.insertTbInventory(stock);
+        try {
+            tbInventoryMapper.insertTbInventory(stock);
+        } catch (DuplicateKeyException e) {
+            log.info("【快速新增】库存记录已存在, bookId={}, 跳过创建", tbBook.getBookId());
+        }
 
         return tbBook;
     }
 
     @Override
-    public void completeInfo(TbBook tbBook)
-    {
+    @Transactional(rollbackFor = Exception.class)
+    public void completeInfo(TbBook tbBook) {
         if (tbBook.getBookId() == null)
         {
             throw new ServiceException("教材ID不能为空");

@@ -13,7 +13,7 @@
           <el-upload
             ref="upload"
             :limit="1"
-            accept=".xlsx, .xls"
+            accept=".xlsx,.xls"
             :headers="headers"
             :action="importUrl"
             :disabled="isUploading"
@@ -28,7 +28,7 @@
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
             <div class="el-upload__tip" slot="tip">
-              只能上传xlsx/xls文件，且不超过10MB
+              支持 .xlsx、.xls 格式，且不超过10MB
             </div>
           </el-upload>
         </el-form-item>
@@ -113,7 +113,7 @@
 
             <h4>注意事项：</h4>
             <ul>
-              <li>支持 .xlsx 和 .xls 格式的Excel文件</li>
+              <li>支持 .xlsx、.xls 格式的Excel文件</li>
               <li>文件大小不超过 10MB</li>
               <li>单次最多可导入 500 条数据</li>
               <li>如果ISBN匹配到系统中的教材，会自动关联教材ID和定价</li>
@@ -145,12 +145,13 @@ export default {
   },
   methods: {
     beforeUpload(file) {
-      const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-                     file.type === 'application/vnd.ms-excel'
+      const isXlsx = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      const isXls = file.type === 'application/vnd.ms-excel'
+      const isExcel = isXlsx || isXls || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
       const isLt10M = file.size / 1024 / 1024 < 10
 
       if (!isExcel) {
-        this.$message.error('只能上传 Excel 文件 (xlsx/xls)!')
+        this.$message.error('只能上传 Excel 文件（支持 .xlsx、.xls 格式）!')
         return false
       }
       if (!isLt10M) {
@@ -173,6 +174,17 @@ export default {
     async submitUpload() {
       if (this.$refs.upload.uploadFiles.length === 0) {
         this.$message.warning('请先选择要导入的Excel文件')
+        return
+      }
+
+      const fileName = this.$refs.upload.uploadFiles[0].name
+      try {
+        await this.$confirm(`确认导入文件"${fileName}"中的采购数据？导入后将生成采购单，请确保数据正确。`, '确认导入', {
+          confirmButtonText: '确认导入',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+      } catch {
         return
       }
 

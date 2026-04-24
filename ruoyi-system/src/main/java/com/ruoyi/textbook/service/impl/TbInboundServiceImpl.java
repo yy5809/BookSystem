@@ -11,6 +11,7 @@ import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbStockLog;
+import com.ruoyi.textbook.domain.dto.StockOperationResult;
 import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbInboundMapper;
 import com.ruoyi.textbook.mapper.TbInventoryMapper;
@@ -19,6 +20,7 @@ import com.ruoyi.textbook.mapper.TbPendingMapper;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.mapper.TbStockLogMapper;
 import com.ruoyi.textbook.service.ITbInboundService;
+import com.ruoyi.textbook.service.IStockOperationService;
 import com.ruoyi.textbook.service.ITbStockLogService;
 import com.ruoyi.textbook.service.NoticeService;
 import org.slf4j.Logger;
@@ -63,6 +65,12 @@ public class TbInboundServiceImpl implements ITbInboundService {
     @Autowired
     private NoticeService noticeService;
 
+    @Autowired
+    private IStockOperationService stockOperationService;
+
+    @Autowired
+    private com.ruoyi.textbook.mapper.BookPersonalApplyMapper bookPersonalApplyMapper;
+
     @Override
     public TbInbound selectTbInboundById(Long inboundId) {
         return tbInboundMapper.selectTbInboundByInboundId(inboundId);
@@ -77,6 +85,20 @@ public class TbInboundServiceImpl implements ITbInboundService {
     @Transactional(rollbackFor = Exception.class)
     public int insertTbInbound(TbInbound tbInbound) {
         log.info("【入库处理】开始处理教材入库, bookId={}, 数量={}", tbInbound.getBookId(), tbInbound.getInNum());
+
+        if (tbInbound.getInNum() == null || tbInbound.getInNum() <= 0) {
+            throw new ServiceException("入库数量必须为正整数");
+        }
+        if (tbInbound.getInNum() > 99999) {
+            throw new ServiceException("单次入库数量不能超过99999");
+        }
+
+        if (tbInbound.getPurchaseId() != null) {
+            TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(tbInbound.getPurchaseId());
+            if (purchase != null && !"4".equals(purchase.getStatus()) && !"6".equals(purchase.getStatus())) {
+                throw new ServiceException("采购单状态不是'已到货'或'已发货'，无法入库，当前状态：" + purchase.getStatus());
+            }
+        }
         
         if (tbInbound.getInboundNo() == null || tbInbound.getInboundNo().isEmpty()) {
             tbInbound.setInboundNo("IN" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + IdUtils.fastSimpleUUID().substring(0, 6));
@@ -90,45 +112,18 @@ public class TbInboundServiceImpl implements ITbInboundService {
         }
         
         if (tbInbound.getBookId() != null && tbInbound.getInNum() != null) {
-            TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(tbInbound.getBookId());
-            Integer beforeStock = (inventory != null) ? inventory.getStockNum() : 0;
-            
-            if (inventory == null) {
-                inventory = new TbInventory();
-                inventory.setBookId(tbInbound.getBookId());
-                inventory.setBookName(tbInbound.getBookName());
-                inventory.setIsbn(tbInbound.getIsbn());
-                inventory.setStockNum(tbInbound.getInNum());
-                inventory.setWarningNum(10);
-                inventory.setCreateTime(DateUtils.getNowDate());
-                tbInventoryMapper.insertTbInventory(inventory);
-                log.info("【入库处理】创建新库存记录, bookId={}, 初始库存={}", tbInbound.getBookId(), tbInbound.getInNum());
-            } else {
-                int currentStock = inventory.getStockNum();
-                int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
-                int rowsAffected = tbInventoryMapper.addStockWithVersion(
-                        tbInbound.getBookId(),
-                        tbInbound.getInNum(),
-                        currentVersion
-                );
-                if (rowsAffected <= 0) {
-                    throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
-                }
+            StockOperationResult stockResult = stockOperationService.addStock(
+                    tbInbound.getBookId(),
+                    tbInbound.getInNum(),
+                    tbInbound.getOperatorId(),
+                    tbInbound.getOperatorName(),
+                    "INBOUND",
+                    tbInbound.getInId(),
+                    "采购入库，入库单号：" + tbInbound.getInboundNo()
+            );
+            if (!stockResult.isSuccess()) {
+                throw new ServiceException(stockResult.getErrorMessage());
             }
-            
-            TbStockLog stockLog = new TbStockLog();
-            stockLog.setBookId(tbInbound.getBookId());
-            stockLog.setBizType("1");
-            stockLog.setChangeNum(tbInbound.getInNum());
-            stockLog.setBeforeStock(beforeStock);
-            int actualStock = tbInventoryMapper.selectStockNumByBookId(tbInbound.getBookId());
-            stockLog.setAfterStock(actualStock);
-            stockLog.setOperatorId(tbInbound.getOperatorId());
-            stockLog.setOperatorName(tbInbound.getOperatorName());
-            stockLog.setRefBizType("INBOUND");
-            stockLog.setRefBizId(tbInbound.getInId());
-            stockLog.setRemark("采购入库，入库单号：" + tbInbound.getInboundNo());
-            stockLogService.insert(stockLog);
             log.info("【入库处理】已生成库存流水记录");
 
             if (tbInbound.getBookId() != null) {
@@ -161,34 +156,19 @@ public class TbInboundServiceImpl implements ITbInboundService {
             throw new ServiceException("入库单不存在");
         }
 
-        TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(inbound.getBookId());
-        if (inventory != null && inbound.getBookId() != null && inbound.getInNum() != null) {
-            int currentStock = inventory.getStockNum();
-            int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
-            int rowsAffected = tbInventoryMapper.deductStockWithVersion(
+        if (inbound.getBookId() != null && inbound.getInNum() != null) {
+            StockOperationResult stockResult = stockOperationService.deductStock(
                     inbound.getBookId(),
                     inbound.getInNum(),
-                    currentVersion
+                    inbound.getOperatorId(),
+                    inbound.getOperatorName(),
+                    "INBOUND_DELETE",
+                    inbound.getInId(),
+                    "删除入库单，回退库存，入库单号：" + inbound.getInboundNo()
             );
-            if (rowsAffected <= 0) {
-                throw new ServiceException("并发冲突：该教材库存已被其他操作修改，删除失败");
+            if (!stockResult.isSuccess()) {
+                throw new ServiceException(stockResult.getErrorMessage());
             }
-            
-            // 生成库存流水记录（出库）
-            TbStockLog stockLog = new TbStockLog();
-            stockLog.setBookId(inbound.getBookId());
-            stockLog.setIsbn(inbound.getIsbn());
-            stockLog.setBookName(inbound.getBookName());
-            stockLog.setBizType("3"); // 入库回退
-            stockLog.setChangeNum(-inbound.getInNum());
-            stockLog.setBeforeStock(currentStock);
-            stockLog.setAfterStock(currentStock - inbound.getInNum());
-            stockLog.setOperatorId(inbound.getOperatorId());
-            stockLog.setOperatorName(inbound.getOperatorName());
-            stockLog.setRefBizType("INBOUND_DELETE");
-            stockLog.setRefBizId(inbound.getInId());
-            stockLog.setRemark("删除入库单，回退库存，入库单号：" + inbound.getInboundNo());
-            stockLogService.insert(stockLog);
             log.info("【入库删除】已生成库存流水记录");
         }
 
@@ -203,32 +183,19 @@ public class TbInboundServiceImpl implements ITbInboundService {
             if (inbound == null) {
                 continue;
             }
-            TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(inbound.getBookId());
-            if (inventory != null && inbound.getBookId() != null && inbound.getInNum() != null) {
-                int currentStock = inventory.getStockNum();
-                int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
-                int rowsAffected = tbInventoryMapper.deductStockWithVersion(
+            if (inbound.getBookId() != null && inbound.getInNum() != null) {
+                StockOperationResult stockResult = stockOperationService.deductStock(
                         inbound.getBookId(),
                         inbound.getInNum(),
-                        currentVersion
+                        SecurityUtils.getUserId(),
+                        SecurityUtils.getUsername(),
+                        "INBOUND_DELETE",
+                        inbound.getInId(),
+                        "批量删除入库单，回退库存，入库单号：" + inbound.getInboundNo()
                 );
-                if (rowsAffected <= 0) {
-                    throw new ServiceException("并发冲突：该教材库存已被其他操作修改，删除失败");
+                if (!stockResult.isSuccess()) {
+                    throw new ServiceException(stockResult.getErrorMessage());
                 }
-                TbStockLog stockLog = new TbStockLog();
-                stockLog.setBookId(inbound.getBookId());
-                stockLog.setIsbn(inbound.getIsbn());
-                stockLog.setBookName(inbound.getBookName());
-                stockLog.setBizType("3");
-                stockLog.setChangeNum(-inbound.getInNum());
-                stockLog.setBeforeStock(currentStock);
-                stockLog.setAfterStock(currentStock - inbound.getInNum());
-                stockLog.setOperatorId(SecurityUtils.getUserId());
-                stockLog.setOperatorName(SecurityUtils.getUsername());
-                stockLog.setRefBizType("INBOUND_DELETE");
-                stockLog.setRefBizId(inbound.getInId());
-                stockLog.setRemark("批量删除入库单，回退库存，入库单号：" + inbound.getInboundNo());
-                stockLogService.insert(stockLog);
                 log.info("【批量删除入库】已回退库存并生成流水, inboundId={}", inboundId);
             }
             tbInboundMapper.deleteTbInboundByInboundId(inboundId);
@@ -244,7 +211,23 @@ public class TbInboundServiceImpl implements ITbInboundService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int processInbound(TbInbound tbInbound, Long operatorId, String operatorName) {
+        if (tbInbound.getInNum() == null || tbInbound.getInNum() <= 0) {
+            throw new ServiceException("入库数量必须为正整数");
+        }
+        if (tbInbound.getInNum() > 99999) {
+            throw new ServiceException("单次入库数量不能超过99999");
+        }
+        if (tbInbound.getBookId() == null) {
+            throw new ServiceException("入库教材ID不能为空");
+        }
         log.info("【入库处理】开始处理教材入库, bookId={}, 数量={}, 操作人={}", tbInbound.getBookId(), tbInbound.getInNum(), operatorId);
+
+        if (tbInbound.getPurchaseId() != null) {
+            TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(tbInbound.getPurchaseId());
+            if (purchase != null && !"4".equals(purchase.getStatus()) && !"6".equals(purchase.getStatus())) {
+                throw new ServiceException("采购单状态不是'已到货'或'已发货'，无法入库，当前状态：" + purchase.getStatus());
+            }
+        }
 
         String inboundNo = "IN" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + IdUtils.fastSimpleUUID().substring(0, 6);
         tbInbound.setInboundNo(inboundNo);
@@ -259,45 +242,18 @@ public class TbInboundServiceImpl implements ITbInboundService {
             throw new ServiceException("创建入库记录失败");
         }
 
-        TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(tbInbound.getBookId());
-        Integer beforeStock = (inventory != null) ? inventory.getStockNum() : 0;
-
-        if (inventory == null) {
-            inventory = new TbInventory();
-            inventory.setBookId(tbInbound.getBookId());
-            inventory.setBookName(tbInbound.getBookName());
-            inventory.setIsbn(tbInbound.getIsbn());
-            inventory.setStockNum(tbInbound.getInNum());
-            inventory.setWarningNum(10);
-            inventory.setCreateTime(DateUtils.getNowDate());
-            tbInventoryMapper.insertTbInventory(inventory);
-            log.info("【入库处理】创建新库存记录, bookId={}, 初始库存={}", tbInbound.getBookId(), tbInbound.getInNum());
-        } else {
-            int currentStock = inventory.getStockNum();
-            int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
-            int rowsAffected = tbInventoryMapper.addStockWithVersion(
-                    tbInbound.getBookId(),
-                    tbInbound.getInNum(),
-                    currentVersion
-            );
-            if (rowsAffected <= 0) {
-                throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
-            }
+        StockOperationResult stockResult = stockOperationService.addStock(
+                tbInbound.getBookId(),
+                tbInbound.getInNum(),
+                operatorId,
+                operatorName,
+                "INBOUND",
+                tbInbound.getInId(),
+                "采购入库，入库单号：" + inboundNo
+        );
+        if (!stockResult.isSuccess()) {
+            throw new ServiceException(stockResult.getErrorMessage());
         }
-
-        TbStockLog stockLog = new TbStockLog();
-        stockLog.setBookId(tbInbound.getBookId());
-        stockLog.setBizType("1");
-        stockLog.setChangeNum(tbInbound.getInNum());
-        stockLog.setBeforeStock(beforeStock);
-        stockLog.setAfterStock(beforeStock + tbInbound.getInNum());
-        stockLog.setOperatorId(operatorId);
-        stockLog.setOperatorName(operatorName);
-        stockLog.setRefBizType("INBOUND");
-        stockLog.setRefBizId(tbInbound.getInId());
-        stockLog.setRemark("采购入库，入库单号：" + inboundNo);
-        stockLogService.insert(stockLog);
-        log.info("【入库处理】已生成库存流水记录");
 
         if (tbInbound.getBookId() != null) {
             TbBook bookInfo = tbBookMapper.selectTbBookByBookId(tbInbound.getBookId());
@@ -318,7 +274,7 @@ public class TbInboundServiceImpl implements ITbInboundService {
         int remainingInbound = tbInbound.getInNum();
         for (TbShortage shortage : shortageList) {
             if (remainingInbound <= 0) break;
-            if (!"0".equals(shortage.getHandleStatus()) && !"1".equals(shortage.getHandleStatus())) {
+            if (!"0".equals(shortage.getHandleStatus()) && !"1".equals(shortage.getHandleStatus()) && !"2".equals(shortage.getHandleStatus())) {
                 continue;
             }
 
@@ -343,13 +299,13 @@ public class TbInboundServiceImpl implements ITbInboundService {
             }
 
             if (shortage.getSourceId() != null && "1".equals(shortage.getSource())) {
-                try {
-                    TbPurchase relatedPurchase = tbPurchaseMapper.selectTbPurchaseById(shortage.getSourceId());
-                    if (relatedPurchase != null && "2".equals(relatedPurchase.getStatus())) {
-                        relatedPurchase.setStatus("0");
-                        relatedPurchase.setRejectReason(null);
-                        tbPurchaseMapper.updateTbPurchase(relatedPurchase);
-
+                TbPurchase relatedPurchase = tbPurchaseMapper.selectTbPurchaseById(shortage.getSourceId());
+                if (relatedPurchase != null && "2".equals(relatedPurchase.getStatus())) {
+                    relatedPurchase.setStatus("0");
+                    relatedPurchase.setRejectReason(null);
+                    tbPurchaseMapper.updateTbPurchase(relatedPurchase);
+                    log.info("【入库处理】已重新开放被驳回的领书单, purchaseId={}", shortage.getSourceId());
+                    try {
                         noticeService.sendOrderApproveNotice(
                                 relatedPurchase.getUserId(),
                                 tbInbound.getBookName(),
@@ -357,10 +313,32 @@ public class TbInboundServiceImpl implements ITbInboundService {
                                 "缺书已到货，您的领书单已重新开放，请等待审核",
                                 shortage.getSourceId()
                         );
-                        log.info("【入库处理】已重新开放被驳回的领书单并通知申请人, purchaseId={}", shortage.getSourceId());
+                    } catch (Exception e) {
+                        log.warn("【入库处理】重新开放领书单通知发送失败: {}", e.getMessage());
                     }
-                } catch (Exception e) {
-                    log.warn("【入库处理】重新开放领书单时异常: {}", e.getMessage());
+                }
+            }
+
+            if (shortage.getSourceId() != null && "3".equals(shortage.getSource())) {
+                com.ruoyi.textbook.domain.BookPersonalApply relatedApply =
+                        bookPersonalApplyMapper.selectBookPersonalApplyById(shortage.getSourceId());
+                if (relatedApply != null && "2".equals(relatedApply.getStatus())) {
+                    relatedApply.setStatus("0");
+                    relatedApply.setAuditOpinion("缺书已到货，申请已自动重新开放");
+                    relatedApply.setUpdateBy("system");
+                    bookPersonalApplyMapper.updateBookPersonalApply(relatedApply);
+                    log.info("【入库处理】已重新开放被驳回的个人领书申请, applyId={}", shortage.getSourceId());
+                    try {
+                        noticeService.sendNoticeToUser(
+                                relatedApply.getTeacherId(),
+                                "缺书到货-申请已重新开放",
+                                "您申请的《" + tbInbound.getBookName() + "》缺书已到货，领书申请已自动重新开放，请等待审核。",
+                                "4",
+                                shortage.getLackId()
+                        );
+                    } catch (Exception e) {
+                        log.warn("【入库处理】重新开放个人领书申请通知发送失败: {}", e.getMessage());
+                    }
                 }
             }
 
@@ -385,10 +363,12 @@ public class TbInboundServiceImpl implements ITbInboundService {
 
         if (tbInbound.getPurchaseId() != null) {
             TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(tbInbound.getPurchaseId());
-            if (purchase != null && "1".equals(purchase.getStatus())) {
+            if (purchase != null && ("4".equals(purchase.getStatus()) || "6".equals(purchase.getStatus()))) {
                 purchase.setStatus("5");
                 tbPurchaseMapper.updateTbPurchase(purchase);
                 log.info("【入库处理】采购单状态更新为'已入库', purchaseId={}", tbInbound.getPurchaseId());
+            } else if (purchase != null) {
+                log.warn("【入库处理】采购单状态不是'已到货'或'已发货'，跳过状态更新, purchaseId={}, currentStatus={}", tbInbound.getPurchaseId(), purchase.getStatus());
             }
         }
 

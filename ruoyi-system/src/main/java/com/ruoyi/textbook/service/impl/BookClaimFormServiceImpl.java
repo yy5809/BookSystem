@@ -104,6 +104,9 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
         if (form == null) {
             throw new ServiceException("领书单不存在");
         }
+        if ("2".equals(form.getStatus())) {
+            throw new ServiceException("该领书单已全部出库，不允许重复出库");
+        }
 
         List<BookClaimFormDetail> details = bookClaimFormDetailMapper.selectBookClaimFormDetailListByFormId(formId);
         if (details == null || details.isEmpty()) {
@@ -121,6 +124,17 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
         }
 
         int remainingToIssue = totalIssuedQtyParam;
+        int totalRemaining = 0;
+        for (BookClaimFormDetail d : details) {
+            int rem = d.getPlannedQty() - d.getIssuedQty();
+            if (rem > 0) totalRemaining += rem;
+        }
+        if (totalRemaining <= 0) {
+            throw new ServiceException("所有教材明细已出库完成，无需再次出库");
+        }
+
+        int actualTotalIssued = 0;
+        int originalTotalRemaining = totalRemaining;
 
         for (int i = 0; i < details.size(); i++) {
             BookClaimFormDetail detail = details.get(i);
@@ -135,12 +149,13 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
             }
 
             int actualIssueQty;
-            if (i == details.size() - 1) {
-                actualIssueQty = remainingToIssue;
+            if (i == details.size() - 1 || originalTotalRemaining == remainingForThisDetail) {
+                actualIssueQty = Math.min(remainingToIssue, remainingForThisDetail);
             } else {
-                double proportion = (double) detail.getPlannedQty() / totalPlannedQty;
-                actualIssueQty = (int) Math.round(totalIssuedQtyParam * proportion);
+                double proportion = (double) remainingForThisDetail / originalTotalRemaining;
+                actualIssueQty = (int) Math.round(remainingToIssue * proportion);
                 actualIssueQty = Math.min(actualIssueQty, remainingForThisDetail);
+                actualIssueQty = Math.min(actualIssueQty, remainingToIssue);
             }
 
             if (actualIssueQty <= 0) {
@@ -170,7 +185,8 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
             stockLog.setBizType("2");
             stockLog.setChangeNum(-actualIssueQty);
             stockLog.setBeforeStock(currentStock);
-            stockLog.setAfterStock(currentStock - actualIssueQty);
+            int actualAfterStock = tbInventoryMapper.selectStockNumByBookId(detail.getTextbookId());
+            stockLog.setAfterStock(actualAfterStock);
             stockLog.setOperatorId(operatorId);
             stockLog.setOperatorName(operatorName);
             stockLog.setRefBizType("CLAIM_FORM");
@@ -178,10 +194,13 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
             stockLog.setRemark("班级领书出库，领书单号：" + form.getFormNo() + "，班级：" + form.getClassName());
             stockLogService.insert(stockLog);
 
+            checkStockWarning(detail.getTextbookId(), detail.getBookName());
+
             remainingToIssue -= actualIssueQty;
+            actualTotalIssued += actualIssueQty;
         }
 
-        int newTotalIssued = form.getIssuedQty() + totalIssuedQtyParam;
+        int newTotalIssued = form.getIssuedQty() + actualTotalIssued;
         String newStatus;
         if (newTotalIssued >= form.getPlannedQty()) {
             newStatus = "2";
@@ -224,16 +243,22 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
                 .count();
 
         bookNoticeMapper.updateIssuedClasses(noticeId, (int) completedForms);
-
-        if (completedForms >= totalForms && totalForms > 0) {
-            bookNoticeMapper.updateNoticeStatus(noticeId, "3");
-        } else if (completedForms > 0) {
-            bookNoticeMapper.updateNoticeStatus(noticeId, "2");
-        }
     }
 
     @Override
     public List<BookClaimFormDetail> selectDetailsByFormId(Long formId) {
         return bookClaimFormDetailMapper.selectBookClaimFormDetailListByFormId(formId);
+    }
+
+    private void checkStockWarning(Long bookId, String bookName) {
+        try {
+            TbInventory inv = tbInventoryMapper.selectTbInventoryByBookId(bookId);
+            if (inv != null && inv.getWarningNum() != null && inv.getStockNum() <= inv.getWarningNum()) {
+                noticeService.sendStockWarningNotice(bookId, bookName, inv.getStockNum(), inv.getWarningNum());
+                log.info("【库存预警】教材《{}》库存{}本低于预警阈值{}本，已发送通知", bookName, inv.getStockNum(), inv.getWarningNum());
+            }
+        } catch (Exception e) {
+            log.warn("【库存预警】检查库存预警失败: {}", e.getMessage());
+        }
     }
 }

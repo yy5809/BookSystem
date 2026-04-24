@@ -74,7 +74,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitInbound">确 认 入 库</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitInbound">确 认 入 库</el-button>
         <el-button @click="inboundOpen = false">取 消</el-button>
       </div>
     </el-dialog>
@@ -112,6 +112,7 @@ export default {
   data() {
     return {
       loading: true,
+      submitLoading: false,
       total: 0,
       inboundList: [],
       showSearch: true,
@@ -164,6 +165,7 @@ export default {
         this.$modal.msgError("请输入有效的实收数量");
         return;
       }
+      this.submitLoading = true;
       const data = {
         buyId: this.inboundForm.buyId || this.inboundForm.id,
         actualQty: this.inboundForm.actualQty,
@@ -174,7 +176,7 @@ export default {
         this.$modal.msgSuccess("入库成功！库存已增加，流水已生成");
         this.inboundOpen = false;
         this.getList();
-      });
+      }).catch(() => {}).finally(() => { this.submitLoading = false; });
     },
     getQualityLabel(val) { return val === '1' ? '合格' : val === '2' ? '有瑕疵' : val === '3' ? '不合格' : '-'; }
   }

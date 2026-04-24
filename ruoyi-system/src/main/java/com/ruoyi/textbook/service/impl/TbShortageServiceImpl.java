@@ -23,6 +23,7 @@ import com.ruoyi.common.core.domain.entity.SysUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -88,7 +89,10 @@ public class TbShortageServiceImpl implements ITbShortageService
     @Transactional(rollbackFor = Exception.class)
     public int insertTbShortage(TbShortage tbShortage)
     {
-        // 根据ISBN查询教材信息获取book_id
+        if (StringUtils.isEmpty(tbShortage.getIsbn())) {
+            throw new ServiceException("ISBN不能为空，缺书登记必须指定教材ISBN");
+        }
+
         if (tbShortage.getIsbn() != null && !tbShortage.getIsbn().isEmpty()) {
             TbBook book = tbBookMapper.selectTbBookByIsbn(tbShortage.getIsbn());
             if (book != null) {
@@ -108,7 +112,15 @@ public class TbShortageServiceImpl implements ITbShortageService
                 newBook.setPrice(new java.math.BigDecimal(0));
                 newBook.setStatus("0");
                 newBook.setCreateBy(SecurityUtils.getUsername());
-                tbBookMapper.insertTbBook(newBook);
+                try {
+                    tbBookMapper.insertTbBook(newBook);
+                } catch (DuplicateKeyException dke) {
+                    newBook = tbBookMapper.selectTbBookByIsbn(tbShortage.getIsbn());
+                    if (newBook == null) {
+                        throw new ServiceException("ISBN=" + tbShortage.getIsbn() + "教材创建失败，请重试");
+                    }
+                    log.info("【缺书登记】ISBN={}并发创建冲突，使用已有教材记录", tbShortage.getIsbn());
+                }
                 // 使用新创建的教材ID
                 tbShortage.setBookId(newBook.getBookId());
                 log.info("【缺书登记】ISBN={}不存在，自动创建教材记录，ID={}", tbShortage.getIsbn(), newBook.getBookId());
@@ -118,13 +130,14 @@ public class TbShortageServiceImpl implements ITbShortageService
         if (tbShortage.getBookId() != null) {
             TbShortage existing = tbShortageMapper.selectTbShortageByBookId(tbShortage.getBookId());
             if (existing != null && ("0".equals(existing.getHandleStatus()) || "1".equals(existing.getHandleStatus()))) {
-                int newLackNum = (existing.getLackNum() != null ? existing.getLackNum() : 0)
-                        + (tbShortage.getLackNum() != null ? tbShortage.getLackNum() : 0);
-                existing.setLackNum(newLackNum);
-                existing.setUpdateTime(DateUtils.getNowDate());
-                tbShortageMapper.updateTbShortage(existing);
-                log.info("【缺书登记】ISBN={}已存在未处理缺书单，累加数量为{}", tbShortage.getIsbn(), newLackNum);
-                return 1;
+                int increment = tbShortage.getLackNum() != null ? tbShortage.getLackNum() : 0;
+                int rows = tbShortageMapper.incrementLackNum(existing.getLackId(), increment);
+                if (rows > 0) {
+                    log.info("【缺书登记】ISBN={}已存在未处理缺书单，原子累加数量{}", tbShortage.getIsbn(), increment);
+                    return 1;
+                } else {
+                    log.warn("【缺书登记】原子累加失败，缺书单可能已被处理，lackId={}", existing.getLackId());
+                }
             }
         }
 
@@ -224,6 +237,11 @@ public class TbShortageServiceImpl implements ITbShortageService
             return 0;
         }
 
+        String currentStatus = shortage.getHandleStatus();
+        if (!isValidStatusTransition(currentStatus, status)) {
+            throw new ServiceException("不允许从状态[" + getStatusName(currentStatus) + "]变更为[" + getStatusName(status) + "]");
+        }
+
         shortage.setHandleStatus(status);
         shortage.setUpdateTime(DateUtils.getNowDate());
         int rows = tbShortageMapper.updateTbShortage(shortage);
@@ -269,9 +287,9 @@ public class TbShortageServiceImpl implements ITbShortageService
                 log.warn("缺书记录不存在: id={}", id);
                 continue;
             }
-            if ("1".equals(s.getHandleStatus())) {
+            if ("1".equals(s.getHandleStatus()) || "3".equals(s.getHandleStatus()) || "4".equals(s.getHandleStatus())) {
                 skippedCount++;
-                log.debug("跳过已处理的缺书记录: id={}, isbn={}", id, s.getIsbn());
+                log.debug("跳过已处理/已补齐/已取消的缺书记录: id={}, isbn={}, status={}", id, s.getIsbn(), s.getHandleStatus());
                 continue;
             }
             allShortages.add(s);
@@ -284,8 +302,13 @@ public class TbShortageServiceImpl implements ITbShortageService
             return result;
         }
 
+        long nullIsbnCount = allShortages.stream().filter(s -> s.getIsbn() == null || s.getIsbn().isEmpty()).count();
+        if (nullIsbnCount > 0) {
+            throw new ServiceException("存在" + nullIsbnCount + "条缺书记录缺少ISBN，无法转为采购单，请先补充教材ISBN信息");
+        }
+
         Map<String, List<TbShortage>> groupedByIsbn = allShortages.stream()
-            .collect(Collectors.groupingBy(s -> s.getIsbn() != null ? s.getIsbn() : "UNKNOWN"));
+            .collect(Collectors.groupingBy(TbShortage::getIsbn));
 
         Long currentUserId = SecurityUtils.getUserId();
         SysUser currentUser = sysUserMapper.selectUserById(currentUserId);
@@ -402,11 +425,33 @@ public class TbShortageServiceImpl implements ITbShortageService
         return result;
     }
 
+    private boolean isValidStatusTransition(String from, String to) {
+        if (from == null || to == null || from.equals(to)) return false;
+        switch (from) {
+            case "0": return "1".equals(to) || "4".equals(to);
+            case "1": return "2".equals(to) || "3".equals(to) || "4".equals(to);
+            case "2": return "3".equals(to) || "4".equals(to);
+            default: return false;
+        }
+    }
+
+    private String getStatusName(String status) {
+        if (status == null) return "未知";
+        switch (status) {
+            case "0": return "未处理";
+            case "1": return "已纳入采购";
+            case "2": return "部分补齐";
+            case "3": return "已补齐";
+            case "4": return "已取消";
+            default: return status;
+        }
+    }
+
     /**
      * 检查当前用户是否为管理员
      */
     private boolean isAdmin() {
-        return SecurityUtils.getUsername().equals("admin");
+        return SecurityUtils.getLoginUser().getUser().isAdmin();
     }
 
     /**

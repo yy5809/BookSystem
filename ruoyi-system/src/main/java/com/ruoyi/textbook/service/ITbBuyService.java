@@ -14,6 +14,7 @@ public interface ITbBuyService {
     int audit(Long buyId, String status, String rejectReason);
     int confirmReceive(Long buyId);
     int delete(Long[] buyIds);
+    int deleteWithCheck(Long buyId);
     List<TbPurchaseDetail> selectDetailsByPurchaseId(Long purchaseId);
     List<TbPurchaseDetail> batchSelectDetailsByPurchaseIds(List<Long> purchaseIds);
     Map<String, Object> getUserOrderStats(Long userId);

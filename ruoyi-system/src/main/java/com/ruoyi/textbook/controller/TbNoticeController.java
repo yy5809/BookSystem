@@ -25,7 +25,14 @@ public class TbNoticeController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(SysNotice notice) {
         startPage();
-        if (!SecurityUtils.hasRole("admin") && !SecurityUtils.hasRole("warehouse")) {
+        if (SecurityUtils.hasRole("admin")) {
+        } else if (SecurityUtils.hasRole("warehouse")) {
+            notice.setUserType("2");
+        } else if (SecurityUtils.hasRole("supplier")) {
+            notice.setUserType("3");
+            notice.setTargetUserId(SecurityUtils.getUserId());
+        } else {
+            notice.setUserType("1");
             notice.setTargetUserId(SecurityUtils.getUserId());
         }
         List<SysNotice> list = noticeService.selectNoticeList(notice);
@@ -35,7 +42,14 @@ public class TbNoticeController extends BaseController {
     @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @GetMapping("/list/all")
     public TableDataInfo listAll(SysNotice notice) {
-        if (!SecurityUtils.hasRole("admin") && !SecurityUtils.hasRole("warehouse")) {
+        if (SecurityUtils.hasRole("admin")) {
+        } else if (SecurityUtils.hasRole("warehouse")) {
+            notice.setUserType("2");
+        } else if (SecurityUtils.hasRole("supplier")) {
+            notice.setUserType("3");
+            notice.setTargetUserId(SecurityUtils.getUserId());
+        } else {
+            notice.setUserType("1");
             notice.setTargetUserId(SecurityUtils.getUserId());
         }
         startPage();
@@ -50,6 +64,14 @@ public class TbNoticeController extends BaseController {
         SysNotice query = new SysNotice();
         query.setTargetUserId(userId);
         query.setReadStatus("0");
+        if (SecurityUtils.hasRole("warehouse")) {
+            query.setUserType("2");
+            query.setTargetUserId(null);
+        } else if (SecurityUtils.hasRole("supplier")) {
+            query.setUserType("3");
+        } else {
+            query.setUserType("1");
+        }
         List<SysNotice> unreadList = noticeService.selectNoticeList(query);
         int count = unreadList != null ? unreadList.size() : 0;
         return AjaxResult.success(count);
@@ -59,10 +81,24 @@ public class TbNoticeController extends BaseController {
     @GetMapping("/{noticeId}")
     public AjaxResult getInfo(@PathVariable Long noticeId) {
         SysNotice existing = noticeService.selectNoticeById(noticeId);
-        if (existing != null && existing.getTargetUserId() != null
-                && !existing.getTargetUserId().equals(SecurityUtils.getUserId())
-                && !SecurityUtils.hasRole("admin") && !SecurityUtils.hasRole("warehouse")) {
-            return AjaxResult.error("无权查看他人的通知");
+        if (existing == null) {
+            return AjaxResult.error("通知不存在");
+        }
+        if (SecurityUtils.hasRole("admin")) {
+        } else if (SecurityUtils.hasRole("warehouse")) {
+            if (!"2".equals(existing.getUserType())) {
+                return AjaxResult.error("无权查看该类型通知");
+            }
+        } else if (SecurityUtils.hasRole("supplier")) {
+            if (!"3".equals(existing.getUserType())
+                    || !SecurityUtils.getUserId().equals(existing.getTargetUserId())) {
+                return AjaxResult.error("无权查看该通知");
+            }
+        } else {
+            if (!"1".equals(existing.getUserType())
+                    || (existing.getTargetUserId() != null && !existing.getTargetUserId().equals(SecurityUtils.getUserId()))) {
+                return AjaxResult.error("无权查看该通知");
+            }
         }
         return AjaxResult.success(existing);
     }
@@ -72,9 +108,17 @@ public class TbNoticeController extends BaseController {
     @PutMapping("/read/{noticeId}")
     public AjaxResult markAsRead(@PathVariable Long noticeId) {
         SysNotice existing = noticeService.selectNoticeById(noticeId);
-        if (existing != null && existing.getTargetUserId() != null
+        if (existing == null) {
+            return AjaxResult.error("通知不存在");
+        }
+        if (existing.getTargetUserId() != null
                 && !existing.getTargetUserId().equals(SecurityUtils.getUserId())) {
             return AjaxResult.error("无权操作他人的通知");
+        }
+        if (existing.getTargetUserId() == null) {
+            if (!SecurityUtils.hasRole("admin") && !SecurityUtils.hasRole("warehouse")) {
+                return AjaxResult.error("无权操作此通知");
+            }
         }
         SysNotice notice = new SysNotice();
         notice.setNoticeId(noticeId);
@@ -113,6 +157,14 @@ public class TbNoticeController extends BaseController {
         SysNotice query = new SysNotice();
         query.setTargetUserId(userId);
         query.setReadStatus("0");
+        if (SecurityUtils.hasRole("warehouse")) {
+            query.setUserType("2");
+            query.setTargetUserId(null);
+        } else if (SecurityUtils.hasRole("supplier")) {
+            query.setUserType("3");
+        } else {
+            query.setUserType("1");
+        }
         List<SysNotice> unreadList = noticeService.selectNoticeList(query);
         if (unreadList != null && !unreadList.isEmpty()) {
             int count = 0;

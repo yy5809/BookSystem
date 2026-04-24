@@ -28,7 +28,22 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     @Override
     public SysNotice selectNoticeById(Long noticeId)
     {
-        return noticeMapper.selectNoticeById(noticeId);
+        SysNotice notice = noticeMapper.selectNoticeById(noticeId);
+        if (notice != null) {
+            com.ruoyi.common.core.domain.entity.SysUser user = com.ruoyi.common.utils.SecurityUtils.getLoginUser().getUser();
+            if (!user.isAdmin()) {
+                Long userId = com.ruoyi.common.utils.SecurityUtils.getUserId();
+                String userType = notice.getUserType();
+                Long targetUserId = notice.getTargetUserId();
+                if ("1".equals(userType) && !userId.equals(targetUserId)) {
+                    return null;
+                }
+                if ("3".equals(userType) && !userId.equals(targetUserId)) {
+                    return null;
+                }
+            }
+        }
+        return notice;
     }
 
     /**
@@ -40,6 +55,23 @@ public class SysNoticeServiceImpl implements ISysNoticeService
     @Override
     public List<SysNotice> selectNoticeList(SysNotice notice)
     {
+        if (notice.getTargetUserId() == null && notice.getUserType() == null) {
+            com.ruoyi.common.core.domain.entity.SysUser user = com.ruoyi.common.utils.SecurityUtils.getLoginUser().getUser();
+            boolean isAdmin = user.isAdmin();
+            if (!isAdmin) {
+                Long userId = com.ruoyi.common.utils.SecurityUtils.getUserId();
+                List<com.ruoyi.common.core.domain.entity.SysRole> roles = user.getRoles();
+                if (roles != null && roles.stream().anyMatch(r -> "teacher".equals(r.getRoleKey()))) {
+                    notice.setUserType("1");
+                    notice.setTargetUserId(userId);
+                } else if (roles != null && roles.stream().anyMatch(r -> "supplier".equals(r.getRoleKey()))) {
+                    notice.setUserType("3");
+                    notice.setTargetUserId(userId);
+                } else if (roles != null && roles.stream().anyMatch(r -> "warehouse".equals(r.getRoleKey()))) {
+                    notice.setUserType("2");
+                }
+            }
+        }
         return noticeMapper.selectNoticeList(notice);
     }
 

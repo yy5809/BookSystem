@@ -22,6 +22,9 @@ public interface TbSupplierMapper {
     // 删除供应商
     int deleteTbSupplierById(Long supplierId);
 
+    // 批量删除供应商
+    int deleteTbSupplierByIds(Long[] supplierIds);
+
     // 查询供应商列表
     List<TbSupplier> selectTbSupplierList(TbSupplier supplier);
 

@@ -18,6 +18,7 @@ import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.domain.TbOutbound;
 import com.ruoyi.textbook.domain.TbStockLog;
 import com.ruoyi.textbook.domain.dto.TbPurchaseImportDTO;
+import com.ruoyi.textbook.domain.dto.StockOperationResult;
 import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.textbook.mapper.TbOutboundMapper;
@@ -25,6 +26,7 @@ import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.mapper.TbStockLogMapper;
 import com.ruoyi.textbook.service.ITbBuyService;
+import com.ruoyi.textbook.service.IStockOperationService;
 import com.ruoyi.textbook.service.ITbStockLogService;
 import com.ruoyi.textbook.service.NoticeService;
 import com.ruoyi.textbook.enums.AuditStatusEnum;
@@ -84,6 +86,9 @@ public class TbBuyServiceImpl implements ITbBuyService {
     @Autowired
     private ITbStockLogService tbStockLogService;
 
+    @Autowired
+    private IStockOperationService stockOperationService;
+
     @Override
     public TbPurchase getById(Long buyId) {
         return tbPurchaseMapper.selectTbPurchaseById(buyId);
@@ -135,14 +140,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
 
         if (AuditStatusEnum.APPROVED.getCode().equals(status)) {
             if (!AuditStatusEnum.PENDING.getCode().equals(currentStatus)) {
-                noticeService.sendOrderApproveNotice(
-                    buy.getUserId(),
-                    details.stream().map(TbPurchaseDetail::getBookName).collect(Collectors.joining("、")),
-                    "1",
-                    "审核通过，请前往书库领取",
-                    buyId
-                );
-                return tbPurchaseMapper.updateTbPurchase(buy);
+                throw new ServiceException("只有待审核状态的采购单才能审核通过，当前状态不允许此操作");
             }
             
             StringBuilder shortageInfo = new StringBuilder();
@@ -183,7 +181,6 @@ public class TbBuyServiceImpl implements ITbBuyService {
             if (hasShortage) {
                 buy.setStatus(AuditStatusEnum.REJECTED.getCode());
                 buy.setRejectReason("部分教材库存不足，无法通过审核。详情：" + shortageInfo.toString());
-                tbPurchaseMapper.updateTbPurchase(buy);
 
                 noticeService.sendOrderApproveNotice(
                     buy.getUserId(),
@@ -193,7 +190,8 @@ public class TbBuyServiceImpl implements ITbBuyService {
                     buyId
                 );
 
-                throw new ServiceException("部分教材库存不足，已自动驳回并登记缺书单。\n" + shortageInfo.toString());
+                log.warn("【采购审核】采购单{}库存不足，已自动驳回并登记缺书单: {}", buy.getPurchaseNo(), shortageInfo);
+                return tbPurchaseMapper.updateTbPurchase(buy);
             }
 
             noticeService.sendOrderApproveNotice(
@@ -234,19 +232,17 @@ public class TbBuyServiceImpl implements ITbBuyService {
 
         List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
         for (TbPurchaseDetail detail : details) {
-            TbInventory stock = tbInventoryMapper.selectTbInventoryByBookId(detail.getBookId());
-            if (stock == null || stock.getStockNum() < detail.getQuantity()) {
-                throw new ServiceException("教材「" + detail.getBookName() + "」库存不足，无法出库");
-            }
-            int beforeStock = stock.getStockNum();
-            int currentVersion = stock.getVersion() != null ? stock.getVersion() : 0;
-            int rowsAffected = tbInventoryMapper.deductStockWithVersion(
+            StockOperationResult stockResult = stockOperationService.deductStock(
                     detail.getBookId(),
                     detail.getQuantity(),
-                    currentVersion
+                    SecurityUtils.getUserId(),
+                    SecurityUtils.getUsername(),
+                    "PURCHASE_RECEIVE",
+                    buyId,
+                    "采购单领书，单号：" + buy.getPurchaseNo()
             );
-            if (rowsAffected <= 0) {
-                throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
+            if (!stockResult.isSuccess()) {
+                throw new ServiceException("教材「" + detail.getBookName() + "」" + stockResult.getErrorMessage());
             }
 
             TbOutbound out = new TbOutbound();
@@ -259,21 +255,6 @@ public class TbBuyServiceImpl implements ITbBuyService {
             out.setReceiveId(buy.getUserId());
             out.setOperatorId(SecurityUtils.getUserId());
             tbOutboundMapper.insertTbOutbound(out);
-
-            TbStockLog stockLog = new TbStockLog();
-            stockLog.setBookId(detail.getBookId());
-            stockLog.setIsbn(detail.getIsbn());
-            stockLog.setBookName(detail.getBookName());
-            stockLog.setBizType("2");
-            stockLog.setChangeNum(-detail.getQuantity());
-            stockLog.setBeforeStock(beforeStock);
-            stockLog.setAfterStock(beforeStock - detail.getQuantity());
-            stockLog.setOperatorId(SecurityUtils.getUserId());
-            stockLog.setOperatorName(SecurityUtils.getUsername());
-            stockLog.setRefBizType("PURCHASE_RECEIVE");
-            stockLog.setRefBizId(buyId);
-            stockLog.setRemark("采购单领书，单号：" + buy.getPurchaseNo());
-            tbStockLogMapper.insert(stockLog);
         }
 
         buy.setStatus(PurchaseStatusEnum.RECEIVED.getCode());
@@ -282,8 +263,50 @@ public class TbBuyServiceImpl implements ITbBuyService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int delete(Long[] buyIds) {
+        for (Long buyId : buyIds) {
+            TbPurchase existing = tbPurchaseMapper.selectTbPurchaseById(buyId);
+            if (existing != null && !"0".equals(existing.getStatus())) {
+                throw new ServiceException("采购单[" + existing.getPurchaseNo() + "]非待审核状态，禁止删除");
+            }
+        }
+        for (Long buyId : buyIds) {
+            List<TbShortage> relatedShortages = tbShortageMapper.selectTbShortageListByPurchaseId(buyId);
+            if (relatedShortages != null) {
+                for (TbShortage shortage : relatedShortages) {
+                    if ("1".equals(shortage.getHandleStatus())) {
+                        shortage.setHandleStatus("0");
+                        shortage.setPurchaseId(null);
+                        shortage.setRemark("关联采购单已删除，状态回退为未处理");
+                        tbShortageMapper.updateTbShortage(shortage);
+                        log.info("【采购单删除】缺书单状态回退, lackId={}", shortage.getLackId());
+                    }
+                }
+            }
+        }
         return tbPurchaseMapper.deleteTbPurchaseByIds(buyIds);
+    }
+
+    @Override
+    public int deleteWithCheck(Long buyId) {
+        TbPurchase order = tbPurchaseMapper.selectTbPurchaseById(buyId);
+        if (order == null) {
+            throw new ServiceException("订单不存在");
+        }
+        if ("5".equals(order.getStatus())) {
+            throw new ServiceException("该采购单已入库，禁止删除。已入库的单据不可删除以保证数据完整性。");
+        }
+        if ("4".equals(order.getStatus())) {
+            throw new ServiceException("该采购单已到货，禁止删除。请先完成入库流程。");
+        }
+        if ("3".equals(order.getStatus())) {
+            throw new ServiceException("该订单已完成领书，禁止删除。已完成领书的单据不可删除以保证数据完整性。");
+        }
+        if ("1".equals(order.getStatus())) {
+            throw new ServiceException("该订单已审核通过，禁止删除。如需取消请联系库管员驳回。");
+        }
+        return delete(new Long[]{buyId});
     }
 
     @Override
@@ -439,7 +462,34 @@ public class TbBuyServiceImpl implements ITbBuyService {
                 } else {
                     TbBook book = tbBookMapper.selectTbBookByIsbn(dto.getIsbn().trim());
                     if (book == null) {
-                        rowError.append("系统中不存在该ISBN对应的教材[").append(dto.getIsbn()).append("]；"); hasError = true;
+                        try {
+                            book = new TbBook();
+                            book.setIsbn(dto.getIsbn().trim());
+                            book.setBookName(dto.getBookName() != null ? dto.getBookName().trim() : "待完善-" + dto.getIsbn().trim());
+                            book.setInfoStatus("0");
+                            book.setInfoSource("3");
+                            book.setStatus("0");
+                            book.setCreateBy(SecurityUtils.getUsername());
+                            book.setCreateTime(DateUtils.getNowDate());
+                            tbBookMapper.insertTbBook(book);
+
+                            TbInventory stock = new TbInventory();
+                            stock.setBookId(book.getBookId());
+                            stock.setStockNum(0);
+                            stock.setWarningNum(10);
+                            stock.setCreateTime(DateUtils.getNowDate());
+                            try {
+                                tbInventoryMapper.insertTbInventory(stock);
+                            } catch (org.springframework.dao.DuplicateKeyException dke) {
+                                log.info("【旧导入】库存记录并发冲突，跳过, bookId={}", book.getBookId());
+                            }
+                            log.info("【旧导入】自动创建教材, ISBN={}, bookId={}", dto.getIsbn(), book.getBookId());
+                        } catch (org.springframework.dao.DuplicateKeyException dke) {
+                            book = tbBookMapper.selectTbBookByIsbn(dto.getIsbn().trim());
+                            if (book == null) {
+                                rowError.append("教材创建失败，请重试；"); hasError = true;
+                            }
+                        }
                     }
                 }
 

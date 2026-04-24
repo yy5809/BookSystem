@@ -23,7 +23,7 @@ public class PurchaseNoGenerator {
         return "CG" + DateUtils.dateTimeNow("yyyyMMdd") + String.format("%04d", seq);
     }
 
-    public static void reset() {
+    private static void reset() {
         sequence.set(0);
     }
 }

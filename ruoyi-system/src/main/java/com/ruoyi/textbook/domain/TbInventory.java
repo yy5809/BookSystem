@@ -75,6 +75,11 @@ public class TbInventory extends BaseEntity {
     public String getStockStatus() { return stockStatus; }
     public void setStockStatus(String stockStatus) { this.stockStatus = stockStatus; }
 
+    public boolean isShortage() { return stockNum != null && stockNum <= 0; }
+    public boolean isWarning() { return stockNum != null && stockNum > 0 && warningNum != null && stockNum <= warningNum; }
+    public boolean isNormal() { return !isShortage() && !isWarning(); }
+    public boolean hasSufficientStock(Integer requiredQty) { return stockNum != null && stockNum >= requiredQty; }
+
     @Override
     public String toString() {
         return new org.apache.commons.lang3.builder.ToStringBuilder(this, org.apache.commons.lang3.builder.ToStringStyle.MULTI_LINE_STYLE)

@@ -37,7 +37,7 @@ public class TbPurchaseImportDTO {
     @Excel(name = "适用班级", sort = 5, width = 20)
     private String className;
 
-    @Excel(name = "备注", sort = 5, width = 30)
+    @Excel(name = "备注", sort = 6, width = 30)
     private String remark;
 
     @JsonIgnore

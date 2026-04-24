@@ -19,5 +19,7 @@ public interface BookNoticeMapper {
 
     public int updateNoticeStatus(@Param("noticeId") Long noticeId, @Param("status") String status);
 
+    public int updateNoticeStatusWithExpected(@Param("noticeId") Long noticeId, @Param("expectedStatus") String expectedStatus, @Param("newStatus") String newStatus);
+
     public int updateIssuedClasses(@Param("noticeId") Long noticeId, @Param("issuedClasses") Integer issuedClasses);
 }

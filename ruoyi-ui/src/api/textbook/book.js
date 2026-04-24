@@ -82,3 +82,12 @@ export function countIncompleteBook() {
     method: 'get'
   })
 }
+
+export function importBook(data) {
+  return request({
+    url: '/textbook/book/import',
+    method: 'post',
+    headers: { 'Content-Type': 'multipart/form-data' },
+    data: data
+  })
+}

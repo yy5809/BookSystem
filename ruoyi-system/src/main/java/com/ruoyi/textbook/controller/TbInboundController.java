@@ -1,5 +1,7 @@
 package com.ruoyi.textbook.controller;
 
+import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.annotation.RateLimiter;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -94,6 +96,7 @@ public class TbInboundController extends BaseController
      * 处理教材入库
      */
     @PreAuthorize("@ss.hasPermi('textbook:inbound:process') and @ss.hasAnyRoles('admin,warehouse')")
+    @RateLimiter(count = 10, time = 60)
     @PostMapping("/process")
     public AjaxResult process(@RequestBody TbInbound tbInbound)
     {

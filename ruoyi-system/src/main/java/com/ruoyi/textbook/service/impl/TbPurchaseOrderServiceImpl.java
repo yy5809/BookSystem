@@ -138,25 +138,35 @@ public class TbPurchaseOrderServiceImpl implements ITbPurchaseOrderService
     @Override
     public int updateTbPurchaseOrder(TbPurchaseOrder tbPurchaseOrder)
     {
+        TbPurchaseOrder existing = tbPurchaseOrderMapper.selectTbPurchaseOrderByOrderId(tbPurchaseOrder.getOrderId());
+        if (existing != null && ("1".equals(existing.getOrderStatus()) || "2".equals(existing.getOrderStatus()) || "3".equals(existing.getOrderStatus()))) {
+            throw new ServiceException("订单已审核/已领书/已拒绝，禁止修改");
+        }
         tbPurchaseOrder.setUpdateTime(DateUtils.getNowDate());
         return tbPurchaseOrderMapper.updateTbPurchaseOrder(tbPurchaseOrder);
     }
 
-    /**
-     * 批量删除购书订单
-     */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbPurchaseOrderByOrderIds(Long[] orderIds)
     {
+        for (Long orderId : orderIds) {
+            TbPurchaseOrder existing = tbPurchaseOrderMapper.selectTbPurchaseOrderByOrderId(orderId);
+            if (existing != null && !"0".equals(existing.getOrderStatus())) {
+                throw new ServiceException("订单[" + existing.getOrderNo() + "]不是待审核状态，禁止删除");
+            }
+        }
         return tbPurchaseOrderMapper.deleteTbPurchaseOrderByOrderIds(orderIds);
     }
 
-    /**
-     * 删除购书订单信息
-     */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbPurchaseOrderByOrderId(Long orderId)
     {
+        TbPurchaseOrder existing = tbPurchaseOrderMapper.selectTbPurchaseOrderByOrderId(orderId);
+        if (existing != null && !"0".equals(existing.getOrderStatus())) {
+            throw new ServiceException("订单[" + existing.getOrderNo() + "]不是待审核状态，禁止删除");
+        }
         return tbPurchaseOrderMapper.deleteTbPurchaseOrderByOrderId(orderId);
     }
 }

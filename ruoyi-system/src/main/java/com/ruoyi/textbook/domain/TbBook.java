@@ -110,6 +110,9 @@ public class TbBook extends BaseEntity {
     public String getInfoSource() { return infoSource; }
     public void setInfoSource(String infoSource) { this.infoSource = infoSource; }
 
+    public boolean isInfoComplete() { return "1".equals(this.infoStatus); }
+    public boolean isInfoIncomplete() { return "0".equals(this.infoStatus); }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)

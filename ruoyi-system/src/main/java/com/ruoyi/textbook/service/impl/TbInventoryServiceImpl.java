@@ -2,6 +2,7 @@ package com.ruoyi.textbook.service.impl;
 
 import java.util.List;
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,8 @@ import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.domain.TbInventory;
 import com.ruoyi.textbook.domain.TbBook;
 import com.ruoyi.textbook.service.ITbInventoryService;
+import com.ruoyi.textbook.domain.BookStockFlow;
+import com.ruoyi.textbook.mapper.BookStockFlowMapper;
 
 /**
  * 教材库存Service业务层处理
@@ -25,6 +28,9 @@ public class TbInventoryServiceImpl implements ITbInventoryService
 
     @Autowired
     private TbBookMapper tbBookMapper;
+
+    @Autowired
+    private BookStockFlowMapper stockFlowMapper;
 
     /**
      * 查询教材库存
@@ -114,6 +120,7 @@ public class TbInventoryServiceImpl implements ITbInventoryService
         if (inventory == null) {
             throw new ServiceException("库存记录不存在，bookId=" + bookId);
         }
+        int beforeStock = inventory.getStockNum();
         int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
         int rowsAffected = tbInventoryMapper.addStockWithVersion(
                 bookId,
@@ -123,6 +130,9 @@ public class TbInventoryServiceImpl implements ITbInventoryService
         if (rowsAffected <= 0) {
             throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
         }
+        int afterStock = beforeStock + quantity;
+        String businessNo = "STOCK_INCR_" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + "_" + bookId;
+        recordStockFlow(bookId, quantity, beforeStock, afterStock, "2", businessNo);
         return rowsAffected;
     }
 
@@ -143,6 +153,7 @@ public class TbInventoryServiceImpl implements ITbInventoryService
         if (stock.getStockNum() < quantity) {
             throw new ServiceException("库存不足：当前库存" + stock.getStockNum() + "本，需要扣减" + quantity + "本");
         }
+        int beforeStock = stock.getStockNum();
         int currentVersion = stock.getVersion() != null ? stock.getVersion() : 0;
         int rowsAffected = tbInventoryMapper.deductStockWithVersion(
                 bookId,
@@ -152,36 +163,17 @@ public class TbInventoryServiceImpl implements ITbInventoryService
         if (rowsAffected <= 0) {
             throw new ServiceException("并发冲突：该教材库存已被其他操作修改，请刷新后重试");
         }
+        int afterStock = beforeStock - quantity;
+        String businessNo = "STOCK_DECR_" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + "_" + bookId;
+        recordStockFlow(bookId, -quantity, beforeStock, afterStock, "3", businessNo);
         return rowsAffected;
     }
 
-    /**
-     * 安全扣减库存（带乐观锁）
-     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int safeDecreaseStock(Long bookId, Integer quantity)
     {
-        if (bookId == null || quantity == null || quantity <= 0) {
-            throw new ServiceException("参数无效：bookId和quantity必须大于0");
-        }
-        TbInventory stock = tbInventoryMapper.selectTbInventoryByBookId(bookId);
-        if (stock == null) {
-            throw new ServiceException("库存记录不存在，bookId=" + bookId);
-        }
-        if (stock.getStockNum() < quantity) {
-            throw new ServiceException("库存不足：当前库存" + stock.getStockNum() + "本，需要扣减" + quantity + "本");
-        }
-        int currentVersion = stock.getVersion() != null ? stock.getVersion() : 0;
-        int rowsAffected = tbInventoryMapper.deductStockWithVersion(
-                bookId,
-                quantity,
-                currentVersion
-        );
-        if (rowsAffected <= 0) {
-            throw new ServiceException("库存扣减失败，可能存在并发操作，请重试");
-        }
-        return rowsAffected;
+        return decreaseStock(bookId, quantity);
     }
 
     /**
@@ -211,5 +203,19 @@ public class TbInventoryServiceImpl implements ITbInventoryService
     public int deleteTbInventoryByInventoryId(Long inventoryId)
     {
         return tbInventoryMapper.deleteTbInventoryById(inventoryId);
+    }
+
+    private void recordStockFlow(Long bookId, int changeQty, int stockBefore, int stockAfter,
+                                  String businessType, String businessNo) {
+        BookStockFlow flow = new BookStockFlow();
+        flow.setTextbookId(bookId);
+        flow.setBusinessType(businessType);
+        flow.setBusinessNo(businessNo);
+        flow.setChangeQty(changeQty);
+        flow.setStockBefore(stockBefore);
+        flow.setStockAfter(stockAfter);
+        flow.setOperator(SecurityUtils.getUsername());
+        flow.setOperateTime(new java.util.Date());
+        stockFlowMapper.insertBookStockFlow(flow);
     }
 }

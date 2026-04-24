@@ -97,6 +97,11 @@
         where notice_id = #{noticeId} and del_flag = '0'
     </update>
 
+    <update id="updateNoticeStatusWithExpected">
+        update textbook_notice set status = #{newStatus}, update_time = sysdate()
+        where notice_id = #{noticeId} and status = #{expectedStatus} and del_flag = '0'
+    </update>
+
     <update id="updateIssuedClasses">
         update textbook_notice set issued_classes = #{issuedClasses},
             <choose>

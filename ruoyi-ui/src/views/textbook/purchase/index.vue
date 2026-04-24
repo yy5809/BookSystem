@@ -41,37 +41,56 @@
 
     <!-- 导入弹窗 -->
     <el-dialog title="Excel导入采购单" :visible.sync="importDialogVisible" width="720px" append-to-body :close-on-click-modal="false">
-      <div class="import-step" v-if="!importResult">
-        <el-alert title="请按以下步骤操作" type="info" :closable="false" show-icon style="margin-bottom: 15px;">
-          <template slot="default">
-            <ol style="margin: 5px 0 0 18px; line-height: 1.8; font-size: 13px;">
-              <li>点击下方按钮<strong>下载标准模板</strong></li>
-              <li>按照模板格式填写数据（ISBN必须存在于系统中）</li>
-              <li>选择文件并上传，系统自动校验</li>
-            </ol>
-          </template>
-        </el-alert>
+      <el-steps :active="importStep" align-center style="margin-bottom: 20px;">
+        <el-step title="下载模板" description="下载标准导入模板"></el-step>
+        <el-step title="上传文件" description="选择填好的Excel文件"></el-step>
+        <el-step title="确认导入" description="确认数据并执行导入"></el-step>
+      </el-steps>
 
+      <!-- 步骤1：下载模板 -->
+      <div v-if="importStep === 0" style="text-align: center; padding: 30px 0;">
+        <i class="el-icon-download" style="font-size: 48px; color: #409EFF;"></i>
+        <p style="margin: 15px 0; color: #606266;">请先下载标准导入模板，按模板格式填写采购数据</p>
+        <el-button type="primary" icon="el-icon-download" @click="downloadTemplate" plain>下载导入模板</el-button>
+        <div style="margin-top: 20px;">
+          <el-button type="primary" @click="importStep = 1">下一步 <i class="el-icon-arrow-right"></i></el-button>
+        </div>
+      </div>
+
+      <!-- 步骤2：上传文件 -->
+      <div v-if="importStep === 1 && !importResult">
         <el-upload ref="uploadRef"
                    drag
                    :auto-upload="false"
                    :limit="1"
-                   accept=".xlsx,.xls"
+                   accept=".xlsx"
                    :on-change="handleFileChange"
                    :on-remove="handleFileRemove"
-                   :before-upload="beforeUpload"
                    :file-list="fileList"
                    action=""
                    class="upload-area">
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
           <div slot="tip" class="el-upload__tip">
-            仅支持 .xlsx/.xls 格式，文件 ≤ 10MB，单次 ≤ 1000 行
+            仅支持 .xlsx 格式，文件 ≤ 10MB，单次 ≤ 1000 行
           </div>
         </el-upload>
-
         <div style="text-align: center; margin-top: 20px;">
-          <el-button type="primary" icon="el-icon-download" @click="downloadTemplate" plain>下载导入模板</el-button>
+          <el-button @click="importStep = 0"><i class="el-icon-arrow-left"></i> 上一步</el-button>
+          <el-button type="primary" @click="importStep = 2" :disabled="!selectedFile">下一步 <i class="el-icon-arrow-right"></i></el-button>
+        </div>
+      </div>
+
+      <!-- 步骤3：确认导入 -->
+      <div v-if="importStep === 2 && !importResult" style="text-align: center; padding: 20px 0;">
+        <el-alert title="请确认导入信息" type="warning" :closable="false" show-icon style="margin-bottom: 15px;">
+          <template slot="default">
+            <p>已选择文件：<strong>{{ selectedFile ? selectedFile.name : '未选择' }}</strong></p>
+            <p>点击"开始导入"按钮执行导入操作</p>
+          </template>
+        </el-alert>
+        <div style="margin-top: 20px;">
+          <el-button @click="importStep = 1"><i class="el-icon-arrow-left"></i> 上一步</el-button>
           <el-button type="warning" icon="el-icon-upload2" @click="startImport" :disabled="!selectedFile || isUploading" :loading="isUploading">
             {{ isUploading ? '正在导入...' : '开始导入' }}
           </el-button>
@@ -177,6 +196,7 @@ export default {
         pageSize: 10
       },
       importDialogVisible: false,
+      importStep: 0,
       selectedFile: null,
       fileList: [],
       isUploading: false,
@@ -201,16 +221,17 @@ export default {
     },
 
     statusText(status) {
-      const map = { '0': '待审核', '1': '已通过', '2': '已驳回' }
+      const map = { '0': '待审核', '1': '已通过', '2': '已驳回', '3': '已领书', '4': '已到货', '5': '已入库', '6': '已发货' }
       return map[status] || '未知'
     },
     statusTagType(status) {
-      const map = { '0': 'warning', '1': 'success', '2': 'danger' }
+      const map = { '0': 'warning', '1': 'success', '2': 'danger', '3': '', '4': 'info', '5': 'success', '6': '' }
       return map[status] || ''
     },
 
     handleImport() {
       this.importDialogVisible = true
+      this.importStep = 0
       this.resetImportState()
     },
     resetImportState() {

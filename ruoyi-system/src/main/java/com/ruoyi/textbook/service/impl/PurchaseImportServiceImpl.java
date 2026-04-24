@@ -21,6 +21,7 @@ import com.ruoyi.textbook.util.PurchaseNoGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,14 +56,14 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
     public Map<String, Object> importFromExcel(List<TbPurchaseImportDTO> dataList, Long operatorId, String operatorName, String fileHash) {
         log.info("【Excel导入】开始处理, 总行数={}, 操作人={}, 文件哈希={}", dataList.size(), operatorName, fileHash);
 
-        // 防重复导入校验
-        if (fileHash != null && !fileHash.isEmpty()) {
-            log.info("【Excel导入】检查文件是否重复导入");
-            TbPurchase existing = tbPurchaseMapper.selectByFileHash(fileHash);
-            if (existing != null) {
-                log.warn("【Excel导入】文件重复导入，采购单号：{}", existing.getPurchaseNo());
-                throw new ServiceException("该文件已导入过，采购单号：" + existing.getPurchaseNo() + "，请勿重复导入");
-            }
+        if (fileHash == null || fileHash.isEmpty()) {
+            throw new ServiceException("文件校验信息缺失，无法进行防重复检查，请重新上传");
+        }
+        log.info("【Excel导入】检查文件是否重复导入");
+        TbPurchase existing = tbPurchaseMapper.selectByFileHash(fileHash);
+        if (existing != null) {
+            log.warn("【Excel导入】文件重复导入，采购单号：{}", existing.getPurchaseNo());
+            throw new ServiceException("该文件已导入过，采购单号：" + existing.getPurchaseNo() + "，请勿重复导入");
         }
 
         List<TbPurchaseImportDTO> successList = new ArrayList<>();
@@ -70,8 +71,7 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         List<TbPurchaseImportDTO> autoCreatedList = new ArrayList<>();
         AtomicInteger autoCreatedCount = new AtomicInteger(0);
 
-        // 数据校验阶段
-        log.info("【Excel导入】开始数据校验阶段");
+        log.info("【Excel导入】开始数据校验阶段（校验阶段无数据库写入，无需事务）");
         for (int i = 0; i < dataList.size(); i++) {
             TbPurchaseImportDTO dto = dataList.get(i);
             dto.setRowIndex(i + 2);
@@ -93,15 +93,14 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
 
         if (successList.isEmpty()) {
             log.warn("【Excel导入】所有数据行校验失败");
-            return buildResult(dataList.size(), 0, failList, "所有数据行校验失败");
+            return buildResult(dataList.size(), 0, failList, "所有数据行校验失败", 0, java.util.Collections.emptyList());
         }
 
-        // 创建采购主单
         log.info("【Excel导入】开始创建采购主单");
         TbPurchase purchase = new TbPurchase();
         String purchaseNo = PurchaseNoGenerator.generateWithUUID();
         purchase.setPurchaseNo(purchaseNo);
-        purchase.setStatus("0"); // 待审核
+        purchase.setStatus("0");
         purchase.setFileHash(fileHash);
         purchase.setCreateBy(operatorName);
         purchase.setCreateTime(DateUtils.getNowDate());
@@ -109,19 +108,16 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
 
         int result = tbPurchaseMapper.insertTbPurchase(purchase);
         if (result <= 0) {
-            log.error("【Excel导入】创建采购主单失败");
             throw new ServiceException("创建采购主单失败");
         }
-
+        Long purchaseId = purchase.getBuyId();
         log.info("【Excel导入】采购主单已创建: {}", purchaseNo);
 
-        // 处理采购明细
-        log.info("【Excel导入】开始处理采购明细");
+        log.info("【Excel导入】开始处理采购明细（单行异常被catch不传播，不触发事务回滚）");
         int detailSuccessCount = 0;
         for (int i = 0; i < successList.size(); i++) {
             TbPurchaseImportDTO dto = successList.get(i);
             try {
-                // 检查教材是否存在
                 TbBook book = tbBookMapper.selectTbBookByIsbn(dto.getIsbn());
                 if (book == null) {
                     book = new TbBook();
@@ -132,22 +128,33 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
                     book.setStatus("0");
                     book.setCreateBy(operatorName);
                     book.setCreateTime(DateUtils.getNowDate());
-                    tbBookMapper.insertTbBook(book);
+                    try {
+                        tbBookMapper.insertTbBook(book);
+                    } catch (DuplicateKeyException dke) {
+                        book = tbBookMapper.selectTbBookByIsbn(dto.getIsbn());
+                        if (book == null) {
+                            throw new ServiceException("ISBN=" + dto.getIsbn() + "教材创建失败，请重试");
+                        }
+                        log.info("【Excel导入】ISBN={}并发创建冲突，使用已有教材记录", dto.getIsbn());
+                    }
 
                     TbInventory stock = new TbInventory();
                     stock.setBookId(book.getBookId());
                     stock.setStockNum(0);
                     stock.setWarningNum(10);
-                    tbInventoryMapper.insertTbInventory(stock);
+                    try {
+                        tbInventoryMapper.insertTbInventory(stock);
+                    } catch (DuplicateKeyException dke2) {
+                        log.info("【Excel导入】教材库存记录已存在，跳过创建, bookId={}", book.getBookId());
+                    }
 
                     autoCreatedCount.incrementAndGet();
                     autoCreatedList.add(dto);
                     log.info("【Excel导入】自动创建教材: ISBN={}, 书名={}", dto.getIsbn(), dto.getBookName());
                 }
 
-                // 创建采购明细
                 TbPurchaseDetail detail = new TbPurchaseDetail();
-                detail.setPurchaseId(purchase.getBuyId());
+                detail.setPurchaseId(purchaseId);
                 detail.setBookId(book.getBookId());
                 detail.setBookName(book.getBookName());
                 detail.setIsbn(dto.getIsbn());
@@ -157,11 +164,10 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
                 tbPurchaseMapper.insertTbPurchaseDetail(detail);
                 detailSuccessCount++;
 
-                // 关联缺书单
                 TbShortage shortage = findMatchingShortage(dto.getIsbn(), dto.getQuantity());
                 if (shortage != null) {
                     shortage.setHandleStatus("1");
-                    shortage.setSourceId(purchase.getBuyId());
+                    shortage.setPurchaseId(purchaseId);
                     shortage.setRemark("已纳入采购单" + purchaseNo);
                     tbShortageMapper.updateTbShortage(shortage);
                     log.info("【Excel导入】缺书单已关联, lackId={}, ISBN={}", shortage.getLackId(), dto.getIsbn());
@@ -180,17 +186,19 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
 
         log.info("【Excel导入】明细处理完成，成功={}, 失败={}", detailSuccessCount, successList.size() - detailSuccessCount);
 
-        // 发送通知
+        if (detailSuccessCount == 0) {
+            throw new ServiceException("所有明细处理失败，采购单未创建。请修正数据后重新导入");
+        }
+
         if (detailSuccessCount > 0) {
             try {
-                noticeService.sendPurchaseCreateNotice(purchase.getBuyId(), purchaseNo, detailSuccessCount);
+                noticeService.sendPurchaseCreateNotice(purchaseId, purchaseNo, detailSuccessCount);
                 log.info("【Excel导入】采购单创建通知发送成功");
             } catch (Exception e) {
                 log.warn("【Excel导入】发送采购单创建通知失败: {}", e.getMessage(), e);
             }
         }
 
-        // 构建结果
         log.info("【Excel导入】完成! 总记录数={}, 成功={}, 失败={}, 自动新增={}, 采购单号={}", dataList.size(), detailSuccessCount, failList.size(), autoCreatedCount.get(), purchaseNo);
         return buildResult(dataList.size(), detailSuccessCount, failList, purchaseNo, autoCreatedCount.get(), autoCreatedList);
     }

@@ -2,6 +2,7 @@ package com.ruoyi.textbook.mapper;
 
 import com.ruoyi.textbook.domain.TbShortage;
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 缺书登记信息Mapper接口
@@ -71,4 +72,6 @@ public interface TbShortageMapper
     public List<TbShortage> selectTbShortageListByIsbn(String isbn);
 
     public List<TbShortage> selectTbShortageListByPurchaseId(Long purchaseId);
+
+    public int incrementLackNum(@Param("lackId") Long lackId, @Param("increment") int increment);
 }

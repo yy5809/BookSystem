@@ -45,7 +45,7 @@
           <div class="card-info">
             <div class="card-title">待到货采购</div>
             <div class="card-number">{{ stats.pendingPurchaseCount }}</div>
-            <div class="card-desc">采购中/已到货</div>
+            <div class="card-desc">采购中/已发货</div>
           </div>
         </div>
       </el-col>
@@ -124,6 +124,7 @@ import { listPersonalApply } from "@/api/textbook/personalApply";
 import { listNotice } from "@/api/textbook/notice";
 import { countIncompleteBook } from "@/api/textbook/book";
 import { getShortageList } from "@/api/textbook/shortage";
+import { listPurchase } from "@/api/textbook/purchase";
 
 export default {
   name: "WarehouseDashboard",
@@ -165,6 +166,13 @@ export default {
 
       getShortageList({ handleStatus: '0', pageNum: 1, pageSize: 1 }).then(response => {
         this.stats.pendingShortageCount = response.total || 0;
+      }).catch(() => {});
+
+      listPurchase({ status: '1', pageNum: 1, pageSize: 1 }).then(response => {
+        this.stats.pendingPurchaseCount = response.total || 0;
+        listPurchase({ status: '6', pageNum: 1, pageSize: 1 }).then(res => {
+          this.stats.pendingPurchaseCount += (res.total || 0);
+        }).catch(() => {});
       }).catch(() => {});
     }
   }

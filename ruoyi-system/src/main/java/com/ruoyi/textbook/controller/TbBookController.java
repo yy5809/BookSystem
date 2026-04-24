@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.annotation.RateLimiter;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -86,7 +89,7 @@ public class TbBookController extends BaseController {
         return toAjax(tbBookService.deleteTbBookByBookId(bookId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:book:quickAdd')")
+    @PreAuthorize("@ss.hasPermi('textbook:book:quickAdd') and @ss.hasAnyRoles('admin,warehouse,teacher')")
     @Log(title = "教材快速新增", businessType = BusinessType.INSERT)
     @PostMapping("/quickAdd")
     public AjaxResult quickAdd(@RequestBody TbBook tbBook) {
@@ -94,7 +97,7 @@ public class TbBookController extends BaseController {
         return AjaxResult.success(result);
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:book:edit')")
+    @PreAuthorize("@ss.hasPermi('textbook:book:edit') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "补充完善教材信息", businessType = BusinessType.UPDATE)
     @PutMapping("/completeInfo")
     public AjaxResult completeInfo(@RequestBody TbBook tbBook) {
@@ -112,5 +115,35 @@ public class TbBookController extends BaseController {
     @GetMapping("/countIncomplete")
     public AjaxResult countIncomplete() {
         return AjaxResult.success(tbBookService.countIncompleteBook());
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:book:import') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "教材信息导入", businessType = BusinessType.IMPORT)
+    @RateLimiter(count = 5, time = 60)
+    @PostMapping("/import")
+    public AjaxResult importBook(@RequestParam("file") MultipartFile file) throws Exception {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.endsWith(".xlsx")) {
+            return error("仅支持 .xlsx 格式的Excel文件");
+        }
+        if (file.getSize() > 10 * 1024 * 1024) {
+            return error("文件大小不能超过10MB");
+        }
+        ExcelUtil<TbBook> util = new ExcelUtil<>(TbBook.class);
+        List<TbBook> bookList = util.importExcel(file.getInputStream());
+        if (bookList == null || bookList.isEmpty()) {
+            return error("Excel文件中没有有效数据");
+        }
+        int successCount = 0;
+        int failCount = 0;
+        for (TbBook book : bookList) {
+            try {
+                tbBookService.quickAdd(book);
+                successCount++;
+            } catch (Exception e) {
+                failCount++;
+            }
+        }
+        return success("导入完成：成功" + successCount + "条，失败" + failCount + "条");
     }
 }

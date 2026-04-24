@@ -98,7 +98,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -151,6 +151,7 @@ export default {
   data() {
     return {
       loading: true,
+      submitLoading: false,
       total: 0,
       shortageList: [],
       showSearch: true,
@@ -238,18 +239,19 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          this.submitLoading = true;
           if (this.form.lackId != null) {
             updateShortage(this.form).then(() => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
-            });
+            }).catch(() => {}).finally(() => { this.submitLoading = false; });
           } else {
             addShortage(this.form).then(() => {
               this.$modal.msgSuccess("登记成功");
               this.open = false;
               this.getList();
-            });
+            }).catch(() => {}).finally(() => { this.submitLoading = false; });
           }
         }
       });

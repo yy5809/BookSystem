@@ -9,6 +9,7 @@ import com.ruoyi.textbook.domain.TbSupplier;
 import com.ruoyi.textbook.domain.vo.SupplierVO;
 import com.ruoyi.textbook.mapper.TbSupplierMapper;
 import com.ruoyi.textbook.service.ITbSupplierService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 供应商管理 服务层实现
@@ -71,12 +72,9 @@ public class TbSupplierServiceImpl implements ITbSupplierService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int deleteTbSupplierByIds(Long[] supplierIds) {
-        int count = 0;
-        for (Long supplierId : supplierIds) {
-            count += tbSupplierMapper.deleteTbSupplierById(supplierId);
-        }
-        return count;
+        return tbSupplierMapper.deleteTbSupplierByIds(supplierIds);
     }
 
     @Override

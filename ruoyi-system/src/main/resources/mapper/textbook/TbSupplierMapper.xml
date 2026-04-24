@@ -97,6 +97,11 @@
         UPDATE textbook_supplier SET del_flag = '1' WHERE supplier_id = #{supplierId}
     </delete>
 
+    <delete id="deleteTbSupplierByIds" parameterType="Long[]">
+        UPDATE textbook_supplier SET del_flag = '1' WHERE supplier_id IN
+        <foreach item="supplierId" collection="array" open="(" separator="," close=")">#{supplierId}</foreach>
+    </delete>
+
     <select id="selectTbSupplierList" parameterType="com.ruoyi.textbook.domain.TbSupplier" resultMap="TbSupplierResult">
         <include refid="selectTbSupplierVo"/>
         <if test="supplierName != null and supplierName != ''">

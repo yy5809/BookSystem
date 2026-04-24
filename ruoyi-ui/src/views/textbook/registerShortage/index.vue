@@ -26,7 +26,7 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
-          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:list']">取消</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:edit']">取消</el-button>
         </template>
       </el-table-column>
     </el-table>

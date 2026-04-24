@@ -26,6 +26,7 @@ public class SysNotice extends BaseEntity
     private String noticeType;
 
     /** 公告内容 */
+    @Xss
     private String noticeContent;
 
     /** 公告状态（0正常 1关闭） */

@@ -63,7 +63,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitOutbound">确 认 出 库</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitOutbound">确 认 出 库</el-button>
         <el-button @click="outboundOpen = false">取 消</el-button>
       </div>
     </el-dialog>
@@ -115,6 +115,7 @@ export default {
   data() {
     return {
       loading: true,
+      submitLoading: false,
       ids: [],
       total: 0,
       claimFormList: [],
@@ -173,6 +174,7 @@ export default {
         this.$modal.msgError("请填写领书人姓名");
         return;
       }
+      this.submitLoading = true;
       const data = {
         formId: this.outboundForm.formId,
         issuedQty: this.outboundForm.issuedQty,
@@ -182,7 +184,7 @@ export default {
         this.$modal.msgSuccess("出库成功！库存已扣减，流水已生成");
         this.outboundOpen = false;
         this.getList();
-      });
+      }).catch(() => {}).finally(() => { this.submitLoading = false; });
     },
     handlePrint(row) {
       const token = getToken();

@@ -159,11 +159,11 @@ export default {
       this.detailOpen = true;
     },
     getBizTypeTag(type) {
-      const map = { '1': 'success', '2': 'warning', '3': 'info', '4': 'danger', '5': 'primary' };
+      const map = { '1': 'success', '2': 'warning', '3': 'info', '4': 'danger', '5': 'primary', '6': 'danger', '7': 'success', '8': '', '9': 'warning' };
       return map[type] || '';
     },
     getBizTypeLabel(type) {
-      const map = { '1': '领书单', '2': '采购单', '3': '入库单', '4': '缺书登记', '5': '其他' };
+      const map = { '1': '领书单', '2': '采购单', '3': '入库单', '4': '缺书登记', '5': '供应商通知', '6': '库存预警', '7': '班级领书出库', '8': '领书通知发布', '9': '供应商发货' };
       return map[type] || type;
     }
   }

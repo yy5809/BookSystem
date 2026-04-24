@@ -23,7 +23,7 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['textbook:personalApply:add']">新增</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd" :loading="bookListLoading" v-hasPermi="['textbook:personalApply:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete" v-hasPermi="['textbook:personalApply:remove']">删除</el-button>
@@ -96,7 +96,7 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -144,7 +144,7 @@
         </template>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitAudit">确 定</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitAudit">确 定</el-button>
         <el-button @click="auditOpen = false">取 消</el-button>
       </div>
     </el-dialog>
@@ -183,6 +183,8 @@ export default {
   data() {
     return {
       loading: true,
+      submitLoading: false,
+      bookListLoading: false,
       ids: [],
       single: true,
       multiple: true,
@@ -229,9 +231,10 @@ export default {
       });
     },
     getBookList() {
+      this.bookListLoading = true;
       listBook({}).then(response => {
         this.bookList = response.rows || [];
-      });
+      }).finally(() => { this.bookListLoading = false; });
     },
     handleBookSelect(val) {
       const book = this.bookList.find(b => b.bookId === val);
@@ -276,11 +279,12 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          this.submitLoading = true;
           addPersonalApply(this.form).then(response => {
             this.$modal.msgSuccess("申请成功");
             this.open = false;
             this.getList();
-          });
+          }).catch(() => {}).finally(() => { this.submitLoading = false; });
         }
       });
     },
@@ -304,11 +308,12 @@ export default {
     submitAudit() {
       this.$refs["auditForm"].validate(valid => {
         if (valid) {
+          this.submitLoading = true;
           auditApply(this.auditForm).then(response => {
             this.$modal.msgSuccess("审核完成");
             this.auditOpen = false;
             this.getList();
-          });
+          }).catch(() => {}).finally(() => { this.submitLoading = false; });
         }
       });
     },

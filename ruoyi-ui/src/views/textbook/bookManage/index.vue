@@ -40,22 +40,25 @@
       <el-col :span="1.5">
         <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleExport" v-hasPermi="['textbook:book:export']">导出</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button type="info" plain icon="el-icon-upload2" size="mini" @click="handleImport" v-hasPermi="['textbook:book:import']">导入</el-button>
+      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="bookList" @selection-change="handleSelectionChange" border stripe>
+    <el-table v-loading="loading" :data="bookList" @selection-change="handleSelectionChange" border stripe :row-class-name="tableRowClassName">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="180" />
-      <el-table-column label="作者" align="center" prop="author" width="100" />
-      <el-table-column label="出版社" align="center" prop="publisher" width="120" />
+      <el-table-column label="作者" align="center" prop="author" width="100" show-overflow-tooltip />
+      <el-table-column label="出版社" align="center" prop="publisher" width="120" show-overflow-tooltip />
       <el-table-column label="定价" align="center" prop="price" width="80">
         <template slot-scope="scope">
           <span v-if="scope.row.price">¥{{ scope.row.price }}</span>
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="适用课程" align="center" prop="courseName" width="120" />
+      <el-table-column label="适用课程" align="center" prop="courseName" width="120" show-overflow-tooltip />
       <el-table-column label="教材类型" align="center" prop="textbookType" width="80">
         <template slot-scope="scope">
           <el-tag size="mini" :type="scope.row.textbookType === '1' ? '' : scope.row.textbookType === '2' ? 'warning' : 'info'">
@@ -265,6 +268,27 @@
         <el-button @click="completeOpen = false">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="教材信息导入" :visible.sync="importOpen" width="400px" append-to-body :close-on-click-modal="false">
+      <el-upload
+        ref="importUpload"
+        action="#"
+        :limit="1"
+        accept=".xlsx"
+        :auto-upload="false"
+        :on-change="handleImportFileChange"
+        :file-list="importFileList"
+        drag
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip" slot="tip">仅支持 .xlsx 格式，文件大小不超过10MB</div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" :loading="importLoading" @click="submitImport">确认导入</el-button>
+        <el-button @click="importOpen = false">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -288,6 +312,10 @@ export default {
       title: "",
       open: false,
       completeOpen: false,
+      importOpen: false,
+      importLoading: false,
+      importFileList: [],
+      importFile: null,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -301,7 +329,10 @@ export default {
       form: {},
       completeForm: {},
       rules: {
-        isbn: [{ required: true, message: "ISBN不能为空", trigger: "blur" }],
+        isbn: [
+          { required: true, message: "ISBN不能为空", trigger: "blur" },
+          { pattern: /^(\d{10}|\d{13})$/, message: "ISBN必须为10位或13位数字", trigger: "blur" }
+        ],
         bookName: [{ required: true, message: "教材名称不能为空", trigger: "blur" }],
         author: [{ required: true, message: "作者不能为空", trigger: "blur" }],
         publisher: [{ required: true, message: "出版社不能为空", trigger: "blur" }],
@@ -322,6 +353,15 @@ export default {
     this.getList();
   },
   methods: {
+    tableRowClassName({row}) {
+      if (row.stockNum !== undefined && row.warningNum !== undefined && row.stockNum <= row.warningNum && row.stockNum > 0) {
+        return 'warning-row';
+      }
+      if (row.stockNum !== undefined && row.stockNum <= 0) {
+        return 'danger-row';
+      }
+      return '';
+    },
     getList() {
       this.loading = true;
       listBook(this.queryParams).then(response => {
@@ -424,6 +464,30 @@ export default {
     },
     handleExport() {
       this.download('textbook/book/export', { ...this.queryParams }, `教材信息_${new Date().getTime()}.xlsx`);
+    },
+    handleImport() {
+      this.importFile = null;
+      this.importFileList = [];
+      this.importOpen = true;
+    },
+    handleImportFileChange(file) {
+      this.importFile = file.raw;
+    },
+    submitImport() {
+      if (!this.importFile) {
+        this.$modal.msgError("请先选择文件");
+        return;
+      }
+      this.importLoading = true;
+      const formData = new FormData();
+      formData.append('file', this.importFile);
+      import('@/api/textbook/book').then(module => {
+        module.importBook(formData).then(response => {
+          this.$modal.msgSuccess("导入成功");
+          this.importOpen = false;
+          this.getList();
+        }).catch(() => {}).finally(() => { this.importLoading = false; });
+      });
     }
   }
 };
@@ -432,5 +496,8 @@ export default {
 <style scoped>
 .el-table .warning-row {
   background-color: #fdf6ec;
+}
+.el-table .danger-row {
+  background-color: #fef0f0;
 }
 </style>

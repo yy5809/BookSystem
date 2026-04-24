@@ -61,6 +61,11 @@
         </set> WHERE lack_id=#{lackId} AND del_flag='0'
     </update>
 
+    <update id="incrementLackNum">
+        UPDATE textbook_lack SET lack_num = lack_num + #{increment}, update_time = NOW()
+        WHERE lack_id = #{lackId} AND del_flag = '0' AND handle_status IN ('0', '1')
+    </update>
+
     <delete id="deleteTbShortageById" parameterType="Long">
         UPDATE textbook_lack SET del_flag='1' WHERE lack_id=#{lackId}
     </delete>
@@ -70,11 +75,11 @@
     </delete>
 
     <select id="selectTbShortageByBookId" parameterType="Long" resultMap="TbShortageResult">
-        <include refid="selectTbShortageVo"/> AND t.book_id = #{bookId} AND t.handle_status = '0'
+        <include refid="selectTbShortageVo"/> AND t.book_id = #{bookId} AND t.handle_status IN ('0', '1')
     </select>
     
     <select id="selectTbShortageListByBookId" parameterType="Long" resultMap="TbShortageResult">
-        <include refid="selectTbShortageVo"/> AND t.book_id = #{bookId} AND t.handle_status IN ('0', '1')
+        <include refid="selectTbShortageVo"/> AND t.book_id = #{bookId} AND t.handle_status IN ('0', '1', '2')
         ORDER BY t.register_time DESC
     </select>
 

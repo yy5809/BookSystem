@@ -45,7 +45,7 @@ public class TbPurchase extends BaseEntity {
     @Excel(name = "申请时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime submitTime;
 
-    @Excel(name = "状态", readConverterExp = "0=待审核,1=已通过,2=已驳回,3=已领书,4=已取消")
+    @Excel(name = "状态", readConverterExp = "0=待审核,1=已通过,2=已驳回,3=已领书,4=已到货,5=已入库,6=已发货")
     private String status;
 
     private Long auditUserId;
@@ -129,6 +129,16 @@ public class TbPurchase extends BaseEntity {
     public void setLogisticsCompany(String logisticsCompany) { this.logisticsCompany = logisticsCompany; }
     public String getInvoiceNo() { return invoiceNo; }
     public void setInvoiceNo(String invoiceNo) { this.invoiceNo = invoiceNo; }
+
+    public boolean isPending() { return "0".equals(this.status); }
+    public boolean isApproved() { return "1".equals(this.status); }
+    public boolean isReceived() { return "3".equals(this.status); }
+    public boolean isArrived() { return "4".equals(this.status); }
+    public boolean isInbound() { return "5".equals(this.status); }
+    public boolean isShipped() { return "6".equals(this.status); }
+    public boolean canDelete() { return isPending(); }
+    public boolean canInbound() { return isArrived() || isShipped(); }
+    public boolean canCancel(Long currentUserId) { return isPending() && this.userId != null && this.userId.equals(currentUserId); }
 
     @Override
     public String toString() {

@@ -102,6 +102,7 @@
 
 <script>
 import { listMyApply } from "@/api/textbook/personalApply";
+import { listNotice } from "@/api/textbook/notice";
 
 export default {
   name: "Dashboard",
@@ -129,17 +130,20 @@ export default {
         const rows = response.rows || [];
         this.recentApplies = rows;
         this.stats.myApplyCount = response.total || 0;
-        this.stats.pendingCount = rows.filter(r => r.status === '0').length;
-        this.stats.approvedCount = rows.filter(r => r.status === '1' || r.status === '3').length;
-        this.stats.issuedCount = rows.filter(r => r.status === '3').length;
+        this.stats.pendingCount = response.total > 0 ? rows.filter(r => r.status === '0').length : 0;
+        this.stats.approvedCount = response.total > 0 ? rows.filter(r => r.status === '1' || r.status === '3').length : 0;
+        this.stats.issuedCount = response.total > 0 ? rows.filter(r => r.status === '3').length : 0;
       });
+      listNotice({ readStatus: '0', pageNum: 1, pageSize: 1 }).then(response => {
+        this.stats.unreadNotice = response.total || 0;
+      }).catch(() => {});
     },
     getStatusType(status) {
       const map = { '0': 'warning', '1': 'success', '2': 'danger', '3': '' };
       return map[status] || 'info';
     },
     getStatusLabel(status) {
-      const map = { '0': '待审核', '1': '已通过', '2': '已驳回', '3': '已出库', '4': '已取消' };
+      const map = { '0': '待审核', '1': '已通过', '2': '已驳回', '3': '已出库', '4': '已到货', '5': '已入库', '6': '已发货' };
       return map[status] || status;
     }
   }

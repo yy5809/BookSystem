@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.annotation.RateLimiter;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.enums.BusinessType;
@@ -18,7 +19,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.textbook.domain.dto.TbPurchaseImportDTO;
 import com.ruoyi.textbook.service.IPurchaseImportService;
-import com.ruoyi.system.textbook.util.ExcelImportUtil;
+import com.ruoyi.textbook.util.ExcelImportUtil;
 
 @RestController
 @RequestMapping("/textbook/purchase/import")
@@ -46,11 +47,18 @@ public class PurchaseImportController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('textbook:import:excel') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "采购单Excel导入", businessType = BusinessType.IMPORT)
+    @RateLimiter(count = 5, time = 60)
     @PostMapping("/excel")
     public AjaxResult importExcel(@RequestParam("file") MultipartFile file) throws Exception {
         String originalFilename = file.getOriginalFilename();
-        if (originalFilename == null || (!originalFilename.endsWith(".xlsx") && !originalFilename.endsWith(".xls"))) {
-            return error("仅支持 .xlsx 或 .xls 格式的Excel文件");
+        if (originalFilename == null || !originalFilename.endsWith(".xlsx")) {
+            return error("仅支持 .xlsx 格式的Excel文件");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType != null && !contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                && !contentType.equals("application/octet-stream")) {
+            return error("文件Content-Type不合法，仅支持Excel文件");
         }
 
         if (file.getSize() > 10 * 1024 * 1024) {

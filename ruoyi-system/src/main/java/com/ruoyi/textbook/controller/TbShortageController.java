@@ -51,6 +51,9 @@ public class TbShortageController extends BaseController
     @PostMapping("/export")
     public void export(HttpServletResponse response, TbShortage tbShortage)
     {
+        if (SecurityUtils.hasRole("teacher")) {
+            tbShortage.setRegisterId(SecurityUtils.getUserId());
+        }
         List<TbShortage> list = tbShortageService.selectTbShortageList(tbShortage);
         ExcelUtil<TbShortage> util = new ExcelUtil<TbShortage>(TbShortage.class);
         util.exportExcel(response, list, "缺书登记信息数据");
@@ -63,7 +66,12 @@ public class TbShortageController extends BaseController
     @GetMapping(value = "/{shortageId}")
     public AjaxResult getInfo(@PathVariable("shortageId") Long shortageId)
     {
-        return AjaxResult.success(tbShortageService.selectTbShortageById(shortageId));
+        TbShortage shortage = tbShortageService.selectTbShortageById(shortageId);
+        if (shortage != null && SecurityUtils.hasRole("teacher")
+                && !SecurityUtils.getUserId().equals(shortage.getRegisterId())) {
+            return AjaxResult.error("无权查看他人的缺书登记");
+        }
+        return AjaxResult.success(shortage);
     }
 
     /**

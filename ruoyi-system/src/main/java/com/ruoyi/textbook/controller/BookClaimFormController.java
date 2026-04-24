@@ -6,6 +6,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.annotation.RateLimiter;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -41,14 +42,14 @@ public class BookClaimFormController extends BaseController {
         return AjaxResult.success(form);
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:claimForm:add')")
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:add') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书单", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody BookClaimForm bookClaimForm) {
         return toAjax(bookClaimFormService.insertBookClaimForm(bookClaimForm));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:claimForm:edit')")
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:edit') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书单", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody BookClaimForm bookClaimForm) {
@@ -57,6 +58,7 @@ public class BookClaimFormController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('textbook:claimForm:outbound') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "确认出库", businessType = BusinessType.UPDATE)
+    @RateLimiter(count = 10, time = 60)
     @PutMapping("/confirmOutbound")
     public AjaxResult confirmOutbound(@RequestBody BookClaimForm bookClaimForm) {
         try {
@@ -74,7 +76,7 @@ public class BookClaimFormController extends BaseController {
         }
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:claimForm:remove')")
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:remove') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书单", businessType = BusinessType.DELETE)
     @DeleteMapping("/{formIds}")
     public AjaxResult remove(@PathVariable Long[] formIds) {
