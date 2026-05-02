@@ -73,6 +73,8 @@ public interface SysRoleMapper
      */
     public SysRole checkRoleKeyUnique(String roleKey);
 
+    public SysRole selectRoleByRoleKey(@Param("roleKey") String roleKey);
+
     /**
      * 修改角色信息
      * 

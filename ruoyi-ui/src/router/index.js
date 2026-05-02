@@ -94,6 +94,20 @@ export const constantRoutes = [
 // 教材管理菜单由数据库sys_menu表驱动，此处仅定义带动态参数的特殊路由
 export const dynamicRoutes = [
   {
+    path: '/textbook/purchase/detail',
+    component: Layout,
+    hidden: true,
+    permissions: ['textbook:purchase:query'],
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/textbook/purchase/detail'),
+        name: 'PurchaseDetail',
+        meta: { title: '采购单详情', activeMenu: '/textbook/purchase' }
+      }
+    ]
+  },
+  {
     path: '/textbook/supplierPurchase/:id(\\d+)',
     component: Layout,
     hidden: true,

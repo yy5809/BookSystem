@@ -1,4 +1,4 @@
-/*
+﻿/*
  Navicat Premium Data Transfer
 
  Source Server         : localhost
@@ -11,7 +11,7 @@
  Target Server Version : 80022
  File Encoding         : 65001
 
- Date: 24/04/2026 23:47:24
+ Date: 28/04/2026 18:41:56
 */
 
 SET NAMES utf8mb4;
@@ -151,6 +151,14 @@ INSERT INTO `sys_dept` VALUES (106, 101, '0,100,101', '财务部门', 4, '若依
 INSERT INTO `sys_dept` VALUES (107, 101, '0,100,101', '运维部门', 5, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', '2026-03-31 20:06:20', '', NULL);
 INSERT INTO `sys_dept` VALUES (108, 102, '0,100,102', '市场部门', 1, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', '2026-03-31 20:06:20', '', NULL);
 INSERT INTO `sys_dept` VALUES (109, 102, '0,100,102', '财务部门', 2, '若依', '15888888888', 'ry@qq.com', '0', '0', 'admin', '2026-03-31 20:06:20', '', NULL);
+INSERT INTO `sys_dept` VALUES (300, 0, '0', '环境科学与工程学院', 1, NULL, NULL, NULL, '0', '0', 'admin', NOW());
+INSERT INTO `sys_dept` VALUES (301, 0, '0', '智能制造学院', 2, NULL, NULL, NULL, '0', '0', 'admin', NOW());
+INSERT INTO `sys_dept` VALUES (302, 0, '0', '土木工程学院', 3, NULL, NULL, NULL, '0', '0', 'admin', NOW());
+INSERT INTO `sys_dept` VALUES (303, 0, '0', '管理学院', 4, NULL, NULL, NULL, '0', '0', 'admin', NOW());
+INSERT INTO `sys_dept` VALUES (304, 0, '0', '艺术学院', 5, NULL, NULL, NULL, '0', '0', 'admin', NOW());
+INSERT INTO `sys_dept` VALUES (305, 0, '0', '语言文化学院', 6, NULL, NULL, NULL, '0', '0', 'admin', NOW());
+INSERT INTO `sys_dept` VALUES (306, 0, '0', '公共教学部', 7, NULL, NULL, NULL, '0', '0', 'admin', NOW());
+INSERT INTO `sys_dept` VALUES (307, 0, '0', '马克思主义学院', 8, NULL, NULL, NULL, '0', '0', 'admin', NOW());
 
 -- ----------------------------
 -- Table structure for sys_dict_data
@@ -206,70 +214,61 @@ INSERT INTO `sys_dict_data` VALUES (26, 8, '生成代码', '8', 'sys_oper_type',
 INSERT INTO `sys_dict_data` VALUES (27, 9, '清空数据', '9', 'sys_oper_type', '', 'danger', 'N', '0', 'admin', '2026-03-31 20:06:20', '', NULL, '清空操作');
 INSERT INTO `sys_dict_data` VALUES (28, 1, '成功', '0', 'sys_common_status', '', 'primary', 'N', '0', 'admin', '2026-03-31 20:06:20', '', NULL, '正常状态');
 INSERT INTO `sys_dict_data` VALUES (29, 2, '失败', '1', 'sys_common_status', '', 'danger', 'N', '0', 'admin', '2026-03-31 20:06:20', '', NULL, '停用状态');
-INSERT INTO `sys_dict_data` VALUES (100, 1, '必修', '1', 'textbook_type', NULL, NULL, 'N', '0', 'admin', '2026-04-08 14:44:16', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (101, 2, '选修', '2', 'textbook_type', NULL, NULL, 'N', '0', 'admin', '2026-04-08 14:44:16', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (102, 3, '参考', '3', 'textbook_type', NULL, NULL, 'N', '0', 'admin', '2026-04-08 14:44:16', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (100, 1, '公共基础课', '1', 'textbook_type', '', 'primary', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (101, 2, '专业基础课', '2', 'textbook_type', '', 'success', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (102, 3, '专业必修课', '3', 'textbook_type', '', 'warning', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (121, 4, '专业选修课', '4', 'textbook_type', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (122, 5, '思想政治课', '5', 'textbook_type', '', 'danger', 'N', '0', 'admin', NOW(), '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (103, 1, '平装', '1', 'book_binding', NULL, NULL, 'N', '0', 'admin', '2026-04-08 14:45:00', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (104, 2, '精装', '2', 'book_binding', NULL, NULL, 'N', '0', 'admin', '2026-04-08 14:45:00', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (105, 1, '普通', '1', 'emergency_level', NULL, NULL, 'N', '0', 'admin', '2026-04-08 14:45:43', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (106, 2, '紧急', '2', 'emergency_level', NULL, NULL, 'N', '0', 'admin', '2026-04-08 14:45:43', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (107, 1, '领书单', '1', 'tb_notice_biz_type', '', 'primary', 'N', '0', 'admin', '2026-04-15 19:46:15', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (108, 2, '采购单', '2', 'tb_notice_biz_type', '', 'warning', 'N', '0', 'admin', '2026-04-15 19:46:15', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (109, 3, '入库单', '3', 'tb_notice_biz_type', '', 'success', 'N', '0', 'admin', '2026-04-15 19:46:15', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (110, 4, '缺书登记', '4', 'tb_notice_biz_type', '', 'danger', 'N', '0', 'admin', '2026-04-15 19:46:15', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (111, 5, '供应商通知', '5', 'tb_notice_biz_type', '', 'info', 'N', '0', 'admin', '2026-04-15 19:46:15', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (112, 6, '库存预警', '6', 'tb_notice_biz_type', '', 'danger', 'N', '0', 'admin', '2026-04-15 19:46:15', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (113, 1, '计算机学院', '1', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (114, 2, '数学与统计学院', '2', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (115, 3, '物理与电子工程学院', '3', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (116, 4, '化学化工学院', '4', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (117, 5, '生命科学学院', '5', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (118, 6, '文学院', '6', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (119, 7, '外国语学院', '7', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (120, 8, '经济管理学院', '8', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (121, 9, '法学院', '9', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (122, 10, '艺术学院', '10', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (123, 11, '教育学院', '11', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (124, 12, '机械工程学院', '12', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (125, 1, '计算机科学与技术', '1', 'tb_major', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (126, 2, '软件工程', '2', 'tb_major', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (127, 3, '网络工程', '3', 'tb_major', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (128, 4, '信息安全', '4', 'tb_major', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (129, 5, '人工智能', '5', 'tb_major', '', 'warning', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (130, 6, '数据科学与大数据技术', '6', 'tb_major', '', 'warning', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (131, 7, '物联网工程', '7', 'tb_major', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (132, 8, '电子信息工程', '8', 'tb_major', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (133, 9, '通信工程', '9', 'tb_major', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (134, 10, '自动化', '10', 'tb_major', '', 'primary', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (135, 11, '机械设计制造及其自动化', '11', 'tb_major', '', 'success', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (136, 12, '土木工程', '12', 'tb_major', '', 'success', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (137, 13, '应用数学', '13', 'tb_major', '', 'info', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (138, 14, '统计学', '14', 'tb_major', '', 'info', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (139, 15, '汉语言文学', '15', 'tb_major', '', 'danger', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (140, 16, '英语', '16', 'tb_major', '', 'danger', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (141, 17, '工商管理', '17', 'tb_major', '', 'warning', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (142, 18, '会计学', '18', 'tb_major', '', 'warning', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (143, 19, '法学', '19', 'tb_major', '', 'info', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (144, 20, '音乐表演', '20', 'tb_major', '', 'danger', 'N', '0', 'admin', '2026-04-15 20:06:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (145, 1, '2025-2026 第一学期', '2025-2026-1', 'tb_semester', '', 'primary', 'Y', '0', 'admin', '2026-04-16 18:08:01', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (146, 2, '2025-2026 第二学期', '2025-2026-2', 'tb_semester', '', 'success', 'N', '0', 'admin', '2026-04-16 18:08:01', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (147, 3, '2026-2027 第一学期', '2026-2027-1', 'tb_semester', '', 'info', 'N', '0', 'admin', '2026-04-16 18:08:01', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (148, 4, '2026-2027 第二学期', '2026-2027-2', 'tb_semester', '', 'warning', 'N', '0', 'admin', '2026-04-16 18:08:01', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (149, 1, '2025-2026 第一学期', '2025-2026-1', 'tb_semester', '', 'primary', 'Y', '0', 'admin', '2026-04-16 18:09:11', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (150, 2, '2025-2026 第二学期', '2025-2026-2', 'tb_semester', '', 'success', 'N', '0', 'admin', '2026-04-16 18:09:11', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (151, 3, '2026-2027 第一学期', '2026-2027-1', 'tb_semester', '', 'info', 'N', '0', 'admin', '2026-04-16 18:09:11', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (152, 4, '2026-2027 第二学期', '2026-2027-2', 'tb_semester', '', 'warning', 'N', '0', 'admin', '2026-04-16 18:09:11', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (153, 1, '计算机学院', '1', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (154, 2, '电子信息学院', '2', 'tb_college', '', 'success', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (155, 3, '机械工程学院', '3', 'tb_college', '', 'info', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (156, 4, '经济管理学院', '4', 'tb_college', '', 'warning', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (157, 5, '外国语学院', '5', 'tb_college', '', 'danger', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (158, 6, '理学院', '6', 'tb_college', '', 'default', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (159, 1, '计算机科学与技术', '1', 'tb_major_cs', '', 'primary', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (160, 2, '软件工程', '2', 'tb_major_cs', '', 'success', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (161, 3, '网络工程', '3', 'tb_major_cs', '', 'info', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (162, 4, '信息安全', '4', 'tb_major_cs', '', 'warning', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
-INSERT INTO `sys_dict_data` VALUES (163, 5, '数据科学', '5', 'tb_major_cs', '', 'danger', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
+INSERT INTO `sys_dict_data` VALUES (113, 1, '智能制造学院', '智能制造学院', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (114, 2, '环境科学与工程学院', '环境科学与工程学院', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (115, 3, '管理学院', '管理学院', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (116, 4, '语言文化学院', '语言文化学院', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (117, 5, '艺术学院', '艺术学院', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (118, 6, '土木工程学院', '土木工程学院', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (119, 7, '公共教学部', '公共教学部', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (120, 8, '马克思主义学院', '马克思主义学院', 'tb_college', '', 'primary', 'N', '0', 'admin', '2026-04-19 16:33:39', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (125, 1, '机械', '智能制造学院|机械', 'tb_major', '', 'primary', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (126, 2, '通信', '智能制造学院|通信', 'tb_major', '', 'primary', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (127, 3, '计算机', '智能制造学院|计算机', 'tb_major', '', 'primary', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (128, 4, '电子', '智能制造学院|电子', 'tb_major', '', 'primary', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (129, 5, '电气', '智能制造学院|电气', 'tb_major', '', 'primary', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (130, 6, '视传', '艺术学院|视传', 'tb_major', '', 'success', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (131, 7, '音乐学', '艺术学院|音乐学', 'tb_major', '', 'success', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (132, 8, '环设', '艺术学院|环设', 'tb_major', '', 'success', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (133, 9, '英语', '语言文化学院|英语', 'tb_major', '', 'warning', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (134, 10, '汉语', '语言文化学院|汉语', 'tb_major', '', 'warning', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (135, 11, '日语', '语言文化学院|日语', 'tb_major', '', 'warning', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (136, 12, '商务英语', '语言文化学院|商务英语', 'tb_major', '', 'warning', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (137, 13, '工管', '土木工程学院|工管', 'tb_major', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (138, 14, '造价', '土木工程学院|造价', 'tb_major', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (139, 15, '土木', '土木工程学院|土木', 'tb_major', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (140, 16, '园林', '环境科学与工程学院|园林', 'tb_major', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (141, 17, '环工', '环境科学与工程学院|环工', 'tb_major', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (142, 18, '给排', '环境科学与工程学院|给排', 'tb_major', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (143, 19, '建能', '环境科学与工程学院|建能', 'tb_major', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (144, 20, '人文', '环境科学与工程学院|人文', 'tb_major', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (145, 21, '财务', '管理学院|财务', 'tb_major', '', 'danger', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (146, 22, '酒店', '管理学院|酒店', 'tb_major', '', 'danger', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (147, 23, '营销', '管理学院|营销', 'tb_major', '', 'danger', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (148, 24, '人力', '管理学院|人力', 'tb_major', '', 'danger', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (149, 25, '物流', '管理学院|物流', 'tb_major', '', 'danger', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (150, 1, '大一', '大一', 'tb_grade', '', 'primary', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (151, 2, '大二', '大二', 'tb_grade', '', 'success', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (152, 3, '大三', '大三', 'tb_grade', '', 'warning', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (153, 4, '大四', '大四', 'tb_grade', '', 'info', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (154, 5, '通用', '通用', 'tb_grade', '', 'danger', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (155, 1, '2025-2026 第一学期', '2025-2026-1', 'tb_semester', '', 'primary', 'Y', '0', 'admin', '2026-04-16 18:08:01', '', NULL, '');
+INSERT INTO `sys_dict_data` VALUES (156, 2, '2025-2026 第二学期', '2025-2026-2', 'tb_semester', '', 'success', 'N', '0', 'admin', '2026-04-16 18:08:01', '', NULL, '');
+INSERT INTO `sys_dict_data` VALUES (157, 3, '2026-2027 第一学期', '2026-2027-1', 'tb_semester', '', 'info', 'N', '0', 'admin', '2026-04-16 18:08:01', '', NULL, '');
+INSERT INTO `sys_dict_data` VALUES (158, 4, '2026-2027 第二学期', '2026-2027-2', 'tb_semester', '', 'warning', 'N', '0', 'admin', '2026-04-16 18:08:01', '', NULL, '');
 INSERT INTO `sys_dict_data` VALUES (164, 1, '普通', '0', 'tb_urgency_level', '', 'info', 'Y', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
 INSERT INTO `sys_dict_data` VALUES (165, 2, '紧急', '1', 'tb_urgency_level', '', 'warning', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
 INSERT INTO `sys_dict_data` VALUES (166, 3, '特急', '2', 'tb_urgency_level', '', 'danger', 'N', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '');
@@ -291,60 +290,6 @@ INSERT INTO `sys_dict_data` VALUES (188, 1, 'pending', '0', 'tb_purchase_status'
 INSERT INTO `sys_dict_data` VALUES (189, 2, 'ordering', '1', 'tb_purchase_status', NULL, 'warning', 'N', '0', 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (190, 3, 'arrived', '2', 'tb_purchase_status', NULL, 'primary', 'N', '0', 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (191, 4, 'inbounded', '3', 'tb_purchase_status', NULL, 'success', 'N', '0', 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (192, 1, '智能制造学院', '智能制造学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (193, 2, '语言文化学院', '语言文化学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (194, 3, '环境科学与工程学院', '环境科学与工程学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (195, 4, '艺术学院', '艺术学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (196, 5, '土木工程学院', '土木工程学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (197, 6, '管理学院', '管理学院', 'tb_college', NULL, NULL, 'N', '0', '', '2026-04-19 16:33:39', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (198, 1, '智能制造工程', '智能制造工程', 'tb_major_192', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (199, 2, '智能装备与控制', '智能装备与控制', 'tb_major_192', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (200, 3, '计算机科学与技术', '计算机科学与技术', 'tb_major_192', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (201, 1, '英语', '英语', 'tb_major_193', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (202, 2, '日语', '日语', 'tb_major_193', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (203, 3, '汉语言文学', '汉语言文学', 'tb_major_193', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (204, 1, '环境工程', '环境工程', 'tb_major_194', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (205, 2, '环境科学', '环境科学', 'tb_major_194', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (206, 3, '给排水科学与工程', '给排水科学与工程', 'tb_major_194', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (207, 1, '视觉传达设计', '视觉传达设计', 'tb_major_195', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (208, 2, '环境设计', '环境设计', 'tb_major_195', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (209, 3, '产品设计', '产品设计', 'tb_major_195', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (210, 1, '土木工程', '土木工程', 'tb_major_196', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (211, 2, '建筑环境与能源应用工程', '建筑环境与能源应用工程', 'tb_major_196', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (212, 3, '工程管理', '工程管理', 'tb_major_196', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (213, 1, '工商管理', '工商管理', 'tb_major_197', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (214, 2, '市场营销', '市场营销', 'tb_major_197', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (215, 3, '财务管理', '财务管理', 'tb_major_197', NULL, NULL, 'N', '0', '', '2026-04-19 16:37:10', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (216, 1, '智能2301', '智能2301', 'tb_class_192_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (217, 2, '智能2302', '智能2302', 'tb_class_192_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (218, 1, '装备2301', '装备2301', 'tb_class_192_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (219, 2, '装备2302', '装备2302', 'tb_class_192_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (220, 1, '计科2301', '计科2301', 'tb_class_192_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (221, 2, '计科2302', '计科2302', 'tb_class_192_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (222, 3, '计科2303', '计科2303', 'tb_class_192_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (223, 1, '英语2301', '英语2301', 'tb_class_193_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (224, 2, '英语2302', '英语2302', 'tb_class_193_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (225, 1, '日语2301', '日语2301', 'tb_class_193_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (226, 1, '中文2301', '中文2301', 'tb_class_193_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (227, 2, '中文2302', '中文2302', 'tb_class_193_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (228, 1, '环境2301', '环境2301', 'tb_class_194_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (229, 2, '环境2302', '环境2302', 'tb_class_194_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (230, 1, '环科2301', '环科2301', 'tb_class_194_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (231, 1, '给排水2301', '给排水2301', 'tb_class_194_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (232, 1, '视传2301', '视传2301', 'tb_class_195_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (233, 2, '视传2302', '视传2302', 'tb_class_195_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (234, 1, '环设2301', '环设2301', 'tb_class_195_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (235, 1, '产品2301', '产品2301', 'tb_class_195_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (236, 1, '土木2301', '土木2301', 'tb_class_196_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (237, 2, '土木2302', '土木2302', 'tb_class_196_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (238, 3, '土木2303', '土木2303', 'tb_class_196_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (239, 1, '建环2301', '建环2301', 'tb_class_196_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (240, 1, '工管2301', '工管2301', 'tb_class_196_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (241, 1, '工商2301', '工商2301', 'tb_class_197_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (242, 2, '工商2302', '工商2302', 'tb_class_197_1', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (243, 1, '市场2301', '市场2301', 'tb_class_197_2', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (244, 1, '财管2301', '财管2301', 'tb_class_197_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
-INSERT INTO `sys_dict_data` VALUES (245, 2, '财管2302', '财管2302', 'tb_class_197_3', NULL, NULL, 'N', '0', '', '2026-04-19 16:38:07', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (251, 1, '待审核', '0', 'tb_personal_apply_status', NULL, NULL, 'Y', '0', '', NULL, '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (252, 2, '已通过', '1', 'tb_personal_apply_status', NULL, NULL, 'N', '0', '', NULL, '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (253, 3, '已驳回', '2', 'tb_personal_apply_status', NULL, NULL, 'N', '0', '', NULL, '', NULL, NULL);
@@ -396,13 +341,12 @@ INSERT INTO `sys_dict_type` VALUES (9, '操作类型', 'sys_oper_type', '0', 'ad
 INSERT INTO `sys_dict_type` VALUES (10, '系统状态', 'sys_common_status', '0', 'admin', '2026-03-31 20:06:20', '', NULL, '登录状态列表');
 INSERT INTO `sys_dict_type` VALUES (100, '教材类型', 'textbook_type', '0', 'admin', '2026-04-08 14:43:55', '', NULL, NULL);
 INSERT INTO `sys_dict_type` VALUES (101, '装帧类型', 'book_binding', '0', 'admin', '2026-04-08 14:44:38', '', NULL, NULL);
-INSERT INTO `sys_dict_type` VALUES (102, '紧急程度', 'emergency_level', '0', 'admin', '2026-04-08 14:45:18', '', NULL, NULL);
 INSERT INTO `sys_dict_type` VALUES (103, '通知业务类型', 'tb_notice_biz_type', '0', 'admin', '2026-04-15 19:46:15', '', NULL, '教材管理系统通知业务类型');
 INSERT INTO `sys_dict_type` VALUES (104, '用户类型', 'tb_user_type', '0', 'admin', '2026-04-15 19:46:15', '', NULL, '教材管理系统用户类型');
 INSERT INTO `sys_dict_type` VALUES (105, '学院列表', 'tb_college', '0', 'admin', '2026-04-15 20:06:07', '', NULL, '采购单导入-申请学院');
 INSERT INTO `sys_dict_type` VALUES (106, '专业列表', 'tb_major', '0', 'admin', '2026-04-15 20:06:07', '', NULL, '采购单导入-申请专业');
+INSERT INTO `sys_dict_type` VALUES (122, '适用年级', 'tb_grade', '0', 'admin', NOW(), '', NULL, '教材-适用年级');
 INSERT INTO `sys_dict_type` VALUES (107, '学期', 'tb_semester', '0', 'admin', '2026-04-16 18:08:01', '', NULL, '教材管理系统学期选项');
-INSERT INTO `sys_dict_type` VALUES (111, '计算机学院专业', 'tb_major_cs', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '计算机学院专业列表');
 INSERT INTO `sys_dict_type` VALUES (112, '缺书紧急程度', 'tb_urgency_level', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '缺书登记紧急程度');
 INSERT INTO `sys_dict_type` VALUES (113, '领书通知状态', 'tb_notice_status', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '领书通知状态');
 INSERT INTO `sys_dict_type` VALUES (114, '领书单状态', 'tb_claim_form_status', '0', 'admin', '2026-04-16 18:09:12', '', NULL, '领书单状态');
@@ -701,7 +645,7 @@ CREATE TABLE `sys_menu`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2213 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2238 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -709,7 +653,6 @@ CREATE TABLE `sys_menu`  (
 INSERT INTO `sys_menu` VALUES (1, '系统管理', 0, 1, 'system', NULL, '', '', 1, 0, 'M', '0', '0', '', 'system', 'admin', '2026-03-31 20:06:20', '', NULL, '系统管理目录');
 INSERT INTO `sys_menu` VALUES (2, '系统监控', 0, 2, 'monitor', NULL, '', '', 1, 0, 'M', '0', '0', '', 'monitor', 'admin', '2026-03-31 20:06:20', '', NULL, '系统监控目录');
 INSERT INTO `sys_menu` VALUES (3, '系统工具', 0, 3, 'tool', NULL, '', '', 1, 0, 'M', '0', '0', '', 'tool', 'admin', '2026-03-31 20:06:20', '', NULL, '系统工具目录');
-INSERT INTO `sys_menu` VALUES (4, '若依官网', 0, 4, 'http://ruoyi.vip', NULL, '', '', 0, 0, 'M', '0', '0', '', 'guide', 'admin', '2026-03-31 20:06:20', '', NULL, '若依官网地址');
 INSERT INTO `sys_menu` VALUES (100, '用户管理', 1, 1, 'user', 'system/user/index', '', '', 1, 0, 'C', '0', '0', 'system:user:list', 'user', 'admin', '2026-03-31 20:06:20', '', NULL, '用户管理菜单');
 INSERT INTO `sys_menu` VALUES (101, '角色管理', 1, 2, 'role', 'system/role/index', '', '', 1, 0, 'C', '0', '0', 'system:role:list', 'peoples', 'admin', '2026-03-31 20:06:20', '', NULL, '角色管理菜单');
 INSERT INTO `sys_menu` VALUES (102, '菜单管理', 1, 3, 'menu', 'system/menu/index', '', '', 1, 0, 'C', '0', '0', 'system:menu:list', 'tree-table', 'admin', '2026-03-31 20:06:20', '', NULL, '菜单管理菜单');
@@ -791,30 +734,7 @@ INSERT INTO `sys_menu` VALUES (1057, '生成删除', 116, 3, '#', '', '', '', 1,
 INSERT INTO `sys_menu` VALUES (1058, '导入代码', 116, 4, '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:import', '#', 'admin', '2026-03-31 20:06:20', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (1059, '预览代码', 116, 5, '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:preview', '#', 'admin', '2026-03-31 20:06:20', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (1060, '生成代码', 116, 6, '#', '', '', '', 1, 0, 'F', '0', '0', 'tool:gen:code', '#', 'admin', '2026-03-31 20:06:20', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2007, '库存查询', 2001, 1, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventory:query', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2008, '库存新增', 2001, 2, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventory:add', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2009, '库存修改', 2001, 3, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventory:edit', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2010, '库存删除', 2001, 4, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventory:remove', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2011, '采购查询', 2002, 1, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:query', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2012, '采购新增', 2002, 2, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:add', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2013, '采购修改', 2002, 3, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:edit', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2014, '采购删除', 2002, 4, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:remove', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2015, '出库查询', 2003, 1, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:outbound:query', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2016, '出库新增', 2003, 2, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:outbound:add', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2017, '出库修改', 2003, 3, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:outbound:edit', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2018, '出库删除', 2003, 4, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:outbound:remove', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2019, '缺书查询', 2004, 1, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:shortage:query', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2020, '缺书新增', 2004, 2, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:shortage:add', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2021, '缺书修改', 2004, 3, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:shortage:edit', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2022, '缺书删除', 2004, 4, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:shortage:remove', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2023, '待购查询', 2005, 1, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:pending:query', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2024, '待购新增', 2005, 2, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:pending:add', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2025, '待购修改', 2005, 3, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:pending:edit', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2026, '待购删除', 2005, 4, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:pending:remove', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2027, '入库查询', 2006, 1, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:query', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2028, '入库新增', 2006, 2, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:add', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2029, '入库修改', 2006, 3, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:edit', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2030, '入库删除', 2006, 4, '', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:remove', '#', 'admin', '2026-03-31 21:44:36', '', NULL, '');
+-- (已删除 2007-2030 孤儿菜单 — 父菜单 2001-2006 不存在)
 INSERT INTO `sys_menu` VALUES (2032, '库存查询', 2031, 1, 'inventory', 'system/textbook/inventory/index', NULL, 'Inventory', 1, 0, 'C', '0', '1', 'textbook:inventory:list', 'icon-storage', 'admin', '2026-03-31 21:49:31', '', NULL, '库存管理菜单');
 INSERT INTO `sys_menu` VALUES (2033, '采购管理', 2031, 2, 'purchase', 'system/textbook/purchase/index', NULL, 'Purchase', 1, 0, 'C', '0', '1', 'textbook:purchase:list', 'icon-shopping', 'admin', '2026-03-31 21:49:31', '', NULL, '采购管理菜单');
 INSERT INTO `sys_menu` VALUES (2034, '出库管理', 2031, 3, 'outbound', 'system/textbook/outbound/index', NULL, 'Outbound', 1, 0, 'C', '0', '1', 'textbook:outbound:list', 'icon-outbox', 'admin', '2026-03-31 21:49:31', '', NULL, '出库管理菜单');
@@ -851,49 +771,46 @@ INSERT INTO `sys_menu` VALUES (2079, '出库管理', 2076, 3, 'outbound', 'syste
 INSERT INTO `sys_menu` VALUES (2080, '缺书管理', 2076, 4, 'shortage', 'system/textbook/shortage/index', NULL, 'Shortage', 1, 0, 'C', '0', '1', 'textbook:shortage:list', 'icon-warning', 'admin', '2026-04-06 22:14:21', '', NULL, '库管员缺书管理菜单');
 INSERT INTO `sys_menu` VALUES (2081, '待处理', 2076, 5, 'pending', 'system/textbook/pending/index', NULL, 'Pending', 1, 0, 'C', '0', '1', 'textbook:pending:list', 'icon-clock', 'admin', '2026-04-06 22:14:21', '', NULL, '库管员待处理菜单');
 INSERT INTO `sys_menu` VALUES (2082, '入库管理', 2076, 6, 'inbound', 'system/textbook/inbound/index', NULL, 'Inbound', 1, 0, 'C', '0', '1', 'textbook:inbound:list', 'icon-inbox', 'admin', '2026-04-06 22:14:21', '', NULL, '库管员入库管理菜单');
-INSERT INTO `sys_menu` VALUES (2086, '教材管理', 0, 5, 'textbook', 'Layout', NULL, 'Textbook', 1, 0, 'M', '0', '0', '', 'education', 'admin', '2026-04-06 22:23:12', '', NULL, '教材管理目录');
+INSERT INTO `sys_menu` VALUES (2213, '库管员模块', 0, 5, 'warehouse', 'Layout', NULL, '', 1, 0, 'M', '0', '0', '', 'component', 'admin', '2026-04-30 00:00:00', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2214, '教师模块', 0, 6, 'teacher', 'Layout', NULL, '', 1, 0, 'M', '0', '0', '', 'peoples', 'admin', '2026-04-30 00:00:00', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2215, '供应商模块', 0, 7, 'supplier', 'Layout', NULL, '', 1, 0, 'M', '0', '0', '', 'tree-table', 'admin', '2026-04-30 00:00:00', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2094, '我的订单列表', 2093, 1, '#', '', NULL, '', 1, 0, 'F', '0', '1', 'textbook:myPurchase:list', '#', 'admin', '2026-04-12 16:20:41', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2095, '批量提交', 2093, 2, '#', '', NULL, '', 1, 0, 'F', '0', '1', 'textbook:myPurchase:add', '#', 'admin', '2026-04-12 16:20:41', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2096, '取消订单', 2093, 3, '#', '', NULL, '', 1, 0, 'F', '0', '1', 'textbook:myPurchase:cancel', '#', 'admin', '2026-04-12 16:20:41', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2097, '确认领书', 2093, 4, '#', '', NULL, '', 1, 0, 'F', '0', '1', 'textbook:myPurchase:receive', '#', 'admin', '2026-04-12 16:20:41', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2098, '供应商管理', 2086, 10, 'supplierManage', 'textbook/supplierManage/index', NULL, '', 1, 0, 'C', '0', '0', 'textbook:supplier:list', 'shopping', 'admin', '2026-04-13 16:20:46', '', NULL, '供应商信息管理');
+INSERT INTO `sys_menu` VALUES (2098, '供应商管理', 2213, 10, 'supplierManage', 'textbook/supplierManage/index', NULL, '', 1, 0, 'C', '0', '0', 'textbook:supplier:list', 'shopping', 'admin', '2026-04-13 16:20:46', '', NULL, '供应商信息管理');
 INSERT INTO `sys_menu` VALUES (2099, '供应商查询', 2098, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplier:list', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2100, '供应商详情', 2098, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplier:query', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2101, '供应商新增', 2098, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplier:add', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2102, '供应商修改', 2098, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplier:edit', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2103, '供应商删除', 2098, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplier:remove', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2104, '供应商导出', 2098, 6, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplier:export', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2105, '库存盘点', 2086, 11, 'inventoryCheck', 'textbook/inventoryCheck/index', NULL, '', 1, 0, 'C', '0', '0', 'textbook:inventoryCheck:list', 'document-checked', 'admin', '2026-04-13 16:20:46', '', NULL, '库存盘点任务管理');
+INSERT INTO `sys_menu` VALUES (2105, '库存盘点', 2213, 11, 'inventoryCheck', 'textbook/inventoryCheck/index', NULL, '', 1, 0, 'C', '0', '0', 'textbook:inventoryCheck:list', 'document-checked', 'admin', '2026-04-13 16:20:46', '', NULL, '库存盘点任务管理');
 INSERT INTO `sys_menu` VALUES (2106, '盘点列表', 2105, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventoryCheck:list', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2107, '盘点详情', 2105, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventoryCheck:query', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2108, '新建盘点', 2105, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventoryCheck:add', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2109, '开始/完成盘点', 2105, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventoryCheck:edit', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2110, '删除盘点', 2105, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventoryCheck:remove', '#', 'admin', '2026-04-13 16:20:46', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2111, '通知管理', 2086, 12, 'warehouseNotice', 'textbook/warehouseNotice/index', '', '', 1, 0, 'C', '0', '0', 'textbook:notice:list', 'message', 'admin', '2026-04-15 19:46:15', '', NULL, '通知管理菜单');
+INSERT INTO `sys_menu` VALUES (2111, '通知管理', 2213, 12, 'warehouseNotice', 'textbook/warehouseNotice/index', '', '', 1, 0, 'C', '0', '0', 'textbook:notice:list', 'message', 'admin', '2026-04-15 19:46:15', '', NULL, '通知管理菜单');
 INSERT INTO `sys_menu` VALUES (2112, '通知查询', 2111, 1, '#', '', '', '', 1, 0, 'F', '0', '0', 'textbook:notice:query', '#', 'admin', '2026-04-15 19:46:15', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2113, '通知新增', 2111, 2, '#', '', '', '', 1, 0, 'F', '0', '0', 'textbook:notice:add', '#', 'admin', '2026-04-15 19:46:15', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2114, '通知修改', 2111, 3, '#', '', '', '', 1, 0, 'F', '0', '0', 'textbook:notice:edit', '#', 'admin', '2026-04-15 19:46:15', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2115, '通知删除', 2111, 4, '#', '', '', '', 1, 0, 'F', '0', '0', 'textbook:notice:remove', '#', 'admin', '2026-04-15 19:46:15', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2116, '领书通知管理', 2086, 5, 'noticeManage', 'textbook/noticeManage/index', NULL, '', 1, 0, 'C', '0', '0', 'textbook:noticeManage:list', 'documentation', 'admin', '2026-04-16 18:07:31', '', NULL, '领书通知管理菜单');
-INSERT INTO `sys_menu` VALUES (2117, '领书通知查询', 2116, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:query', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2118, '领书通知新增', 2116, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:add', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2119, '领书通知修改', 2116, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:edit', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2120, '领书通知发布', 2116, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:publish', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2121, '领书通知删除', 2116, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:remove', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2122, '领书单管理', 2086, 6, 'claimForm', 'textbook/claimForm/index', NULL, '', 1, 0, 'C', '0', '0', 'textbook:claimForm:list', 'form', 'admin', '2026-04-16 18:07:31', '', NULL, '领书单管理菜单');
-INSERT INTO `sys_menu` VALUES (2123, '领书单查询', 2122, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:query', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2124, '领书单新增', 2122, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:add', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2125, '领书单修改', 2122, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:edit', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2126, '领书单出库', 2122, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:outbound', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2127, '领书单删除', 2122, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:remove', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2129, '教材信息管理', 2086, 2, 'bookManage', 'textbook/bookManage/index', NULL, 'TbBook', 1, 0, 'C', '0', '0', 'textbook:book:list', 'book', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2116, '领书管理', 2213, 5, 'claimManage', 'textbook/claimManage/index', NULL, '', 1, 0, 'C', '0', '0', 'textbook:noticeManage:list', 'form', 'admin', '2026-04-16 18:07:31', '', NULL, '领书管理（合并通知管理和领书单管理）');
+INSERT INTO `sys_menu` VALUES (2117, '领书管理查询', 2116, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:query', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2118, '领书管理新增', 2116, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:add', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2119, '领书管理修改', 2116, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:edit', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2120, '领书管理发布', 2116, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:publish', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2121, '领书管理删除', 2116, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:remove', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2126, '领书单出库', 2116, 6, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:outbound', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2129, '教材信息管理', 2213, 2, 'bookManage', 'textbook/bookManage/index', NULL, 'TbBook', 1, 0, 'C', '0', '0', 'textbook:book:list', 'book', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2130, 'query', 2129, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2131, 'add', 2129, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2132, 'edit', 2129, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:edit', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2133, 'remove', 2129, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:remove', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2134, 'export', 2129, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:export', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2135, 'import', 2129, 6, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:import', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2136, '采购管理', 2086, 3, 'purchase', 'textbook/purchase/index', NULL, 'TbPurchase', 1, 0, 'C', '0', '0', 'textbook:purchase:list', 'shopping', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2136, '采购管理', 2213, 3, 'purchase', 'textbook/purchase/index', NULL, 'TbPurchase', 1, 0, 'C', '0', '0', 'textbook:purchase:list', 'shopping', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2137, 'query', 2136, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2138, 'add', 2136, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2139, 'edit', 2136, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:edit', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
@@ -901,43 +818,43 @@ INSERT INTO `sys_menu` VALUES (2140, 'remove', 2136, 4, '#', '', NULL, '', 1, 0,
 INSERT INTO `sys_menu` VALUES (2141, 'excel_import', 2136, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:import:excel', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2142, 'arrive', 2136, 6, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:audit', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2143, 'status', 2136, 7, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:status', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2144, '入库管理', 2086, 4, 'inbound', 'textbook/inbound/index', NULL, 'TbInbound', 1, 0, 'C', '0', '0', 'textbook:inbound:list', 'inbox', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2144, '入库管理', 2213, 4, 'inbound', 'textbook/inbound/index', NULL, 'TbInbound', 1, 0, 'C', '0', '0', 'textbook:inbound:list', 'inbox', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2145, 'query', 2144, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2146, 'confirm', 2144, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2156, '个人领书管理', 2086, 7, 'personalApply', 'textbook/personalApply/index', NULL, 'PersonalApply', 1, 0, 'C', '0', '0', 'textbook:personalApply:list', 'peoples', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2156, '个人领书', 2116, 2, '#', '', NULL, '', 1, 0, 'M', '0', '0', 'textbook:personalApply:list', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '个人领书申请（合入领书管理Tab2）');
 INSERT INTO `sys_menu` VALUES (2157, 'query', 2156, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:personalApply:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2158, 'submit', 2156, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:personalApply:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2159, 'cancel', 2156, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:personalApply:cancel', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2160, 'audit', 2156, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:personalApply:audit', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2161, 'issue', 2156, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:personalApply:issue', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2162, '缺书管理', 2086, 8, 'shortage', 'textbook/shortage/index', NULL, 'TbShortage', 1, 0, 'C', '0', '0', 'textbook:shortage:list', 'warning', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2162, '缺书管理', 2213, 8, 'shortage', 'textbook/shortage/index', NULL, 'TbShortage', 1, 0, 'C', '0', '0', 'textbook:shortage:list', 'warning', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2163, 'query', 2162, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:shortage:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2164, 'register', 2162, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:shortage:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2165, 'edit', 2162, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:shortage:edit', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2166, 'to_purchase', 2162, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:shortage:process', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2167, '库存查询', 2086, 9, 'inventory', 'textbook/inventory/index', NULL, 'TbInventory', 1, 0, 'C', '0', '0', 'textbook:inventory:list', 'coin', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2167, '库存查询', 2213, 9, 'inventory', 'textbook/inventory/index', NULL, 'TbInventory', 1, 0, 'C', '0', '0', 'textbook:inventory:list', 'coin', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2168, '库存查询', 2167, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inventory:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2169, 'flow', 2167, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:stockFlow:list', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2175, '教师首页', 2086, 101, 'dashboard', 'textbook/dashboard/index', NULL, 'Dashboard', 1, 0, 'C', '0', '0', 'textbook:dashboard:view', 'chart', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2176, '教材信息查询', 2086, 102, 'bookQuery', 'textbook/bookQuery/index', NULL, 'BookQuery', 1, 0, 'C', '0', '0', 'textbook:book:list', 'search', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2175, '教师首页', 2214, 1, 'dashboard', 'textbook/dashboard/index', NULL, 'Dashboard', 1, 0, 'C', '0', '0', 'textbook:dashboard:view', 'chart', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2176, '教材信息查询', 2214, 2, 'bookQuery', 'textbook/bookQuery/index', NULL, 'BookQuery', 1, 0, 'C', '0', '0', 'textbook:book:list', 'search', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2177, 'query', 2176, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2178, '我的领书申请', 2086, 103, 'myApply', 'textbook/myApply/index', NULL, 'MyApply', 1, 0, 'C', '0', '0', 'textbook:myApply:list', 'document', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2178, '我的领书申请', 2214, 3, 'myApply', 'textbook/myApply/index', NULL, 'MyApply', 1, 0, 'C', '0', '0', 'textbook:myApply:list', 'document', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2179, 'view', 2178, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:myApply:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2180, 'submit', 2178, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:myApply:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2181, 'cancel', 2178, 3, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:myApply:cancel', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2182, '缺书登记', 2086, 104, 'registerShortage', 'textbook/registerShortage/index', NULL, 'RegisterShortage', 1, 0, 'C', '0', '0', 'textbook:shortage:list', 'edit', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2182, '缺书登记', 2214, 4, 'registerShortage', 'textbook/registerShortage/index', NULL, 'RegisterShortage', 1, 0, 'C', '0', '0', 'textbook:shortage:list', 'edit', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2183, 'register', 2182, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:shortage:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2184, '通知中心', 2086, 105, 'myNotice', 'textbook/myNotice/index', NULL, 'MyNotice', 1, 0, 'C', '0', '0', 'textbook:notice:list', 'bell', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2184, '通知中心', 2214, 5, 'myNotice', 'textbook/myNotice/index', NULL, 'MyNotice', 1, 0, 'C', '0', '0', 'textbook:notice:list', 'bell', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2185, 'view', 2184, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:notice:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2186, 'read', 2184, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:notice:edit', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2187, '我的采购单', 2086, 202, 'supplierPurchase', 'textbook/supplier/purchase/index', NULL, 'SupplierPurchase', 1, 0, 'C', '0', '0', 'textbook:supplierPurchase:list', 'list', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2187, '我的采购单', 2215, 2, 'supplierPurchase', 'textbook/supplier/purchase/index', NULL, 'SupplierPurchase', 1, 0, 'C', '0', '0', 'textbook:supplierPurchase:list', 'list', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2188, 'view', 2187, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplierPurchase:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2189, 'ship', 2187, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplierPurchase:ship', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2190, '通知中心', 2086, 203, 'supplierNotice', 'textbook/supplier/notice/index', NULL, 'SupplierNotice', 1, 0, 'C', '0', '0', 'textbook:supplierNotice:query', 'message', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2190, '通知中心', 2215, 3, 'supplierNotice', 'textbook/supplier/notice/index', NULL, 'SupplierNotice', 1, 0, 'C', '0', '0', 'textbook:supplierNotice:query', 'message', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2191, 'view', 2190, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplierNotice:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2192, 'read', 2190, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:supplierNotice:read', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2200, '库管员首页', 2086, 1, 'warehouseDashboard', 'textbook/warehouseDashboard/index', NULL, 'WarehouseHome', 1, 0, 'C', '0', '0', 'textbook:warehouseDashboard:view', 'dashboard', 'admin', '2026-04-21 22:04:33', '', NULL, '');
-INSERT INTO `sys_menu` VALUES (2201, '供应商首页', 2086, 201, 'supplierHome', 'textbook/supplier/index', NULL, 'SupplierHome', 1, 0, 'C', '0', '0', 'textbook:supplierHome:view', 'dashboard', 'admin', '2026-04-21 22:04:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2200, '库管员首页', 2213, 1, 'warehouseDashboard', 'textbook/warehouseDashboard/index', NULL, 'WarehouseHome', 1, 0, 'C', '0', '0', 'textbook:warehouseDashboard:view', 'dashboard', 'admin', '2026-04-21 22:04:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2201, '供应商首页', 2215, 1, 'supplierHome', 'textbook/supplier/index', NULL, 'SupplierHome', 1, 0, 'C', '0', '0', 'textbook:supplierHome:view', 'dashboard', 'admin', '2026-04-21 22:04:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2202, '入库确认', 2144, 7, '', NULL, NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:process', '#', 'admin', '2026-04-22 02:25:49', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2203, '入库修改', 2144, 8, '', NULL, NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:edit', '#', 'admin', '2026-04-22 02:25:49', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2204, '入库删除', 2144, 9, '', NULL, NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:remove', '#', 'admin', '2026-04-22 02:25:49', '', NULL, '');
@@ -949,6 +866,14 @@ INSERT INTO `sys_menu` VALUES (2209, '缺书导出', 2162, 6, '#', '', '', '', 1
 INSERT INTO `sys_menu` VALUES (2210, '缺书删除', 2162, 7, '#', '', '', '', 1, 0, 'F', '0', '0', 'textbook:shortage:remove', '#', 'admin', '2026-04-22 02:53:22', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2211, '领书申请删除', 2156, 7, '#', '', '', '', 1, 0, 'F', '0', '0', 'textbook:personalApply:remove', '#', 'admin', '2026-04-22 02:53:22', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2212, '快速新增', 2129, 7, '', '', '', '', 1, 0, 'F', '0', '0', 'textbook:book:quickAdd', '#', 'admin', '2026-04-23 02:08:53', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2230, '教师管理', 2213, 13, 'teacherManage', 'textbook/teacherManage/index', NULL, 1, 0, 'C', '0', '0', 'textbook:teacher:list', 'peoples', 'admin', NOW(), NULL, NULL, '教师账号管理');
+INSERT INTO `sys_menu` VALUES (2231, '教师查询', 2230, 1, '#', '', NULL, 1, 0, 'F', '0', '0', 'textbook:teacher:query', '#', 'admin', NOW(), NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (2232, '教师新增', 2230, 2, '#', '', NULL, 1, 0, 'F', '0', '0', 'textbook:teacher:add', '#', 'admin', NOW(), NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (2233, '教师修改', 2230, 3, '#', '', NULL, 1, 0, 'F', '0', '0', 'textbook:teacher:edit', '#', 'admin', NOW(), NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (2234, '教师删除', 2230, 4, '#', '', NULL, 1, 0, 'F', '0', '0', 'textbook:teacher:remove', '#', 'admin', NOW(), NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (2235, '教师导入', 2230, 5, '#', '', NULL, 1, 0, 'F', '0', '0', 'textbook:teacher:import', '#', 'admin', NOW(), NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (2236, '教师导出', 2230, 6, '#', '', NULL, 1, 0, 'F', '0', '0', 'textbook:teacher:export', '#', 'admin', NOW(), NULL, NULL, '');
+INSERT INTO `sys_menu` VALUES (2237, '重置密码', 2230, 7, '#', '', NULL, 1, 0, 'F', '0', '0', 'textbook:teacher:resetPwd', '#', 'admin', NOW(), NULL, NULL, '');
 
 -- ----------------------------
 -- Table structure for sys_notice
@@ -976,7 +901,7 @@ CREATE TABLE `sys_notice`  (
   INDEX `idx_notice_target_user`(`target_user_id`) USING BTREE,
   INDEX `idx_notice_user_type`(`user_type`) USING BTREE,
   INDEX `idx_notice_read_status`(`read_status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '通知公告表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '通知公告表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_notice
@@ -985,6 +910,7 @@ INSERT INTO `sys_notice` VALUES (1, '温馨提醒：2018-07-01 若依新版本�
 INSERT INTO `sys_notice` VALUES (2, '维护通知：2018-07-01 若依系统凌晨维护', '1', 0xE7BBB4E68AA4E58685E5AEB9, '0', 'admin', '2026-03-31 20:06:20', '', '2026-04-16 18:58:31', '管理员', NULL, NULL, '1', NULL, NULL, '0');
 INSERT INTO `sys_notice` VALUES (10, '教材缺货通知', '1', 0xE38090E7BCBAE4B9A6E9A284E8ADA6E380910AE69599E69D90EFBC9AE3808AE6B58BE8AF95E3808B0A4953424EEFBC9A313233343536373839300AE5BD93E5898DE5BA93E5AD98EFBC9A30E69CAC0AE99C80E98787E8B4ADE695B0E9878FEFBC9A31E69CAC0A0AE8AFB7E58F8AE697B6E5A484E79086E98787E8B4ADE4BA8BE5AE9CEFBC81, '0', '', '2026-04-21 17:20:48', '', '2026-04-21 17:35:04', NULL, 4, '4', '1', NULL, NULL, '0');
 INSERT INTO `sys_notice` VALUES (11, '教材缺货通知', '1', 0xE38090E7BCBAE4B9A6E9A284E8ADA6E380910AE69599E69D90EFBC9AE3808AE6B58BE8AF95E3808B0A4953424EEFBC9A313233343536373839300AE5BD93E5898DE5BA93E5AD98EFBC9A30E69CAC0AE99C80E98787E8B4ADE695B0E9878FEFBC9A31E69CAC0A0AE8AFB7E58F8AE697B6E5A484E79086E98787E8B4ADE4BA8BE5AE9CEFBC81, '0', '', '2026-04-21 18:04:58', '', NULL, NULL, 5, '4', '0', NULL, NULL, '0');
+INSERT INTO `sys_notice` VALUES (13, '缺书登记已取消', '1', 0xE682A8E79A84E3808AE6B58BE8AF95E3808BE7BCBAE4B9A6E799BBE8AEB0E5B7B2E8A2ABE58F96E6B688E38082, '0', 'warehouse', '2026-04-28 18:00:10', '', NULL, NULL, 6, '4', '0', 110, '1', '0');
 
 -- ----------------------------
 -- Table structure for sys_oper_log
@@ -1012,7 +938,7 @@ CREATE TABLE `sys_oper_log`  (
   INDEX `idx_sys_oper_log_bt`(`business_type`) USING BTREE,
   INDEX `idx_sys_oper_log_s`(`status`) USING BTREE,
   INDEX `idx_sys_oper_log_ot`(`oper_time`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 113 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 115 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '操作日志记录' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -1030,6 +956,8 @@ INSERT INTO `sys_oper_log` VALUES (109, '教材信息', 3, 'com.ruoyi.textbook.c
 INSERT INTO `sys_oper_log` VALUES (110, '教材信息', 3, 'com.ruoyi.textbook.controller.TbBookController.remove()', 'DELETE', 1, 'warehouse', '研发部门', '/textbook/book/16', '127.0.0.1', '内网IP', '16', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-04-22 02:29:09', 4);
 INSERT INTO `sys_oper_log` VALUES (111, 'Personal Apply Audit', 2, 'com.ruoyi.textbook.controller.BookPersonalApplyController.audit()', 'PUT', 1, 'warehouse', '研发部门', '/textbook/personalApply/audit', '127.0.0.1', '内网IP', '{\"applyId\":2,\"auditBy\":\"warehouse\",\"auditOpinion\":\"\",\"auditTime\":\"2026-04-22 02:29:36\",\"params\":{},\"registerShortage\":true,\"shortageQty\":1,\"shortageRemark\":\"\",\"shortageUrgency\":\"0\",\"status\":\"1\"}', NULL, 1, '库存不足，无法通过审核（当前库存：0，需求：1）', '2026-04-22 02:29:36', 25);
 INSERT INTO `sys_oper_log` VALUES (112, 'Personal Apply Audit', 2, 'com.ruoyi.textbook.controller.BookPersonalApplyController.audit()', 'PUT', 1, 'warehouse', '研发部门', '/textbook/personalApply/audit', '127.0.0.1', '内网IP', '{\"applyId\":2,\"auditBy\":\"warehouse\",\"auditOpinion\":\"测试\",\"auditTime\":\"2026-04-22 02:29:51\",\"params\":{},\"registerShortage\":true,\"shortageQty\":1,\"shortageRemark\":\"测试\",\"shortageUrgency\":\"1\",\"status\":\"2\"}', NULL, 1, '\r\n### Error updating database.  Cause: com.mysql.cj.jdbc.exceptions.MysqlDataTruncation: Data truncation: Data too long for column \'biz_type\' at row 1\r\n### The error may exist in file [D:\\USERPROG\\JavaEE\\RuoYi-Vue\\ruoyi-system\\target\\classes\\mapper\\system\\SysNoticeMapper.xml]\r\n### The error may involve com.ruoyi.system.mapper.SysNoticeMapper.insertNotice-Inline\r\n### The error occurred while setting parameters\r\n### SQL: insert into sys_notice (     notice_title,       notice_type,       notice_content,       status,       biz_id,       biz_type,       read_status,       target_user_id,                       create_time    )values(     ?,       ?,       ?,       ?,       ?,       ?,       ?,       ?,                       sysdate()   )\r\n### Cause: com.mysql.cj.jdbc.exceptions.MysqlDataTruncation: Data truncation: Data too long for column \'biz_type\' at row 1\n; Data truncation: Data too long for column \'biz_type\' at row 1; nested exception is com.mysql.cj.jdbc.exceptions.MysqlDataTruncation: Data truncation: Data too long for column \'biz_type\' at row 1', '2026-04-22 02:29:52', 66);
+INSERT INTO `sys_oper_log` VALUES (113, 'Personal Apply Audit', 2, 'com.ruoyi.textbook.controller.BookPersonalApplyController.audit()', 'PUT', 1, 'warehouse', '研发部门', '/textbook/personalApply/audit', '127.0.0.1', '内网IP', '{\"applyId\":2,\"auditBy\":\"warehouse\",\"auditOpinion\":\"\",\"auditTime\":\"2026-04-28 17:59:58\",\"params\":{},\"registerShortage\":true,\"shortageQty\":1,\"shortageRemark\":\"\",\"shortageUrgency\":\"0\",\"status\":\"1\"}', NULL, 1, '库存不足，无法通过审核（当前库存：0，需求：1）。请驳回并建议教师重新申请。', '2026-04-28 17:59:58', 42);
+INSERT INTO `sys_oper_log` VALUES (114, '取消缺书登记', 2, 'com.ruoyi.textbook.controller.TbShortageController.cancel()', 'PUT', 1, 'warehouse', '研发部门', '/textbook/shortage/cancel/6', '127.0.0.1', '内网IP', '6', '{\"msg\":\"操作成功\",\"code\":200}', 0, NULL, '2026-04-28 18:00:10', 31);
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -1132,7 +1060,9 @@ INSERT INTO `sys_role_menu` VALUES (1, 2079);
 INSERT INTO `sys_role_menu` VALUES (1, 2080);
 INSERT INTO `sys_role_menu` VALUES (1, 2081);
 INSERT INTO `sys_role_menu` VALUES (1, 2082);
-INSERT INTO `sys_role_menu` VALUES (1, 2086);
+INSERT INTO `sys_role_menu` VALUES (1, 2213);
+INSERT INTO `sys_role_menu` VALUES (1, 2214);
+INSERT INTO `sys_role_menu` VALUES (1, 2215);
 INSERT INTO `sys_role_menu` VALUES (1, 2098);
 INSERT INTO `sys_role_menu` VALUES (1, 2099);
 INSERT INTO `sys_role_menu` VALUES (1, 2100);
@@ -1163,10 +1093,62 @@ INSERT INTO `sys_role_menu` VALUES (1, 2124);
 INSERT INTO `sys_role_menu` VALUES (1, 2125);
 INSERT INTO `sys_role_menu` VALUES (1, 2126);
 INSERT INTO `sys_role_menu` VALUES (1, 2127);
+INSERT INTO `sys_role_menu` VALUES (1, 2129);
+INSERT INTO `sys_role_menu` VALUES (1, 2130);
+INSERT INTO `sys_role_menu` VALUES (1, 2131);
+INSERT INTO `sys_role_menu` VALUES (1, 2132);
+INSERT INTO `sys_role_menu` VALUES (1, 2133);
+INSERT INTO `sys_role_menu` VALUES (1, 2134);
+INSERT INTO `sys_role_menu` VALUES (1, 2135);
+INSERT INTO `sys_role_menu` VALUES (1, 2136);
+INSERT INTO `sys_role_menu` VALUES (1, 2137);
+INSERT INTO `sys_role_menu` VALUES (1, 2138);
+INSERT INTO `sys_role_menu` VALUES (1, 2139);
+INSERT INTO `sys_role_menu` VALUES (1, 2140);
+INSERT INTO `sys_role_menu` VALUES (1, 2141);
+INSERT INTO `sys_role_menu` VALUES (1, 2142);
+INSERT INTO `sys_role_menu` VALUES (1, 2143);
+INSERT INTO `sys_role_menu` VALUES (1, 2144);
+INSERT INTO `sys_role_menu` VALUES (1, 2145);
+INSERT INTO `sys_role_menu` VALUES (1, 2146);
+INSERT INTO `sys_role_menu` VALUES (1, 2156);
+INSERT INTO `sys_role_menu` VALUES (1, 2157);
+INSERT INTO `sys_role_menu` VALUES (1, 2158);
+INSERT INTO `sys_role_menu` VALUES (1, 2159);
+INSERT INTO `sys_role_menu` VALUES (1, 2160);
+INSERT INTO `sys_role_menu` VALUES (1, 2161);
+INSERT INTO `sys_role_menu` VALUES (1, 2162);
+INSERT INTO `sys_role_menu` VALUES (1, 2163);
+INSERT INTO `sys_role_menu` VALUES (1, 2164);
+INSERT INTO `sys_role_menu` VALUES (1, 2165);
+INSERT INTO `sys_role_menu` VALUES (1, 2166);
+INSERT INTO `sys_role_menu` VALUES (1, 2167);
+INSERT INTO `sys_role_menu` VALUES (1, 2168);
+INSERT INTO `sys_role_menu` VALUES (1, 2169);
+INSERT INTO `sys_role_menu` VALUES (1, 2175);
+INSERT INTO `sys_role_menu` VALUES (1, 2176);
+INSERT INTO `sys_role_menu` VALUES (1, 2178);
+INSERT INTO `sys_role_menu` VALUES (1, 2182);
+INSERT INTO `sys_role_menu` VALUES (1, 2184);
+INSERT INTO `sys_role_menu` VALUES (1, 2187);
+INSERT INTO `sys_role_menu` VALUES (1, 2190);
+INSERT INTO `sys_role_menu` VALUES (1, 2200);
+INSERT INTO `sys_role_menu` VALUES (1, 2201);
+INSERT INTO `sys_role_menu` VALUES (1, 2202);
+INSERT INTO `sys_role_menu` VALUES (1, 2203);
+INSERT INTO `sys_role_menu` VALUES (1, 2204);
+INSERT INTO `sys_role_menu` VALUES (1, 2205);
+INSERT INTO `sys_role_menu` VALUES (1, 2206);
+INSERT INTO `sys_role_menu` VALUES (1, 2207);
+INSERT INTO `sys_role_menu` VALUES (1, 2208);
+INSERT INTO `sys_role_menu` VALUES (1, 2209);
+INSERT INTO `sys_role_menu` VALUES (1, 2210);
+INSERT INTO `sys_role_menu` VALUES (1, 2211);
+INSERT INTO `sys_role_menu` VALUES (1, 2212);
 INSERT INTO `sys_role_menu` VALUES (2, 2031);
 INSERT INTO `sys_role_menu` VALUES (2, 2032);
 INSERT INTO `sys_role_menu` VALUES (2, 2038);
-INSERT INTO `sys_role_menu` VALUES (3, 2086);
+INSERT INTO `sys_role_menu` VALUES (3, 2214);
 INSERT INTO `sys_role_menu` VALUES (3, 2157);
 INSERT INTO `sys_role_menu` VALUES (3, 2158);
 INSERT INTO `sys_role_menu` VALUES (3, 2159);
@@ -1183,7 +1165,7 @@ INSERT INTO `sys_role_menu` VALUES (3, 2184);
 INSERT INTO `sys_role_menu` VALUES (3, 2185);
 INSERT INTO `sys_role_menu` VALUES (3, 2186);
 INSERT INTO `sys_role_menu` VALUES (3, 2212);
-INSERT INTO `sys_role_menu` VALUES (7, 2086);
+INSERT INTO `sys_role_menu` VALUES (7, 2213);
 INSERT INTO `sys_role_menu` VALUES (7, 2098);
 INSERT INTO `sys_role_menu` VALUES (7, 2099);
 INSERT INTO `sys_role_menu` VALUES (7, 2100);
@@ -1258,7 +1240,7 @@ INSERT INTO `sys_role_menu` VALUES (7, 2209);
 INSERT INTO `sys_role_menu` VALUES (7, 2210);
 INSERT INTO `sys_role_menu` VALUES (7, 2211);
 INSERT INTO `sys_role_menu` VALUES (7, 2212);
-INSERT INTO `sys_role_menu` VALUES (8, 2086);
+INSERT INTO `sys_role_menu` VALUES (8, 2215);
 INSERT INTO `sys_role_menu` VALUES (8, 2187);
 INSERT INTO `sys_role_menu` VALUES (8, 2188);
 INSERT INTO `sys_role_menu` VALUES (8, 2189);
@@ -1319,6 +1301,22 @@ INSERT INTO `sys_role_menu` VALUES (105, 2189);
 INSERT INTO `sys_role_menu` VALUES (105, 2190);
 INSERT INTO `sys_role_menu` VALUES (105, 2191);
 INSERT INTO `sys_role_menu` VALUES (105, 2192);
+INSERT INTO `sys_role_menu` VALUES (1, 2230);
+INSERT INTO `sys_role_menu` VALUES (1, 2231);
+INSERT INTO `sys_role_menu` VALUES (1, 2232);
+INSERT INTO `sys_role_menu` VALUES (1, 2233);
+INSERT INTO `sys_role_menu` VALUES (1, 2234);
+INSERT INTO `sys_role_menu` VALUES (1, 2235);
+INSERT INTO `sys_role_menu` VALUES (1, 2236);
+INSERT INTO `sys_role_menu` VALUES (1, 2237);
+INSERT INTO `sys_role_menu` VALUES (7, 2230);
+INSERT INTO `sys_role_menu` VALUES (7, 2231);
+INSERT INTO `sys_role_menu` VALUES (7, 2232);
+INSERT INTO `sys_role_menu` VALUES (7, 2233);
+INSERT INTO `sys_role_menu` VALUES (7, 2234);
+INSERT INTO `sys_role_menu` VALUES (7, 2235);
+INSERT INTO `sys_role_menu` VALUES (7, 2236);
+INSERT INTO `sys_role_menu` VALUES (7, 2237);
 
 -- ----------------------------
 -- Table structure for sys_user
@@ -1610,19 +1608,31 @@ CREATE TABLE `textbook_info`  (
   INDEX `idx_book_name`(`book_name`) USING BTREE,
   INDEX `idx_category`(`category`) USING BTREE,
   INDEX `idx_status`(`status`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of textbook_info
 -- ----------------------------
-INSERT INTO `textbook_info` VALUES (11, 'Java程序设计', '9787111111111', '张三', '清华大学出版社', NULL, NULL, NULL, NULL, NULL, 49.00, NULL, NULL, NULL, '软件工程', '大一', NULL, '专业基础课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0', '1', '0');
-INSERT INTO `textbook_info` VALUES (12, '数据结构', '9787112222222', '李四', '高等教育出版社', NULL, NULL, NULL, NULL, NULL, 45.00, NULL, NULL, NULL, '计算机科学与技术', '大二', NULL, '专业基础课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0', '1', '0');
-INSERT INTO `textbook_info` VALUES (13, '数据库原理', '9787113333333', '王五', '人民邮电出版社', NULL, NULL, NULL, NULL, NULL, 52.00, NULL, NULL, NULL, '软件工程', '大二', NULL, '专业核心课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0', '1', '0');
-INSERT INTO `textbook_info` VALUES (14, '操作系统', '9787114444444', '赵六', '电子工业出版社', NULL, NULL, NULL, NULL, NULL, 48.00, NULL, NULL, NULL, '计算机科学与技术', '大二', NULL, '专业核心课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0', '1', '0');
-INSERT INTO `textbook_info` VALUES (15, '计算机网络', '9787115555555', '钱七', '机械工业出版社', NULL, NULL, NULL, NULL, NULL, 46.00, NULL, NULL, NULL, '网络工程', '大三', NULL, '专业核心课', NULL, NULL, '0', '', '2026-04-19 00:04:57', '', NULL, '0', '1', '0');
-INSERT INTO `textbook_info` VALUES (16, '测试', '1234567890', '未知', '未知', NULL, NULL, NULL, NULL, NULL, 0.00, NULL, NULL, NULL, '未知', '未知', NULL, NULL, NULL, NULL, '0', 'teacher', '2026-04-20 21:51:15', '', NULL, '1', '1', '0');
-INSERT INTO `textbook_info` VALUES (17, '测试', '123467890', '未知', '未知', NULL, NULL, NULL, NULL, NULL, 0.00, NULL, NULL, NULL, '未知', '未知', NULL, NULL, NULL, NULL, '0', 'teacher', '2026-04-21 14:00:28', '', NULL, '1', '1', '0');
-INSERT INTO `textbook_info` VALUES (18, '测试3', '7894561230', '未知', '未知', NULL, NULL, NULL, NULL, NULL, 0.00, NULL, NULL, NULL, '未知', '未知', NULL, NULL, NULL, NULL, '0', 'teacher', '2026-04-21 14:06:29', '', NULL, '1', '1', '0');
+INSERT INTO `textbook_info` VALUES (1, '高等数学（第八版）上册', '9787040589818', '同济大学数学科学学院', '高等教育出版社', NULL, '第8版', NULL, NULL, NULL, 56.80, NULL, NULL, NULL, '未知', '未知', '公共基础课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (2, '高等数学（第八版）下册', '9787040589825', '同济大学数学科学学院', '高等教育出版社', NULL, '第8版', NULL, NULL, NULL, 56.80, NULL, NULL, NULL, '未知', '未知', '公共基础课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (3, '工程数学 线性代数（第七版）', '9787040592931', '同济大学数学科学学院', '高等教育出版社', NULL, '第7版', NULL, NULL, NULL, 26.80, NULL, NULL, NULL, '未知', '未知', '公共基础课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (4, '概率论与数理统计（第五版）', '9787040516609', '盛骤、谢式千、潘承毅', '高等教育出版社', NULL, '第5版', NULL, NULL, NULL, 49.80, NULL, NULL, NULL, '未知', '未知', '公共基础课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (5, '大学物理学（第三版）上册', '9787302570523', '张三慧', '清华大学出版社', NULL, '第3版', NULL, NULL, NULL, 59.00, NULL, NULL, NULL, '未知', '未知', '公共基础课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (6, '大学物理学（第三版）下册', '9787302570530', '张三慧', '清华大学出版社', NULL, '第3版', NULL, NULL, NULL, 59.00, NULL, NULL, NULL, '未知', '未知', '公共基础课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (7, '数据结构（C语言版）（第3版）', '9787115651259', '严蔚敏、李冬梅、吴伟民', '人民邮电出版社', NULL, '第3版', NULL, NULL, NULL, 59.80, NULL, NULL, NULL, '未知', '未知', '专业必修课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (8, '计算机网络（第8版）', '9787121411748', '谢希仁', '电子工业出版社', NULL, '第8版', NULL, NULL, NULL, 59.80, NULL, NULL, NULL, '未知', '未知', '专业必修课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (9, '计算机操作系统（第四版）', '9787560633503', '汤小丹、梁红兵、哲凤屏、汤子瀛', '西安电子科技大学出版社', NULL, '第4版', NULL, NULL, NULL, 67.00, NULL, NULL, NULL, '未知', '未知', '专业必修课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (10, '软件工程导论（第六版）', '9787302330981', '张海藩、牟永敏', '清华大学出版社', NULL, '第6版', NULL, NULL, NULL, 39.50, NULL, NULL, NULL, '未知', '未知', '专业必修课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:20:40', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (11, '程序设计语言编译原理（第3版）', '9787118022070', '陈火旺、刘春林等', '国防工业出版社', NULL, '第3版', NULL, NULL, NULL, 49.00, NULL, NULL, NULL, '未知', '未知', '专业必修课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:38:20', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (12, 'C语言程序设计（第五版）', '9787302653721', '谭浩强', '清华大学出版社', NULL, '第5版', NULL, NULL, NULL, 49.80, NULL, NULL, NULL, '未知', '未知', '专业基础课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:38:20', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (13, 'Java语言程序设计（第3版）', '9787302581659', '郑莉、张宇', '清华大学出版社', NULL, '第3版', NULL, NULL, NULL, 86.00, NULL, NULL, NULL, '未知', '未知', '专业必修课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:39:19', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (14, '数据库系统概论（第五版）', '9787040591255', '王珊、杜小勇、陈红', '高等教育出版社', NULL, '第5版', NULL, NULL, NULL, 59.00, NULL, NULL, NULL, '未知', '未知', '专业必修课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:39:19', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (15, '人工智能导论（第2版）', '9787302606734', '王万良', '清华大学出版社', NULL, '第2版', NULL, NULL, NULL, 59.80, NULL, NULL, NULL, '未知', '未知', '专业选修课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:39:19', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (16, '数据结构与算法', '9787040615098', '俞勇、张铭、陈越、韩文弢', '高等教育出版社', NULL, '第1版', NULL, NULL, NULL, 79.00, NULL, NULL, NULL, '未知', '未知', '专业必修课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:39:19', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (17, '马克思主义基本原理（2023年版）', '9787040599008', '本书编写组', '高等教育出版社', NULL, '2023版', NULL, NULL, NULL, 23.00, NULL, NULL, NULL, '未知', '未知', '思想政治课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:39:50', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (18, '中国近现代史纲要（2023年版）', '9787040599015', '本书编写组', '高等教育出版社', NULL, '2023版', NULL, NULL, NULL, 26.00, NULL, NULL, NULL, '未知', '未知', '思想政治课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:39:50', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (19, '思想道德与法治（2023年版）', '9787040599022', '沈壮海、王易', '高等教育出版社', NULL, '2023版', NULL, NULL, NULL, 18.00, NULL, NULL, NULL, '未知', '未知', '思想政治课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:39:50', '', NULL, '0', '1', '0');
+INSERT INTO `textbook_info` VALUES (20, '新视野大学英语读写教程3（第三版）', '9787521316964', '郑树棠', '外语教学与研究出版社', NULL, '第3版', NULL, NULL, NULL, 58.90, NULL, NULL, NULL, '未知', '未知', '公共基础课', NULL, NULL, NULL, '0', 'admin', '2026-04-28 18:39:50', '', NULL, '0', '1', '0');
 
 -- ----------------------------
 -- Table structure for textbook_inventory_check
@@ -1704,14 +1714,14 @@ CREATE TABLE `textbook_lack`  (
   `lack_num` int NOT NULL COMMENT '缺书数量',
   `book_name` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '教材名称',
   `isbn` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'ISBN编号',
-  `urgency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '紧急程度:0普通 1紧急',
+  `urgency` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '0' COMMENT '紧急程度:0普通 1紧急 2特急',
   `register_id` bigint NOT NULL COMMENT '登记人ID(关联sys_user)',
   `register_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '登记时间',
-  `handle_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '处理状态(0未处理 1已处理)',
+  `handle_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '处理状态(0未处理 1已纳入采购 2部分补齐 3已补齐 4已取消)',
   `handle_time` datetime(0) NULL DEFAULT NULL COMMENT '处理时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
   `purchase_id` bigint NULL DEFAULT NULL COMMENT '关联采购单ID(关联textbook_pending)',
-  `source` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '1' COMMENT '来源(1采购缺书 2领书缺书)',
+  `source` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '1' COMMENT '来源(1采购缺书 2领书缺书 3审核转入)',
   `source_id` bigint NULL DEFAULT NULL COMMENT '来源ID',
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '删除标志(0正常 2删除)',
   `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
@@ -1729,7 +1739,7 @@ CREATE TABLE `textbook_lack`  (
 -- ----------------------------
 INSERT INTO `textbook_lack` VALUES (4, 16, 5, NULL, NULL, '1', 110, '2026-04-21 17:20:48', '4', NULL, NULL, NULL, '1', NULL, '0', '', NULL, NULL, NULL);
 INSERT INTO `textbook_lack` VALUES (5, 16, 1, NULL, NULL, '1', 110, '2026-04-21 18:04:58', '1', NULL, NULL, 5, '1', NULL, '0', '', NULL, NULL, NULL);
-INSERT INTO `textbook_lack` VALUES (6, 17, 1, NULL, NULL, '2', 110, '2026-04-21 18:27:43', '0', NULL, NULL, NULL, '1', NULL, '0', '', NULL, NULL, NULL);
+INSERT INTO `textbook_lack` VALUES (6, 17, 1, NULL, NULL, '2', 110, '2026-04-21 18:27:43', '4', NULL, NULL, NULL, '1', NULL, '0', '', NULL, NULL, '2026-04-28 18:00:10');
 
 -- ----------------------------
 -- Table structure for textbook_location
@@ -1981,16 +1991,31 @@ CREATE TABLE `textbook_stock`  (
   UNIQUE INDEX `uk_book_id`(`book_id`) USING BTREE,
   INDEX `idx_stock_status`(`stock_status`) USING BTREE,
   INDEX `idx_stock_num_warning_num`(`stock_num`, `warning_num`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '库存表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 36 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '库存表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of textbook_stock
 -- ----------------------------
-INSERT INTO `textbook_stock` VALUES (11, 11, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0, '', '2026-04-23 01:11:35', '');
-INSERT INTO `textbook_stock` VALUES (12, 12, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0, '', '2026-04-23 01:11:35', '');
-INSERT INTO `textbook_stock` VALUES (13, 13, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0, '', '2026-04-23 01:11:35', '');
-INSERT INTO `textbook_stock` VALUES (14, 14, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0, '', '2026-04-23 01:11:35', '');
-INSERT INTO `textbook_stock` VALUES (15, 15, 0, NULL, 10, '2026-04-19 00:05:12', '0', 'normal', 0, 0, 0, '', '2026-04-23 01:11:35', '');
+INSERT INTO `textbook_stock` VALUES (16, 1, 0, NULL, 30, '2026-04-28 18:26:17', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:17', '');
+INSERT INTO `textbook_stock` VALUES (17, 2, 0, NULL, 30, '2026-04-28 18:26:17', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:17', '');
+INSERT INTO `textbook_stock` VALUES (18, 3, 0, NULL, 30, '2026-04-28 18:26:17', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:17', '');
+INSERT INTO `textbook_stock` VALUES (19, 4, 0, NULL, 30, '2026-04-28 18:26:17', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:17', '');
+INSERT INTO `textbook_stock` VALUES (20, 5, 0, NULL, 30, '2026-04-28 18:26:17', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:17', '');
+INSERT INTO `textbook_stock` VALUES (21, 6, 0, NULL, 30, '2026-04-28 18:26:18', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:18', '');
+INSERT INTO `textbook_stock` VALUES (22, 7, 0, NULL, 30, '2026-04-28 18:26:18', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:18', '');
+INSERT INTO `textbook_stock` VALUES (23, 8, 0, NULL, 30, '2026-04-28 18:26:18', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:18', '');
+INSERT INTO `textbook_stock` VALUES (24, 9, 0, NULL, 30, '2026-04-28 18:26:18', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:18', '');
+INSERT INTO `textbook_stock` VALUES (25, 10, 0, NULL, 30, '2026-04-28 18:26:18', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:26:18', '');
+INSERT INTO `textbook_stock` VALUES (46, 11, 0, NULL, 30, '2026-04-28 18:38:20', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:38:20', '');
+INSERT INTO `textbook_stock` VALUES (47, 12, 0, NULL, 30, '2026-04-28 18:38:20', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:38:20', '');
+INSERT INTO `textbook_stock` VALUES (48, 13, 0, NULL, 30, '2026-04-28 18:39:19', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:39:19', '');
+INSERT INTO `textbook_stock` VALUES (49, 14, 0, NULL, 30, '2026-04-28 18:39:19', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:39:19', '');
+INSERT INTO `textbook_stock` VALUES (50, 15, 0, NULL, 30, '2026-04-28 18:39:19', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:39:19', '');
+INSERT INTO `textbook_stock` VALUES (51, 16, 0, NULL, 30, '2026-04-28 18:39:19', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:39:19', '');
+INSERT INTO `textbook_stock` VALUES (52, 17, 0, NULL, 30, '2026-04-28 18:39:50', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:39:50', '');
+INSERT INTO `textbook_stock` VALUES (53, 18, 0, NULL, 30, '2026-04-28 18:39:50', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:39:50', '');
+INSERT INTO `textbook_stock` VALUES (54, 19, 0, NULL, 30, '2026-04-28 18:39:50', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:39:50', '');
+INSERT INTO `textbook_stock` VALUES (55, 20, 0, NULL, 30, '2026-04-28 18:39:50', '0', 'shortage', 0, 0, 0, 'admin', '2026-04-28 18:39:50', '');
 
 -- ----------------------------
 -- Table structure for textbook_stock_flow
@@ -2007,6 +2032,7 @@ CREATE TABLE `textbook_stock_flow`  (
   `stock_after` int NOT NULL DEFAULT 0,
   `operator` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '',
   `operate_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+  `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '备注',
   `create_time` datetime(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
   `create_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '创建者',
   `update_by` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT '' COMMENT '更新者',

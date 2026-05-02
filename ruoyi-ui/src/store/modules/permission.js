@@ -1,4 +1,4 @@
-import auth from '@/plugins/auth'
+import auth, { SUPER_ROLE } from '@/plugins/auth'
 import router, { constantRoutes, dynamicRoutes } from '@/router'
 import { getRouters } from '@/api/menu'
 import Layout from '@/layout/index'
@@ -30,21 +30,33 @@ const permission = {
   },
   actions: {
     // 生成路由
-    GenerateRoutes({ commit }) {
+    GenerateRoutes({ commit, getters }) {
       return new Promise(resolve => {
         // 向后端请求路由数据
         getRouters().then(res => {
           const sdata = JSON.parse(JSON.stringify(res.data))
           const rdata = JSON.parse(JSON.stringify(res.data))
           const sidebarRoutes = filterAsyncRouter(sdata)
-          const rewriteRoutes = filterAsyncRouter(rdata, false, true)
+          let rewriteRoutes = filterAsyncRouter(rdata, false, true)
           const asyncRoutes = filterDynamicRoutes(dynamicRoutes)
           rewriteRoutes.push({ path: '*', redirect: '/404', hidden: true })
           router.addRoutes(asyncRoutes)
+          const userRoles = getters.roles
+          let sidebarRouters
+          if (userRoles && !userRoles.includes(SUPER_ROLE)) {
+            // 移除框架"首页"
+            let srouteArr = constantRoutes.filter(r => !(r.children && r.children.some(c => c.name === 'Index' && c.path === 'index')))
+            // 扁平化 sidebarRoutes + rewriteRoutes
+            srouteArr = srouteArr.concat(flattenForRole(sidebarRoutes))
+            sidebarRouters = srouteArr
+            rewriteRoutes = flattenForRole(rewriteRoutes)
+          } else {
+            sidebarRouters = constantRoutes.concat(sidebarRoutes)
+          }
           commit('SET_ROUTES', rewriteRoutes)
-          commit('SET_SIDEBAR_ROUTERS', constantRoutes.concat(sidebarRoutes))
-          commit('SET_DEFAULT_ROUTES', sidebarRoutes)
-          commit('SET_TOPBAR_ROUTES', sidebarRoutes)
+          commit('SET_SIDEBAR_ROUTERS', sidebarRouters)
+          commit('SET_DEFAULT_ROUTES', sidebarRouters)
+          commit('SET_TOPBAR_ROUTES', sidebarRouters)
           resolve(rewriteRoutes)
         })
       })
@@ -54,12 +66,11 @@ const permission = {
 
 // 遍历后台传来的路由字符串，转换为组件对象
 function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = false) {
-  return asyncRouterMap.filter(route => {
+  return asyncRouterMap.map(route => {
     if (type && route.children) {
-      route.children = filterChildren(route.children)
+      route.children = filterChildren(route.children, false)
     }
     if (route.component) {
-      // Layout ParentView 组件特殊处理
       if (route.component === 'Layout') {
         route.component = Layout
       } else if (route.component === 'ParentView') {
@@ -76,7 +87,7 @@ function filterAsyncRouter(asyncRouterMap, lastRouter = false, type = false) {
       delete route['children']
       delete route['redirect']
     }
-    return true
+    return route
   })
 }
 
@@ -93,12 +104,38 @@ function filterChildren(childrenMap, lastRouter = false) {
   return children
 }
 
+// 需要将子菜单提升为顶级菜单的模块路径
+const FLATTEN_MODULE_PATHS = ['warehouse', 'teacher', 'supplier']
+
+// 非admin角色：将模块下子菜单提升为顶级菜单
+function flattenForRole(routes) {
+  const modPaths = FLATTEN_MODULE_PATHS
+  const result = []
+  routes.forEach(r => {
+    if (modPaths.includes(r.path) && r.children && r.children.length) {
+      r.children.forEach(child => {
+        result.push({
+          path: (r.path.startsWith('/') ? r.path : '/' + r.path) + '/' + child.path,
+          component: Layout,
+          redirect: 'noRedirect',
+          hidden: child.hidden,
+          meta: child.meta || {},
+          children: [{ path: '', component: child.component, meta: child.meta || {} }]
+        })
+      })
+    } else {
+      result.push(r)
+    }
+  })
+  return result
+}
+
 // 动态路由遍历，验证是否具备权限
 export function filterDynamicRoutes(routes) {
   const res = []
   routes.forEach(route => {
     if (route.permissions && route.roles) {
-      // 同时有权限和角色，满足其中一个即可
+      // 路由同时定义了 permissions 和 roles 时，满足其一即可访问（OR 逻辑）
       if (auth.hasPermiOr(route.permissions) || auth.hasRoleOr(route.roles)) {
         res.push(route)
       }

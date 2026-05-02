@@ -4,18 +4,18 @@
  */
 
 import store from '@/store'
+import { ALL_PERMISSION } from '@/plugins/auth'
 
 export default {
   inserted(el, binding, vnode) {
     const { value } = binding
-    const all_permission = "*:*:*"
     const permissions = store.getters && store.getters.permissions
 
     if (value && value instanceof Array && value.length > 0) {
       const permissionFlag = value
 
       const hasPermissions = permissions.some(permission => {
-        return all_permission === permission || permissionFlag.includes(permission)
+        return ALL_PERMISSION === permission || permissionFlag.includes(permission)
       })
 
       if (!hasPermissions) {

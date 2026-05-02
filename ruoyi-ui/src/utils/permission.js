@@ -1,4 +1,5 @@
 import store from '@/store'
+import { ALL_PERMISSION, SUPER_ROLE } from '@/plugins/auth'
 
 /**
  * 字符权限校验
@@ -9,10 +10,9 @@ export function checkPermi(value) {
   if (value && value instanceof Array && value.length > 0) {
     const permissions = store.getters && store.getters.permissions
     const permissionDatas = value
-    const all_permission = "*:*:*"
 
     const hasPermission = permissions.some(permission => {
-      return all_permission === permission || permissionDatas.includes(permission)
+      return ALL_PERMISSION === permission || permissionDatas.includes(permission)
     })
 
     return hasPermission
@@ -32,10 +32,9 @@ export function checkRole(value) {
   if (value && value instanceof Array && value.length > 0) {
     const roles = store.getters && store.getters.roles
     const permissionRoles = value
-    const super_admin = "admin"
 
     const hasRole = roles.some(role => {
-      return super_admin === role || permissionRoles.includes(role)
+      return SUPER_ROLE === role || permissionRoles.includes(role)
     })
 
     return hasRole

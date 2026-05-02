@@ -92,7 +92,7 @@ service.interceptors.response.use(res => {
       }).catch(() => {
         isRelogin.show = false
       })
-    }
+      }
       return Promise.reject('无效的会话，或者会话已过期，请重新登录。')
     } else if (code === 500) {
       Message({ message: msg, type: 'error' })
@@ -137,7 +137,15 @@ export function download(url, params, filename, config) {
       saveAs(blob, filename)
     } else {
       const resText = await data.text()
-      const rspObj = JSON.parse(resText)
+      let rspObj
+      try {
+        rspObj = JSON.parse(resText)
+      } catch (e) {
+        console.error('接口返回非JSON数据:', resText)
+        Message.error('下载文件出现错误，请联系管理员！')
+        downloadLoadingInstance.close()
+        return
+      }
       const errMsg = errorCode[rspObj.code] || rspObj.msg || errorCode['default']
       Message.error(errMsg)
     }

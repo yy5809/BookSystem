@@ -1,11 +1,13 @@
 import store from '@/store'
 
+export const ALL_PERMISSION = '*:*:*'
+export const SUPER_ROLE = 'admin'
+
 function authPermission(permission) {
-  const all_permission = "*:*:*"
   const permissions = store.getters && store.getters.permissions
   if (permission && permission.length > 0) {
     return permissions.some(v => {
-      return all_permission === v || v === permission
+      return ALL_PERMISSION === v || v === permission
     })
   } else {
     return false
@@ -13,11 +15,10 @@ function authPermission(permission) {
 }
 
 function authRole(role) {
-  const super_admin = "admin"
   const roles = store.getters && store.getters.roles
   if (role && role.length > 0) {
     return roles.some(v => {
-      return super_admin === v || v === role
+      return SUPER_ROLE === v || v === role
     })
   } else {
     return false
