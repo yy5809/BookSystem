@@ -12,11 +12,11 @@ public interface IStockOperationService {
 
     StockOperationResult deductStock(Long bookId, Integer quantity,
             Long operatorId, String operatorName,
-            String refBizType, Long refBizId, String remark);
+            String refBizType, String refBizId, String remark);
 
     StockOperationResult addStock(Long bookId, Integer quantity,
             Long operatorId, String operatorName,
-            String refBizType, Long refBizId, String remark);
+            String refBizType, String refBizId, String remark);
 
     void checkAndSendStockWarning(Long bookId, String bookName);
 

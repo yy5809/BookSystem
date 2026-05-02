@@ -1,6 +1,7 @@
 package com.ruoyi.textbook.mapper;
 
 import java.util.List;
+import org.apache.ibatis.annotations.Mapper;
 import com.ruoyi.textbook.domain.TbBook;
 
 /**
@@ -8,6 +9,7 @@ import com.ruoyi.textbook.domain.TbBook;
  * 
  * @author ruoyi
  */
+@Mapper
 public interface TbBookMapper 
 {
     /**

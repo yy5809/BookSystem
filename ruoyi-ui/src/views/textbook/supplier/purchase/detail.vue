@@ -40,8 +40,9 @@
         </el-table>
       </el-card>
       
-      <div class="action-buttons" v-if="purchaseInfo.purchaseStatus === '1'">
-        <el-button type="primary" @click="confirmShipment">确认发货</el-button>
+      <div class="action-buttons" v-if="purchaseInfo.purchaseStatus === '1' || purchaseInfo.purchaseStatus === '2'">
+        <el-button type="success" @click="handleAccept" v-if="purchaseInfo.purchaseStatus === '1'">确认接单</el-button>
+        <el-button type="primary" @click="confirmShipment" v-if="purchaseInfo.purchaseStatus === '2'">确认发货</el-button>
       </div>
     </el-card>
     
@@ -70,7 +71,7 @@
 </template>
 
 <script>
-import { getSupplierPurchaseDetail, confirmShipment } from '@/api/textbook/supplier'
+import { getSupplierPurchaseDetail, acceptOrder, confirmShipment } from '@/api/textbook/supplier'
 
 export default {
   name: 'SupplierPurchaseDetail',
@@ -108,14 +109,16 @@ export default {
       })
     },
     goBack() {
-      this.$router.push('/textbook/supplierPurchase')
+      this.$router.push('/supplier/supplierPurchase')
     },
     getStatusType(status) {
       const typeMap = {
         '0': 'info',
         '1': 'warning',
         '2': 'success',
-        '3': 'success'
+        '3': '',
+        '4': 'info',
+        '5': 'success'
       }
       return typeMap[status] || 'info'
     },
@@ -123,10 +126,22 @@ export default {
       const textMap = {
         '0': '待采购',
         '1': '采购中',
-        '2': '已到货',
-        '3': '已入库'
+        '2': '已接单',
+        '3': '已发货',
+        '4': '已到货',
+        '5': '已入库'
       }
       return textMap[status] || '未知'
+    },
+    handleAccept() {
+      this.$confirm('确认接单该采购单？', '确认接单', {
+        confirmButtonText: '确认接单', cancelButtonText: '取消', type: 'success'
+      }).then(() => {
+        return acceptOrder(this.purchaseInfo.buyId)
+      }).then(() => {
+        this.$message.success('已接单')
+        this.getPurchaseDetail()
+      }).catch(() => {})
     },
     confirmShipment() {
       this.shipmentForm = {

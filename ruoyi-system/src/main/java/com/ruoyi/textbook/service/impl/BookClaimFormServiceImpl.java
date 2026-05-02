@@ -7,9 +7,10 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.textbook.domain.*;
+import com.ruoyi.textbook.domain.dto.StockOperationResult;
 import com.ruoyi.textbook.mapper.*;
 import com.ruoyi.textbook.service.IBookClaimFormService;
-import com.ruoyi.textbook.service.ITbStockLogService;
+import com.ruoyi.textbook.service.IStockOperationService;
 import com.ruoyi.textbook.service.NoticeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +30,7 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
     private BookClaimFormDetailMapper bookClaimFormDetailMapper;
 
     @Autowired
-    private TbInventoryMapper tbInventoryMapper;
-
-    @Autowired
-    private TbStockLogMapper tbStockLogMapper;
-
-    @Autowired
-    private ITbStockLogService stockLogService;
+    private IStockOperationService stockOperationService;
 
     @Autowired
     private BookNoticeMapper bookNoticeMapper;
@@ -138,10 +133,6 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
 
         for (int i = 0; i < details.size(); i++) {
             BookClaimFormDetail detail = details.get(i);
-            TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(detail.getTextbookId());
-            if (inventory == null) {
-                throw new ServiceException("教材《" + detail.getBookName() + "》库存记录不存在");
-            }
 
             int remainingForThisDetail = detail.getPlannedQty() - detail.getIssuedQty();
             if (remainingForThisDetail <= 0) {
@@ -162,39 +153,20 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
                 continue;
             }
 
-            int currentStock = inventory.getStockNum();
-            if (currentStock < actualIssueQty) {
-                throw new ServiceException("教材《" + detail.getBookName() + "》库存不足，当前库存：" + currentStock + "，需求：" + actualIssueQty);
-            }
-
-            int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
-            int rowsAffected = tbInventoryMapper.deductStockWithVersion(
+            StockOperationResult result = stockOperationService.deductStock(
                     detail.getTextbookId(),
                     actualIssueQty,
-                    currentVersion
-            );
-            if (rowsAffected <= 0) {
-                throw new ServiceException("并发冲突：教材《" + detail.getBookName() + "》库存已被其他操作修改，请刷新后重试");
+                    operatorId,
+                    operatorName,
+                    "CLAIM_FORM",
+                    String.valueOf(formId),
+                    "班级领书出库，领书单号：" + form.getFormNo() + "，班级：" + form.getClassName());
+            if (!result.isSuccess()) {
+                throw new ServiceException("教材《" + detail.getBookName() + "》" + result.getErrorMessage());
             }
 
             detail.setIssuedQty(detail.getIssuedQty() + actualIssueQty);
             bookClaimFormDetailMapper.updateBookClaimFormDetail(detail);
-
-            TbStockLog stockLog = new TbStockLog();
-            stockLog.setBookId(detail.getTextbookId());
-            stockLog.setBizType("2");
-            stockLog.setChangeNum(-actualIssueQty);
-            stockLog.setBeforeStock(currentStock);
-            int actualAfterStock = tbInventoryMapper.selectStockNumByBookId(detail.getTextbookId());
-            stockLog.setAfterStock(actualAfterStock);
-            stockLog.setOperatorId(operatorId);
-            stockLog.setOperatorName(operatorName);
-            stockLog.setRefBizType("CLAIM_FORM");
-            stockLog.setRefBizId(formId);
-            stockLog.setRemark("班级领书出库，领书单号：" + form.getFormNo() + "，班级：" + form.getClassName());
-            stockLogService.insert(stockLog);
-
-            checkStockWarning(detail.getTextbookId(), detail.getBookName());
 
             remainingToIssue -= actualIssueQty;
             actualTotalIssued += actualIssueQty;
@@ -250,15 +222,4 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
         return bookClaimFormDetailMapper.selectBookClaimFormDetailListByFormId(formId);
     }
 
-    private void checkStockWarning(Long bookId, String bookName) {
-        try {
-            TbInventory inv = tbInventoryMapper.selectTbInventoryByBookId(bookId);
-            if (inv != null && inv.getWarningNum() != null && inv.getStockNum() <= inv.getWarningNum()) {
-                noticeService.sendStockWarningNotice(bookId, bookName, inv.getStockNum(), inv.getWarningNum());
-                log.info("【库存预警】教材《{}》库存{}本低于预警阈值{}本，已发送通知", bookName, inv.getStockNum(), inv.getWarningNum());
-            }
-        } catch (Exception e) {
-            log.warn("【库存预警】检查库存预警失败: {}", e.getMessage());
-        }
-    }
 }

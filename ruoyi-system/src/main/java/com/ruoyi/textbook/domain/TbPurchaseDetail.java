@@ -46,6 +46,14 @@ public class TbPurchaseDetail extends BaseEntity
     @Excel(name = "总价")
     private BigDecimal totalPrice;
 
+    /** 作者 */
+    @Excel(name = "作者")
+    private String author;
+
+    /** 出版社 */
+    @Excel(name = "出版社")
+    private String publisher;
+
     public void setDetailId(Long detailId)
     {
         this.detailId = detailId;
@@ -126,6 +134,26 @@ public class TbPurchaseDetail extends BaseEntity
         return totalPrice;
     }
 
+    public void setAuthor(String author)
+    {
+        this.author = author;
+    }
+
+    public String getAuthor()
+    {
+        return author;
+    }
+
+    public void setPublisher(String publisher)
+    {
+        this.publisher = publisher;
+    }
+
+    public String getPublisher()
+    {
+        return publisher;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -137,6 +165,8 @@ public class TbPurchaseDetail extends BaseEntity
             .append("quantity", getQuantity())
             .append("unitPrice", getUnitPrice())
             .append("totalPrice", getTotalPrice())
+            .append("author", getAuthor())
+            .append("publisher", getPublisher())
             .toString();
     }
 }

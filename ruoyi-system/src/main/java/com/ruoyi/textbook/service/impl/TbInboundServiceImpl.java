@@ -11,6 +11,7 @@ import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbStockLog;
+import com.ruoyi.textbook.domain.BookPersonalApply;
 import com.ruoyi.textbook.domain.dto.StockOperationResult;
 import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbInboundMapper;
@@ -31,7 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TbInboundServiceImpl implements ITbInboundService {
@@ -118,7 +121,7 @@ public class TbInboundServiceImpl implements ITbInboundService {
                     tbInbound.getOperatorId(),
                     tbInbound.getOperatorName(),
                     "INBOUND",
-                    tbInbound.getInId(),
+                    String.valueOf(tbInbound.getInId()),
                     "采购入库，入库单号：" + tbInbound.getInboundNo()
             );
             if (!stockResult.isSuccess()) {
@@ -163,13 +166,35 @@ public class TbInboundServiceImpl implements ITbInboundService {
                     inbound.getOperatorId(),
                     inbound.getOperatorName(),
                     "INBOUND_DELETE",
-                    inbound.getInId(),
+                    String.valueOf(inbound.getInId()),
                     "删除入库单，回退库存，入库单号：" + inbound.getInboundNo()
             );
             if (!stockResult.isSuccess()) {
                 throw new ServiceException(stockResult.getErrorMessage());
             }
             log.info("【入库删除】已生成库存流水记录");
+        }
+
+        if (inbound.getPurchaseId() != null) {
+            TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(inbound.getPurchaseId());
+            if (purchase != null && "5".equals(purchase.getStatus())) {
+                purchase.setStatus("4");
+                tbPurchaseMapper.updateTbPurchase(purchase);
+                log.info("【入库删除】已将采购单状态回退为'已到货', purchaseId={}", inbound.getPurchaseId());
+            }
+        }
+
+        List<TbShortage> relatedShortages = tbShortageMapper.selectTbShortageListByBookId(inbound.getBookId());
+        if (relatedShortages != null) {
+            for (TbShortage s : relatedShortages) {
+                if ("2".equals(s.getHandleStatus()) || "3".equals(s.getHandleStatus())) {
+                    s.setHandleStatus("0");
+                    s.setHandleTime(null);
+                    s.setRemark("入库单" + inbound.getInboundNo() + "已删除，缺书单已自动回退为未处理");
+                    tbShortageMapper.updateTbShortage(s);
+                    log.info("【入库删除】已回退缺书单状态为未处理, lackId={}", s.getLackId());
+                }
+            }
         }
 
         return tbInboundMapper.deleteTbInboundByInboundId(inboundId);
@@ -190,13 +215,35 @@ public class TbInboundServiceImpl implements ITbInboundService {
                         SecurityUtils.getUserId(),
                         SecurityUtils.getUsername(),
                         "INBOUND_DELETE",
-                        inbound.getInId(),
+                        String.valueOf(inbound.getInId()),
                         "批量删除入库单，回退库存，入库单号：" + inbound.getInboundNo()
                 );
                 if (!stockResult.isSuccess()) {
                     throw new ServiceException(stockResult.getErrorMessage());
                 }
                 log.info("【批量删除入库】已回退库存并生成流水, inboundId={}", inboundId);
+            }
+
+            if (inbound.getPurchaseId() != null) {
+                TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(inbound.getPurchaseId());
+                if (purchase != null && "5".equals(purchase.getStatus())) {
+                    purchase.setStatus("4");
+                    tbPurchaseMapper.updateTbPurchase(purchase);
+                    log.info("【批量删除入库】已将采购单状态回退为'已到货', purchaseId={}", inbound.getPurchaseId());
+                }
+            }
+
+            List<TbShortage> relatedShortages = tbShortageMapper.selectTbShortageListByBookId(inbound.getBookId());
+            if (relatedShortages != null) {
+                for (TbShortage s : relatedShortages) {
+                    if ("2".equals(s.getHandleStatus()) || "3".equals(s.getHandleStatus())) {
+                        s.setHandleStatus("0");
+                        s.setHandleTime(null);
+                        s.setRemark("入库单" + inbound.getInboundNo() + "已删除，缺书单已自动回退为未处理");
+                        tbShortageMapper.updateTbShortage(s);
+                        log.info("【批量删除入库】已回退缺书单状态为未处理, lackId={}", s.getLackId());
+                    }
+                }
             }
             tbInboundMapper.deleteTbInboundByInboundId(inboundId);
         }
@@ -248,7 +295,7 @@ public class TbInboundServiceImpl implements ITbInboundService {
                 operatorId,
                 operatorName,
                 "INBOUND",
-                tbInbound.getInId(),
+                String.valueOf(tbInbound.getInId()),
                 "采购入库，入库单号：" + inboundNo
         );
         if (!stockResult.isSuccess()) {
@@ -272,6 +319,34 @@ public class TbInboundServiceImpl implements ITbInboundService {
 
         List<TbShortage> shortageList = tbShortageMapper.selectTbShortageListByBookId(tbInbound.getBookId());
         int remainingInbound = tbInbound.getInNum();
+
+        List<Long> purchaseSourceIds = new ArrayList<>();
+        List<Long> applySourceIds = new ArrayList<>();
+        for (TbShortage s : shortageList) {
+            if (s.getSourceId() != null) {
+                if ("1".equals(s.getSource())) {
+                    purchaseSourceIds.add(s.getSourceId());
+                } else if ("3".equals(s.getSource())) {
+                    applySourceIds.add(s.getSourceId());
+                }
+            }
+        }
+        Map<Long, TbPurchase> purchaseMap = new HashMap<>();
+        if (!purchaseSourceIds.isEmpty()) {
+            List<TbPurchase> purchases = tbPurchaseMapper.selectTbPurchaseByIds(purchaseSourceIds);
+            for (TbPurchase p : purchases) {
+                purchaseMap.put(p.getBuyId(), p);
+            }
+        }
+        Map<Long, BookPersonalApply> applyMap = new HashMap<>();
+        if (!applySourceIds.isEmpty()) {
+            List<BookPersonalApply> applies = bookPersonalApplyMapper.selectBookPersonalApplyByIds(applySourceIds);
+            for (BookPersonalApply a : applies) {
+                applyMap.put(a.getApplyId(), a);
+            }
+        }
+        log.info("【入库处理】批量预查询完成, 采购单{}条, 个人申请{}条", purchaseMap.size(), applyMap.size());
+
         for (TbShortage shortage : shortageList) {
             if (remainingInbound <= 0) break;
             if (!"0".equals(shortage.getHandleStatus()) && !"1".equals(shortage.getHandleStatus()) && !"2".equals(shortage.getHandleStatus())) {
@@ -299,7 +374,7 @@ public class TbInboundServiceImpl implements ITbInboundService {
             }
 
             if (shortage.getSourceId() != null && "1".equals(shortage.getSource())) {
-                TbPurchase relatedPurchase = tbPurchaseMapper.selectTbPurchaseById(shortage.getSourceId());
+                TbPurchase relatedPurchase = purchaseMap.get(shortage.getSourceId());
                 if (relatedPurchase != null && "2".equals(relatedPurchase.getStatus())) {
                     relatedPurchase.setStatus("0");
                     relatedPurchase.setRejectReason(null);
@@ -320,8 +395,7 @@ public class TbInboundServiceImpl implements ITbInboundService {
             }
 
             if (shortage.getSourceId() != null && "3".equals(shortage.getSource())) {
-                com.ruoyi.textbook.domain.BookPersonalApply relatedApply =
-                        bookPersonalApplyMapper.selectBookPersonalApplyById(shortage.getSourceId());
+                BookPersonalApply relatedApply = applyMap.get(shortage.getSourceId());
                 if (relatedApply != null && "2".equals(relatedApply.getStatus())) {
                     relatedApply.setStatus("0");
                     relatedApply.setAuditOpinion("缺书已到货，申请已自动重新开放");

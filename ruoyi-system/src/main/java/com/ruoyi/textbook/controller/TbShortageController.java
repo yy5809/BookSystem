@@ -32,7 +32,7 @@ public class TbShortageController extends BaseController
     /**
      * 查询缺书登记信息列表
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:list')")
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse,teacher')")
     @GetMapping("/list")
     public TableDataInfo list(TbShortage tbShortage)
     {
@@ -47,7 +47,7 @@ public class TbShortageController extends BaseController
     /**
      * 导出缺书登记信息列表
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:export')")
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
     @PostMapping("/export")
     public void export(HttpServletResponse response, TbShortage tbShortage)
     {
@@ -62,7 +62,7 @@ public class TbShortageController extends BaseController
     /**
      * 获取缺书登记信息详细信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:query')")
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse,teacher')")
     @GetMapping(value = "/{shortageId}")
     public AjaxResult getInfo(@PathVariable("shortageId") Long shortageId)
     {
@@ -77,7 +77,7 @@ public class TbShortageController extends BaseController
     /**
      * 新增缺书登记信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:add') and @ss.hasAnyRoles('admin,warehouse,teacher')")
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse,teacher')")
     @PostMapping
     public AjaxResult add(@RequestBody TbShortage tbShortage)
     {
@@ -88,7 +88,7 @@ public class TbShortageController extends BaseController
     /**
      * 修改缺书登记信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
     @PutMapping
     public AjaxResult edit(@RequestBody TbShortage tbShortage)
     {
@@ -98,7 +98,7 @@ public class TbShortageController extends BaseController
     /**
      * 删除缺书登记信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:remove') and @ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
     @DeleteMapping("/{shortageIds}")
     public AjaxResult remove(@PathVariable Long[] shortageIds)
     {
@@ -108,25 +108,26 @@ public class TbShortageController extends BaseController
     /**
      * 处理缺书
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:process') and @ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
     @PutMapping("/process/{shortageId}")
-    public AjaxResult process(@PathVariable Long shortageId, @RequestParam String status)
+    public AjaxResult process(@PathVariable Long shortageId, @RequestParam String status,
+                              @RequestParam(required = false) Long supplierId)
     {
-        return toAjax(tbShortageService.processShortage(shortageId, status));
+        return toAjax(tbShortageService.processShortage(shortageId, status, supplierId));
     }
 
     /**
      * 根据教材ID查询缺书登记信息
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:query')")
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
     @GetMapping("/byBook/{bookId}")
     public AjaxResult getByBookId(@PathVariable Long bookId)
     {
         return AjaxResult.success(tbShortageService.selectTbShortageByBookId(bookId));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:process') and @ss.hasAnyRoles('admin,warehouse')")
-    @Log(title = "缺书批量转采购(ISBN聚合)", businessType = BusinessType.UPDATE)
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "缺书批量转采购")
     @PostMapping("/convertToPurchase")
     public AjaxResult convertToPurchase(@RequestBody Long[] shortageIds)
     {
@@ -140,8 +141,8 @@ public class TbShortageController extends BaseController
     /**
      * 取消缺书登记
      */
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:list') and @ss.hasAnyRoles('admin,warehouse,teacher')")
-    @Log(title = "取消缺书登记", businessType = BusinessType.UPDATE)
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse,teacher')")
+    @Log(title = "取消缺书登记")
     @PutMapping("/cancel/{shortageId}")
     public AjaxResult cancel(@PathVariable Long shortageId)
     {

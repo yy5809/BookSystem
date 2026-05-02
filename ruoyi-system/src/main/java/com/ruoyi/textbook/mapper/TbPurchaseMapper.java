@@ -83,6 +83,14 @@ public interface TbPurchaseMapper
      */
     public List<TbPurchaseDetail> selectTbPurchaseDetailListByPurchaseIds(List<Long> purchaseIds);
 
+    /**
+     * 批量查询购书信息（解决N+1问题）
+     *
+     * @param purchaseIds 购书ID集合
+     * @return 购书信息集合
+     */
+    public List<TbPurchase> selectTbPurchaseByIds(List<Long> purchaseIds);
+
     public TbPurchase selectByFileHash(String fileHash);
 
     /**

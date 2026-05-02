@@ -5,10 +5,8 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
-import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.textbook.domain.TbInventory;
 import com.ruoyi.textbook.mapper.TbInventoryMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,11 +21,13 @@ public class TbBookServiceImpl implements ITbBookService
 {
     private static final Logger log = LoggerFactory.getLogger(TbBookServiceImpl.class);
 
-    @Autowired
-    private TbBookMapper tbBookMapper;
+    private final TbBookMapper tbBookMapper;
+    private final TbInventoryMapper tbInventoryMapper;
 
-    @Autowired
-    private TbInventoryMapper tbInventoryMapper;
+    public TbBookServiceImpl(TbBookMapper tbBookMapper, TbInventoryMapper tbInventoryMapper) {
+        this.tbBookMapper = tbBookMapper;
+        this.tbInventoryMapper = tbInventoryMapper;
+    }
 
     /**
      * 查询教材基础信息
@@ -91,6 +91,11 @@ public class TbBookServiceImpl implements ITbBookService
     }
 
     @Override
+    public TbInventory checkStockBeforeDelete(Long bookId) {
+        return tbInventoryMapper.selectTbInventoryByBookId(bookId);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public TbBook quickAdd(TbBook tbBook)
     {
@@ -106,6 +111,14 @@ public class TbBookServiceImpl implements ITbBookService
         {
             throw new ServiceException("教材名称不能为空");
         }
+        if (StringUtils.isEmpty(tbBook.getAuthor()))
+        {
+            throw new ServiceException("作者不能为空");
+        }
+        if (StringUtils.isEmpty(tbBook.getPublisher()))
+        {
+            throw new ServiceException("出版社不能为空");
+        }
         TbBook existBook = tbBookMapper.selectTbBookByIsbn(tbBook.getIsbn());
         if (existBook != null)
         {
@@ -113,6 +126,15 @@ public class TbBookServiceImpl implements ITbBookService
         }
         tbBook.setInfoStatus("0");
         tbBook.setStatus("0");
+        if (StringUtils.isEmpty(tbBook.getMajor())) {
+            tbBook.setMajor("未知");
+        }
+        if (StringUtils.isEmpty(tbBook.getGrade())) {
+            tbBook.setGrade("未知");
+        }
+        if (tbBook.getPrice() == null) {
+            tbBook.setPrice(java.math.BigDecimal.ZERO);
+        }
         tbBook.setCreateBy(SecurityUtils.getUsername());
         tbBook.setCreateTime(DateUtils.getNowDate());
         try {

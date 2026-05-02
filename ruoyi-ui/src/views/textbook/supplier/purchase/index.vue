@@ -23,8 +23,10 @@
           >
             <el-option label="待采购" value="0"></el-option>
             <el-option label="采购中" value="1"></el-option>
-            <el-option label="已到货" value="2"></el-option>
-            <el-option label="已入库" value="3"></el-option>
+            <el-option label="已接单" value="2"></el-option>
+            <el-option label="已发货" value="3"></el-option>
+            <el-option label="已到货" value="4"></el-option>
+            <el-option label="已入库" value="5"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -44,9 +46,12 @@
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" width="180"></el-table-column>
-        <el-table-column label="操作" width="150">
+        <el-table-column label="操作" width="250">
           <template slot-scope="scope">
-            <el-button type="primary" size="small" @click="confirmShipment(scope.row)" v-if="scope.row.purchaseStatus === '1'" v-hasPermi="['textbook:supplier:ship']">
+            <el-button type="primary" size="small" @click="handleAccept(scope.row)" v-if="scope.row.purchaseStatus === '1'">
+              确认接单
+            </el-button>
+            <el-button type="primary" size="small" @click="confirmShipment(scope.row)" v-if="scope.row.purchaseStatus === '2'">
               确认发货
             </el-button>
             <el-button type="info" size="small" @click="viewPurchaseDetail(scope.row)">
@@ -90,7 +95,7 @@
 </template>
 
 <script>
-import { listSupplierPurchases, confirmShipment } from '@/api/textbook/supplier'
+import { listSupplierPurchases, acceptOrder, confirmShipment } from '@/api/textbook/supplier'
 
 export default {
   name: 'SupplierPurchaseList',
@@ -132,8 +137,10 @@ export default {
     getList() {
       this.loading = true
       listSupplierPurchases(this.queryParams).then(response => {
-        this.purchaseList = response.data.rows
-        this.total = response.data.total
+        this.purchaseList = response.rows
+        this.total = response.total
+        this.loading = false
+      }).catch(() => {
         this.loading = false
       })
     },
@@ -155,7 +162,9 @@ export default {
         '0': 'info',
         '1': 'warning',
         '2': 'success',
-        '3': 'success'
+        '3': '',
+        '4': 'info',
+        '5': 'success'
       }
       return typeMap[status] || 'info'
     },
@@ -163,13 +172,25 @@ export default {
       const textMap = {
         '0': '待采购',
         '1': '采购中',
-        '2': '已到货',
-        '3': '已入库'
+        '2': '已接单',
+        '3': '已发货',
+        '4': '已到货',
+        '5': '已入库'
       }
       return textMap[status] || '未知'
     },
     viewPurchaseDetail(purchase) {
-      this.$router.push(`/textbook/supplierPurchase/${purchase.buyId}`)
+      this.$router.push(`/supplier/supplierPurchase/${purchase.buyId}`)
+    },
+    handleAccept(purchase) {
+      this.$confirm('确认接单采购单 ' + purchase.purchaseNo + ' ？', '确认接单', {
+        confirmButtonText: '确认接单', cancelButtonText: '取消', type: 'success'
+      }).then(() => {
+        return acceptOrder(purchase.buyId)
+      }).then(() => {
+        this.$modal.msgSuccess('已接单')
+        this.getList()
+      }).catch(() => {})
     },
     confirmShipment(purchase) {
       this.shipmentForm = {

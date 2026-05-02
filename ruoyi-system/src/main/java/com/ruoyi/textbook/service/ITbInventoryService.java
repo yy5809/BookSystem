@@ -41,21 +41,6 @@ public interface ITbInventoryService
     public int updateTbInventory(TbInventory tbInventory);
 
     /**
-     * 增加库存数量（带校验）
-     */
-    public int increaseStock(Long bookId, Integer quantity);
-
-    /**
-     * 减少库存数量（带校验）
-     */
-    public int decreaseStock(Long bookId, Integer quantity);
-
-    /**
-     * 安全扣减库存（带乐观锁，返回实际影响行数）
-     */
-    public int safeDecreaseStock(Long bookId, Integer quantity) throws Exception;
-
-    /**
      * 校验教材是否存在
      */
     public boolean validateBookExists(Long bookId);

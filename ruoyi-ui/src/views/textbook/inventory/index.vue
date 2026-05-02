@@ -99,21 +99,21 @@
         <el-table-column type="index" label="#" width="45" align="center" />
         <el-table-column label="业务类型" width="110" align="center">
           <template slot-scope="scope">
-            <el-tag :type="getBizTypeTagType(scope.row.businessType)" size="mini">{{ getBizTypeLabel(scope.row.businessType) }}</el-tag>
+            <el-tag :type="getBizTypeTagType(scope.row.bizType)" size="mini">{{ getBizTypeLabel(scope.row.bizType) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="关联单号" prop="businessNo" width="180" show-overflow-tooltip />
-        <el-table-column label="变动数量" align="center" prop="changeQty" width="100">
+        <el-table-column label="关联单号" prop="refBizId" width="180" show-overflow-tooltip />
+        <el-table-column label="变动数量" align="center" prop="changeNum" width="100">
           <template slot-scope="scope">
-            <span :style="{ color: scope.row.changeQty > 0 ? '#67C23A' : '#F56C6C', fontWeight: 'bold' }">
-              {{ scope.row.changeQty > 0 ? '+' : '' }}{{ scope.row.changeQty }}
+            <span :style="{ color: scope.row.changeNum > 0 ? '#67C23A' : '#F56C6C', fontWeight: 'bold' }">
+              {{ scope.row.changeNum > 0 ? '+' : '' }}{{ scope.row.changeNum }}
             </span>
           </template>
         </el-table-column>
-        <el-table-column label="变动前" prop="stockBefore" width="80" align="center" />
-        <el-table-column label="变动后" prop="stockAfter" width="80" align="center" />
-        <el-table-column label="操作人" prop="operator" width="90" />
-        <el-table-column label="操作时间" prop="operateTime" width="160" align="center" />
+        <el-table-column label="变动前" prop="beforeStock" width="80" align="center" />
+        <el-table-column label="变动后" prop="afterStock" width="80" align="center" />
+        <el-table-column label="操作人" prop="operatorName" width="90" />
+        <el-table-column label="操作时间" prop="createTime" width="160" align="center" />
       </el-table>
       <div slot="footer" class="dialog-footer">
         <el-button @click="logOpen = false">关 闭</el-button>
@@ -124,7 +124,7 @@
 
 <script>
 import { getInventoryList, getInventoryInfo, exportInventory } from "@/api/textbook/inventory";
-import { listStockFlow } from "@/api/textbook/stockFlow";
+import { listStockLog } from "@/api/textbook/stockLog";
 
 export default {
   name: "InventoryManage",
@@ -194,7 +194,7 @@ export default {
       this.logIsbn = row.isbn || '';
       this.logOpen = true;
       this.logLoading = true;
-      listStockFlow({ isbn: row.isbn }).then(res => {
+      listStockLog({ isbn: row.isbn }).then(res => {
         this.logList = res.rows || [];
         this.logLoading = false;
       }).catch(() => { this.logLoading = false; });

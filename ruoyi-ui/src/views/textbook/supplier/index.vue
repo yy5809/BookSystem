@@ -73,13 +73,13 @@ export default {
     loadDashboardData() {
       // 获取仪表盘数据
       getSupplierDashboard().then(response => {
-        this.unreadNoticeCount = response.data.unreadNoticeCount || 0
-        this.pendingShipmentCount = response.data.pendingShipmentCount || 0
+        this.unreadNoticeCount = response.unreadNoticeCount || 0
+        this.pendingShipmentCount = response.pendingShipmentCount || 0
       })
       
       // 获取最近采购单
       listSupplierPurchases({ pageSize: 5 }).then(response => {
-        this.recentPurchases = response.data.rows || []
+        this.recentPurchases = response.rows || []
       })
     },
     getStatusType(status) {
@@ -87,7 +87,9 @@ export default {
         '0': 'info',
         '1': 'warning',
         '2': 'success',
-        '3': 'success'
+        '3': '',
+        '4': 'info',
+        '5': 'success'
       }
       return typeMap[status] || 'info'
     },
@@ -95,16 +97,18 @@ export default {
       const textMap = {
         '0': '待采购',
         '1': '采购中',
-        '2': '已到货',
-        '3': '已入库'
+        '2': '已接单',
+        '3': '已发货',
+        '4': '已到货',
+        '5': '已入库'
       }
       return textMap[status] || '未知'
     },
     viewPurchase(purchase) {
-      this.$router.push(`/textbook/supplierPurchase/${purchase.buyId}`)
+      this.$router.push(`/supplier/supplierPurchase/${purchase.buyId}`)
     },
     goToPurchaseList() {
-      this.$router.push('/textbook/supplierPurchase')
+      this.$router.push('/supplier/supplierPurchase')
     }
   }
 }

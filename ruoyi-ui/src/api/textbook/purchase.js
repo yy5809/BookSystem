@@ -12,6 +12,15 @@ export function addPurchase(data) {
 export function auditPurchase(data) {
   return request({ url: '/textbook/purchase/audit', method: 'put', data })
 }
+export function confirmOrder(buyId, supplierId) {
+  return request({ url: '/textbook/purchase/confirmOrder/' + buyId, method: 'put', params: { supplierId } })
+}
+export function confirmArrived(buyId) {
+  return request({ url: '/textbook/purchase/confirmArrived/' + buyId, method: 'put' })
+}
+export function confirmInbound(buyId) {
+  return request({ url: '/textbook/purchase/confirmInbound/' + buyId, method: 'put' })
+}
 export function confirmReceive(buyId) {
   return request({ url: '/textbook/purchase/receive/' + buyId, method: 'put' })
 }
@@ -19,11 +28,25 @@ export function deletePurchase(purchaseId) {
   return request({ url: '/textbook/purchase/remove/' + purchaseId, method: 'delete' })
 }
 
-/**
- * Excel导入采购单
- * @param {File} file - Excel文件
- * @returns {Promise} 导入结果
- */
+export function previewPurchaseExcel(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request({
+    url: '/textbook/purchase/import/preview',
+    method: 'post',
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+export function confirmPurchaseImport(previewToken) {
+  return request({
+    url: '/textbook/purchase/import/confirm',
+    method: 'post',
+    data: { previewToken }
+  })
+}
+
 export function importPurchaseExcel(file) {
   const formData = new FormData()
   formData.append('file', file)

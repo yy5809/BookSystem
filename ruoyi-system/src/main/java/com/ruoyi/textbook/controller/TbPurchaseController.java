@@ -61,6 +61,27 @@ public class TbPurchaseController extends BaseController {
             request.getRejectReason()));
     }
 
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "确认下单通知供应商", businessType = BusinessType.UPDATE)
+    @PutMapping("/confirmOrder/{id}")
+    public AjaxResult confirmOrder(@PathVariable("id") Long buyId, @RequestParam Long supplierId) {
+        return toAjax(tbBuyService.confirmOrder(buyId, supplierId));
+    }
+
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "确认到货", businessType = BusinessType.UPDATE)
+    @PutMapping("/confirmArrived/{id}")
+    public AjaxResult confirmArrived(@PathVariable("id") Long buyId) {
+        return toAjax(tbBuyService.confirmArrived(buyId));
+    }
+
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "验收入库", businessType = BusinessType.UPDATE)
+    @PutMapping("/confirmInbound/{id}")
+    public AjaxResult confirmInbound(@PathVariable("id") Long buyId) {
+        return toAjax(tbBuyService.confirmInbound(buyId));
+    }
+
     @PreAuthorize("@ss.hasPermi('textbook:purchase:add')")
     @Log(title = "取消购书单", businessType = BusinessType.UPDATE)
     @PutMapping("/cancel/{id}")

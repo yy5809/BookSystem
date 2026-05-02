@@ -56,7 +56,7 @@
         <el-card shadow="hover">
           <div slot="header">
             <span>我的最近申请</span>
-            <el-button style="float: right; padding: 3px 0" type="text" @click="$router.push('/textbook/myApply')">查看全部</el-button>
+            <el-button style="float: right; padding: 3px 0" type="text" @click="$router.push('/teacher/myApply')">查看全部</el-button>
           </div>
           <el-table :data="recentApplies" size="small" v-loading="loading" border stripe>
             <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip />
@@ -74,20 +74,20 @@
         <el-card shadow="hover">
           <div slot="header"><span>快捷操作</span></div>
           <div class="quick-actions">
-            <div class="action-item" @click="$router.push('/textbook/myApply')">
+            <div class="action-item" @click="$router.push('/teacher/myApply')">
               <i class="el-icon-plus"></i>
               <span>提交领书申请</span>
             </div>
-            <div class="action-item" @click="$router.push('/textbook/bookQuery')">
+            <div class="action-item" @click="$router.push('/teacher/bookQuery')">
               <i class="el-icon-search"></i>
               <span>查询教材信息</span>
             </div>
-            <div class="action-item" @click="$router.push('/textbook/registerShortage')">
+            <div class="action-item" @click="$router.push('/teacher/registerShortage')">
               <i class="el-icon-edit-outline"></i>
               <span>登记缺书</span>
             </div>
 
-            <div class="action-item" @click="$router.push('/textbook/myNotice')">
+            <div class="action-item" @click="$router.push('/teacher/myNotice')">
               <i class="el-icon-bell"></i>
               <span>查看通知</span>
             </div>

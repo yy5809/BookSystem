@@ -66,6 +66,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where apply_id = #{applyId} and del_flag = '0'
     </select>
 
+    <select id="selectBookPersonalApplyByIds" parameterType="java.util.List" resultMap="BookPersonalApplyResult">
+        <include refid="selectBookPersonalApplyVo"/>
+        where apply_id in
+        <foreach item="applyId" collection="list" open="(" separator="," close=")">#{applyId}</foreach>
+        and del_flag = '0'
+    </select>
+
     <insert id="insertBookPersonalApply" parameterType="com.ruoyi.textbook.domain.BookPersonalApply" useGeneratedKeys="true" keyProperty="applyId">
         insert into textbook_personal_apply (
             <if test="applyNo != null and applyNo != ''">apply_no,</if>

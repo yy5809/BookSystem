@@ -12,51 +12,60 @@ public class TbBook extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     private Long bookId;
-    private String bookName;
+
+    @Excel(name = "ISBN", sort = 0, width = 20)
     private String isbn;
+
+    @Excel(name = "教材名称", sort = 1, width = 30)
+    private String bookName;
+
+    @Excel(name = "作者", sort = 2, width = 15)
     private String author;
+
+    @Excel(name = "出版社", sort = 3, width = 20)
     private String publisher;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "出版日期", width = 30, dateFormat = "yyyy-MM-dd")
+    @Excel(name = "出版日期", sort = 4, width = 15, dateFormat = "yyyy-MM-dd")
     private Date publishDate;
 
+    @Excel(name = "版次", sort = 5, width = 10)
     private String edition;
     private String printTimes;
     private String format;
     private String binding;
 
-    @Excel(name = "定价")
+    @Excel(name = "定价", sort = 6)
     private BigDecimal price;
 
-    @Excel(name = "字数")
+    @Excel(name = "字数", sort = 7)
     private Integer wordCount;
 
-    @Excel(name = "页数")
+    @Excel(name = "页数", sort = 8)
     private Integer pageCount;
 
-    @Excel(name = "适用课程")
+    @Excel(name = "适用课程", sort = 9)
     private String courseName;
 
-    @Excel(name = "适用专业")
+    @Excel(name = "适用专业", sort = 10)
     private String major;
 
-    @Excel(name = "适用年级")
+    @Excel(name = "适用年级", sort = 11)
     private String grade;
 
-    @Excel(name = "教材类型", readConverterExp = "1=必修,2=选修,3=参考")
+    @Excel(name = "教材类型", sort = 12)
     private String textbookType;
 
-    @Excel(name = "分类")
+    @Excel(name = "分类", sort = 13)
     private String category;
     private String description;
     private String coverImage;
 
-    @Excel(name = "状态", readConverterExp = "0=正常,1=停用")
+    @Excel(name = "状态", sort = 14, readConverterExp = "0=正常,1=停用")
     private String status;
     private String delFlag;
 
-    @Excel(name = "信息状态", readConverterExp = "0=待完善,1=已完善")
+    @Excel(name = "信息状态", sort = 15, readConverterExp = "0=待完善,1=已完善")
     private String infoStatus;
 
     private String infoSource;

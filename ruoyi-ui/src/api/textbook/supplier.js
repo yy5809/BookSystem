@@ -32,6 +32,9 @@ export function listSupplierPurchases(query) {
 export function getSupplierPurchaseDetail(purchaseId) {
   return request({ url: `/textbook/supplier/purchase/detail/${purchaseId}`, method: 'get' })
 }
+export function acceptOrder(purchaseId) {
+  return request({ url: `/textbook/supplier/purchase/accept/${purchaseId}`, method: 'put' })
+}
 export function confirmShipment(data) {
   return request({ url: '/textbook/supplier/purchase/shipment', method: 'post', data })
 }

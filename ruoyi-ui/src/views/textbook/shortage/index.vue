@@ -30,10 +30,10 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['textbook:shortage:add']">登记缺书</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd">登记缺书</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="success" plain icon="el-icon-download" size="mini" @click="handleExport" v-hasPermi="['textbook:shortage:export']">导出</el-button>
+        <el-button type="success" plain icon="el-icon-download" size="mini" @click="handleExport">导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -49,9 +49,7 @@
       </el-table-column>
       <el-table-column label="来源" align="center" prop="source" width="100">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.source === '1' ? '' : scope.row.source === '2' ? 'warning' : 'info'" size="mini">
-            {{ scope.row.source === '1' ? '领书缺货' : scope.row.source === '2' ? '审核转入' : '库存预警' }}
-          </el-tag>
+          <el-tag :type="getSourceTag(scope.row.source)" size="mini">{{ getSourceLabel(scope.row.source) }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="登记人" align="center" prop="createBy" width="90" />
@@ -64,9 +62,10 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
-          <el-button size="mini" type="text" icon="el-icon-s-claim" style="color:#E6A23C" @click="handleProcess(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:edit']">转采购</el-button>
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleEdit(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:edit']">编辑</el-button>
-          <el-button size="mini" type="text" icon="el-icon-delete" style="color:#F56C6C" @click="handleDelete(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:remove']">删除</el-button>
+          <el-button size="mini" type="text" icon="el-icon-s-claim" style="color:#E6A23A" @click="handleProcess(scope.row)" v-if="scope.row.handleStatus === '0'">转采购</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleEdit(scope.row)" v-if="scope.row.handleStatus === '0'">编辑</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.handleStatus === '0'">取消</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" style="color:#F56C6C" @click="handleDelete(scope.row)" v-if="scope.row.handleStatus === '0'">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -112,7 +111,7 @@
           <el-tag :type="getUrgencyType(viewData.urgency)">{{ getUrgencyLabel(viewData.urgency) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="来源">
-          <el-tag :type="viewData.source === '1' ? '' : 'warning'">{{ viewData.source === '1' ? '领书缺货' : viewData.source === '2' ? '审核转入' : '库存预警' }}</el-tag>
+          <el-tag :type="getSourceTag(viewData.source)">{{ getSourceLabel(viewData.source) }}</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="状态">
           <el-tag :type="getStatusType(viewData.handleStatus)">{{ getStatusLabel(viewData.handleStatus) }}</el-tag>
@@ -134,17 +133,25 @@
         <p style="font-size: 16px; font-weight: bold; margin: 8px 0;">{{ processData.bookName }}</p>
         <p>缺书数量：<span style="color: #E6A23C; font-weight: bold; font-size: 18px;">{{ processData.lackNum }}</span> 本</p>
       </div>
+      <el-form label-width="80px" style="margin-top: 15px;">
+        <el-form-item label="分配供应商">
+          <el-select v-model="processData.supplierId" placeholder="请选择供应商" style="width: 100%" filterable clearable>
+            <el-option v-for="s in supplierOptions" :key="s.supplierId" :label="s.supplierName" :value="s.supplierId" />
+          </el-select>
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="processOpen = false">取 消</el-button>
-        <el-button type="warning" @click="confirmProcess">确认转采购</el-button>
+        <el-button type="warning" @click="confirmProcess" :disabled="!processData.supplierId">确认转采购</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { getShortageList, getShortageInfo, addShortage, updateShortage, deleteShortage, processShortage } from "@/api/textbook/shortage";
+import { getShortageList, getShortageInfo, addShortage, updateShortage, deleteShortage, processShortage, cancelShortage } from "@/api/textbook/shortage";
 import { listBook } from "@/api/textbook/book";
+import { listSupplierOptions } from "@/api/textbook/supplier";
 
 export default {
   name: "ShortageManage",
@@ -164,6 +171,7 @@ export default {
       form: {},
       bookLoading: false,
       bookOptions: [],
+      supplierOptions: [],
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -188,6 +196,8 @@ export default {
       getShortageList(this.queryParams).then(response => {
         this.shortageList = response.rows;
         this.total = response.total;
+        this.loading = false;
+      }).catch(() => {
         this.loading = false;
       });
     },
@@ -263,15 +273,34 @@ export default {
       });
     },
     handleProcess(row) {
-      this.processData = { ...row };
+      this.processData = { ...row, supplierId: null };
+      this.loadSupplierOptions();
       this.processOpen = true;
     },
+    loadSupplierOptions() {
+      listSupplierOptions().then(res => {
+        this.supplierOptions = res.data || [];
+      }).catch(() => {});
+    },
     confirmProcess() {
-      processShortage(this.processData.lackId, '1').then(() => {
-        this.$modal.msgSuccess("已转为采购需求");
+      const supplierName = this.getSelectedSupplierName();
+      processShortage(this.processData.lackId, '1', this.processData.supplierId).then(() => {
+        this.$modal.msgSuccess('已生成采购单，供应商：' + supplierName);
         this.processOpen = false;
         this.getList();
       });
+    },
+    getSelectedSupplierName() {
+      const s = this.supplierOptions.find(item => item.supplierId === this.processData.supplierId);
+      return s ? s.supplierName : '未知';
+    },
+    handleCancel(row) {
+      this.$modal.confirm('是否确认取消该缺书登记？').then(() => {
+        return cancelShortage(row.lackId);
+      }).then(() => {
+        this.getList();
+        this.$modal.msgSuccess("取消成功");
+      }).catch(() => {});
     },
     handleDelete(row) {
       this.$modal.confirm('是否确认删除该缺书记录？').then(() => {
@@ -287,7 +316,9 @@ export default {
     getUrgencyType(level) { return level === '2' ? 'danger' : level === '1' ? 'warning' : 'info'; },
     getUrgencyLabel(level) { return level === '2' ? '特急' : level === '1' ? '紧急' : '普通'; },
     getStatusType(status) { return status === '3' ? 'success' : status === '2' ? 'info' : status === '1' ? 'warning' : 'danger'; },
-    getStatusLabel(status) { return status === '3' ? '已完成' : status === '2' ? '已到货' : status === '1' ? '已纳入采购' : '未处理'; }
+    getStatusLabel(status) { return status === '3' ? '已完成' : status === '2' ? '已到货' : status === '1' ? '已纳入采购' : '未处理'; },
+    getSourceLabel(s) { return s === '3' ? '审核转入' : s === '2' ? '库存预警' : '领书登记'; },
+    getSourceTag(s) { return s === '2' ? 'danger' : s === '3' ? 'warning' : 'info'; }
   }
 };
 </script>

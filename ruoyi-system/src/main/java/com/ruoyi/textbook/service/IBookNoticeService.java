@@ -17,5 +17,8 @@ public interface IBookNoticeService {
 
     public int publishNotice(Long noticeId);
 
+    /** 保存领书计划并自动生成领书单（合并 新建+发布 为一步） */
+    public int saveAndGenerate(BookNotice bookNotice);
+
     public List<BookClaimForm> generateClaimForms(Long noticeId);
 }

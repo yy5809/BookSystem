@@ -12,6 +12,9 @@ public interface ITbBuyService {
     TbPurchase getById(Long buyId);
     int submit(TbPurchase buy);
     int audit(Long buyId, String status, String rejectReason);
+    int confirmOrder(Long buyId, Long supplierId);
+    int confirmArrived(Long buyId);
+    int confirmInbound(Long buyId);
     int confirmReceive(Long buyId);
     int delete(Long[] buyIds);
     int deleteWithCheck(Long buyId);

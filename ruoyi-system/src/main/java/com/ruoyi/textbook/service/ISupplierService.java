@@ -17,6 +17,9 @@ public interface ISupplierService {
     // 获取供应商采购单详情
     TbPurchase getSupplierPurchaseDetail(Long purchaseId);
 
+    // 供应商确认接单
+    void acceptOrder(Long purchaseId);
+
     // 供应商确认发货
     void confirmShipment(Long purchaseId, String logisticsCompany, String logisticsNo, String remark);
 

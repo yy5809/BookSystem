@@ -46,6 +46,61 @@ public class PurchaseImportController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:import:excel') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "采购单Excel预览", businessType = BusinessType.IMPORT)
+    @RateLimiter(count = 5, time = 60)
+    @PostMapping("/preview")
+    public AjaxResult previewExcel(@RequestParam("file") MultipartFile file) throws Exception {
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.endsWith(".xlsx")) {
+            return error("仅支持 .xlsx 格式的Excel文件");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType != null && !contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                && !contentType.equals("application/octet-stream")) {
+            return error("文件Content-Type不合法，仅支持Excel文件");
+        }
+
+        if (file.getSize() > 10 * 1024 * 1024) {
+            return error("文件大小不能超过10MB");
+        }
+
+        String fileHash = calculateFileMD5(file);
+
+        List<TbPurchaseImportDTO> dataList = ExcelImportUtil.parsePurchaseExcel(file);
+        if (dataList == null || dataList.isEmpty()) {
+            return error("Excel文件中没有有效数据或格式不正确");
+        }
+
+        if (dataList.size() > 1000) {
+            return error("单次导入不能超过1000行数据");
+        }
+
+        Map<String, Object> result = purchaseImportService.previewFromExcel(dataList, fileHash, SecurityUtils.getUserId());
+        result.put("fileName", originalFilename);
+        return success(result);
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:import:excel') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "采购单Excel确认导入", businessType = BusinessType.IMPORT)
+    @RateLimiter(count = 5, time = 60)
+    @PostMapping("/confirm")
+    public AjaxResult confirmImport(@RequestBody Map<String, String> params) {
+        String previewToken = params.get("previewToken");
+        if (previewToken == null || previewToken.isEmpty()) {
+            return error("预览令牌不能为空");
+        }
+
+        Map<String, Object> result = purchaseImportService.confirmImport(
+                previewToken,
+                SecurityUtils.getUserId(),
+                SecurityUtils.getUsername()
+        );
+
+        return success(result);
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:import:excel') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "采购单Excel导入", businessType = BusinessType.IMPORT)
     @RateLimiter(count = 5, time = 60)
     @PostMapping("/excel")

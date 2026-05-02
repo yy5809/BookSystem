@@ -48,6 +48,17 @@ public class BookNoticeController extends BaseController {
         return toAjax(bookNoticeService.insertBookNotice(bookNotice));
     }
 
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:add') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "保存并生成领书单", businessType = BusinessType.INSERT)
+    @PostMapping("/saveAndGenerate")
+    public AjaxResult saveAndGenerate(@RequestBody BookNotice bookNotice) {
+        try {
+            return toAjax(bookNoticeService.saveAndGenerate(bookNotice));
+        } catch (RuntimeException e) {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
     @PreAuthorize("@ss.hasPermi('textbook:noticeManage:edit') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "领书通知", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -103,23 +114,40 @@ public class BookNoticeController extends BaseController {
     }
     
     /**
-     * 获取专业列表
+     * 获取专业列表（按学院过滤）
      */
     @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @GetMapping("/major/list/{collegeId}")
     public AjaxResult getMajors(@PathVariable Long collegeId) {
-        // 从字典表获取专业数据
         List<Map<String, Object>> majors = new ArrayList<>();
-        String dictType = "tb_major_" + collegeId;
-        SysDictData query = new SysDictData();
-        query.setDictType(dictType);
-        query.setStatus("0");
-        List<SysDictData> dictList = dictDataMapper.selectDictDataList(query);
+        // 从 tb_college 取学院名称
+        SysDictData collegeQuery = new SysDictData();
+        collegeQuery.setDictType("tb_college");
+        collegeQuery.setStatus("0");
+        List<SysDictData> collegeList = dictDataMapper.selectDictDataList(collegeQuery);
+        String collegeName = null;
+        for (SysDictData d : collegeList) {
+            if (d.getDictCode().equals(collegeId)) {
+                collegeName = d.getDictLabel();
+                break;
+            }
+        }
+        if (collegeName == null) {
+            return AjaxResult.success(majors);
+        }
+        // 从 tb_major 取所有专业，过滤该学院下的
+        SysDictData majorQuery = new SysDictData();
+        majorQuery.setDictType("tb_major");
+        majorQuery.setStatus("0");
+        List<SysDictData> dictList = dictDataMapper.selectDictDataList(majorQuery);
+        String prefix = collegeName + "|";
         for (SysDictData dict : dictList) {
-            Map<String, Object> major = new java.util.HashMap<>();
-            major.put("id", dict.getDictCode());
-            major.put("name", dict.getDictLabel());
-            majors.add(major);
+            if (dict.getDictValue() != null && dict.getDictValue().startsWith(prefix)) {
+                Map<String, Object> major = new java.util.HashMap<>();
+                major.put("id", dict.getDictCode());
+                major.put("name", dict.getDictLabel());
+                majors.add(major);
+            }
         }
         return AjaxResult.success(majors);
     }

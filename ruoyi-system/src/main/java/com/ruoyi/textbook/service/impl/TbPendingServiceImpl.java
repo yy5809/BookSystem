@@ -198,7 +198,7 @@ public class TbPendingServiceImpl implements ITbPendingService
         stockLog.setOperatorId(SecurityUtils.getUserId());
         stockLog.setOperatorName(SecurityUtils.getUsername());
         stockLog.setRefBizType("PENDING_INBOUND");
-        stockLog.setRefBizId(id);
+        stockLog.setRefBizId(String.valueOf(id));
         stockLog.setRemark("待购入库，待购单号：" + pending.getPendingNo());
         stockLogService.insert(stockLog);
 

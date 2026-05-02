@@ -59,11 +59,9 @@
         </template>
       </el-table-column>
       <el-table-column label="适用课程" align="center" prop="courseName" width="120" show-overflow-tooltip />
-      <el-table-column label="教材类型" align="center" prop="textbookType" width="80">
+      <el-table-column label="教材类型" align="center" prop="textbookType" width="100">
         <template slot-scope="scope">
-          <el-tag size="mini" :type="scope.row.textbookType === '1' ? '' : scope.row.textbookType === '2' ? 'warning' : 'info'">
-            {{ scope.row.textbookType === '1' ? '必修' : scope.row.textbookType === '2' ? '选修' : '参考' }}
-          </el-tag>
+          <dict-tag :options="dict.type.textbook_type" :value="scope.row.textbookType" />
         </template>
       </el-table-column>
       <el-table-column label="信息状态" align="center" prop="infoStatus" width="90">
@@ -136,9 +134,7 @@
           <el-col :span="12">
             <el-form-item label="教材类型" prop="textbookType">
               <el-select v-model="form.textbookType" placeholder="请选择教材类型" style="width: 100%">
-                <el-option label="必修" value="1" />
-                <el-option label="选修" value="2" />
-                <el-option label="参考" value="3" />
+                <el-option v-for="dict in dict.type.textbook_type" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -158,7 +154,9 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="适用年级" prop="grade">
-              <el-input v-model="form.grade" placeholder="请输入适用年级" />
+              <el-select v-model="form.grade" placeholder="请选择适用年级" clearable style="width: 100%">
+                <el-option v-for="dict in dict.type.tb_grade" :key="dict.value" :label="dict.label" :value="dict.value" />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -236,9 +234,7 @@
           <el-col :span="12">
             <el-form-item label="教材类型" prop="textbookType">
               <el-select v-model="completeForm.textbookType" placeholder="请选择教材类型" style="width: 100%">
-                <el-option label="必修" value="1" />
-                <el-option label="选修" value="2" />
-                <el-option label="参考" value="3" />
+                <el-option v-for="dict in dict.type.textbook_type" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -258,7 +254,9 @@
         <el-row>
           <el-col :span="12">
             <el-form-item label="适用年级" prop="grade">
-              <el-input v-model="completeForm.grade" placeholder="请输入适用年级" />
+              <el-select v-model="completeForm.grade" placeholder="请选择适用年级" clearable style="width: 100%">
+                <el-option v-for="dict in dict.type.tb_grade" :key="dict.value" :label="dict.label" :value="dict.value" />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
@@ -269,35 +267,136 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="教材信息导入" :visible.sync="importOpen" width="400px" append-to-body :close-on-click-modal="false">
-      <el-upload
-        ref="importUpload"
-        action="#"
-        :limit="1"
-        accept=".xlsx"
-        :auto-upload="false"
-        :on-change="handleImportFileChange"
-        :file-list="importFileList"
-        drag
-      >
-        <i class="el-icon-upload"></i>
-        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-        <div class="el-upload__tip" slot="tip">仅支持 .xlsx 格式，文件大小不超过10MB</div>
-      </el-upload>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" :loading="importLoading" @click="submitImport">确认导入</el-button>
-        <el-button @click="importOpen = false">取 消</el-button>
+    <el-dialog title="教材信息导入" :visible.sync="importOpen" width="800px" append-to-body :close-on-click-modal="false">
+      <el-steps :active="importStep" align-center style="margin-bottom: 20px;">
+        <el-step title="下载模板" description="下载标准导入模板"></el-step>
+        <el-step title="上传文件" description="选择填好的Excel文件"></el-step>
+        <el-step title="预览数据" description="校验并预览导入数据"></el-step>
+        <el-step title="确认导入" description="确认数据并执行导入"></el-step>
+      </el-steps>
+
+      <div v-if="importStep === 0" style="text-align: center; padding: 30px 0;">
+        <i class="el-icon-download" style="font-size: 48px; color: #409EFF;"></i>
+        <p style="margin: 15px 0; color: #606266;">请先下载标准导入模板，按模板格式填写教材数据</p>
+        <el-button type="primary" icon="el-icon-download" @click="downloadTemplate" plain>下载导入模板</el-button>
+        <div style="margin-top: 20px;">
+          <el-button type="primary" @click="importStep = 1">下一步 <i class="el-icon-arrow-right"></i></el-button>
+        </div>
+      </div>
+
+      <div v-if="importStep === 1 && !previewData">
+        <el-upload ref="importUploadRef"
+                   drag
+                   :auto-upload="false"
+                   :limit="1"
+                   accept=".xlsx"
+                   :on-change="handleImportFileChange"
+                   :on-remove="handleImportFileRemove"
+                   :file-list="importFileList"
+                   action=""
+                   class="upload-area">
+          <i class="el-icon-upload"></i>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+          <div slot="tip" class="el-upload__tip">仅支持 .xlsx 格式，文件 ≤ 10MB</div>
+        </el-upload>
+        <div style="text-align: center; margin-top: 20px;">
+          <el-button @click="importStep = 0"><i class="el-icon-arrow-left"></i> 上一步</el-button>
+          <el-button type="primary" @click="doPreview" :disabled="!importFile" :loading="isPreviewing">
+            {{ isPreviewing ? '正在校验...' : '上传并预览' }} <i class="el-icon-view"></i>
+          </el-button>
+        </div>
+      </div>
+
+      <div v-if="importStep === 2 && previewData" style="max-height: 55vh; overflow-y: auto;">
+        <el-alert :title="'文件：' + (previewData.fileName || '未知') + '，共 ' + previewData.totalRows + ' 行数据'"
+                  :type="previewData.failCount > 0 ? 'warning' : 'success'"
+                  :closable="false" show-icon style="margin-bottom: 15px;">
+          <template slot="default">
+            <span>校验通过 <strong style="color:#67c23a">{{ previewData.successCount }}</strong> 行，
+            校验失败 <strong style="color:#f56c6c">{{ previewData.failCount }}</strong> 行</span>
+          </template>
+        </el-alert>
+
+        <el-tabs v-model="previewActiveTab">
+          <el-tab-pane label="校验通过数据" name="success">
+            <span slot="label"><i class="el-icon-check" style="color:#67c23a"></i> 校验通过 ({{ previewData.successCount }})</span>
+            <el-table :data="previewData.successList" border stripe max-height="300" size="small">
+              <el-table-column label="行号" prop="rowIndex" width="70" align="center">
+                <template slot-scope="scope"><el-tag size="mini">第{{ scope.row.rowIndex }}行</el-tag></template>
+              </el-table-column>
+              <el-table-column label="ISBN" prop="isbn" width="140" align="center"/>
+              <el-table-column label="教材名称" prop="bookName" min-width="150" show-overflow-tooltip/>
+              <el-table-column label="作者" prop="author" width="100" show-overflow-tooltip/>
+              <el-table-column label="出版社" prop="publisher" width="120" show-overflow-tooltip/>
+              <el-table-column label="定价" prop="price" width="80" align="center"/>
+              <el-table-column label="教材类型" prop="textbookType" width="80" align="center"/>
+            </el-table>
+          </el-tab-pane>
+          <el-tab-pane label="校验失败数据" name="fail" v-if="previewData.failCount > 0">
+            <span slot="label"><i class="el-icon-close" style="color:#f56c6c"></i> 校验失败 ({{ previewData.failCount }})</span>
+            <el-table :data="previewData.failList" border stripe max-height="300" size="small">
+              <el-table-column label="行号" prop="rowIndex" width="70" align="center">
+                <template slot-scope="scope"><el-tag size="mini" type="danger">第{{ scope.row.rowIndex }}行</el-tag></template>
+              </el-table-column>
+              <el-table-column label="ISBN" prop="isbn" width="130" align="center"/>
+              <el-table-column label="教材名称" prop="bookName" min-width="150" show-overflow-tooltip/>
+              <el-table-column label="失败原因" prop="errorMsg" min-width="220" align="left">
+                <template slot-scope="scope">
+                  <el-tag size="mini" type="danger" effect="plain">{{ scope.row.errorMsg }}</el-tag>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+        </el-tabs>
+
+        <div style="text-align: center; margin-top: 20px;">
+          <el-button @click="backToUpload"><i class="el-icon-arrow-left"></i> 重新选择文件</el-button>
+          <el-button type="primary" @click="importStep = 3" :disabled="previewData.successCount === 0">
+            确认导入 <i class="el-icon-arrow-right"></i>
+          </el-button>
+        </div>
+      </div>
+
+      <div v-if="importStep === 3 && previewData && !importResult" style="text-align: center; padding: 20px 0;">
+        <el-alert title="请确认导入信息" type="warning" :closable="false" show-icon style="margin-bottom: 15px;">
+          <template slot="default">
+            <p>已选择文件：<strong>{{ previewData.fileName || '未知' }}</strong></p>
+            <p>校验通过 <strong style="color:#67c23a">{{ previewData.successCount }}</strong> 行，
+            失败 <strong style="color:#f56c6c">{{ previewData.failCount }}</strong> 行</p>
+            <p style="color:#e6a23c;">点击"开始导入"按钮执行导入操作</p>
+          </template>
+        </el-alert>
+        <div style="margin-top: 20px;">
+          <el-button @click="importStep = 2"><i class="el-icon-arrow-left"></i> 返回预览</el-button>
+          <el-button type="danger" icon="el-icon-upload2" @click="doConfirmImport" :loading="importLoading">
+            {{ importLoading ? '正在导入...' : '开始导入' }}
+          </el-button>
+        </div>
+      </div>
+
+      <div v-if="importResult" class="import-result-area">
+        <el-result :icon="importResult.failCount === 0 ? 'success' : 'warning'"
+                    :title="importResult.msg">
+        </el-result>
+        <div style="text-align: center; margin-top: 25px;">
+          <el-button type="primary" @click="closeImportAndRefresh">确定</el-button>
+          <el-button v-if="importResult.failCount > 0" @click="resetImport">重新导入</el-button>
+        </div>
+      </div>
+
+      <div slot="footer" v-if="!importResult && importStep < 3">
+        <el-button @click="importOpen = false">取消</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listBook, getBook, addBook, updateBook, delBook, completeBookInfo } from "@/api/textbook/book";
+import { listBook, getBook, addBook, updateBook, delBook, completeBookInfo, downloadBookImportTemplate, previewBookImport, confirmBookImport } from "@/api/textbook/book";
 
 export default {
   name: "BookManage",
-  dicts: ['textbook_info_status'],
+  dicts: ['textbook_info_status', 'textbook_type', 'tb_grade'],
   data() {
     return {
       loading: true,
@@ -313,9 +412,14 @@ export default {
       open: false,
       completeOpen: false,
       importOpen: false,
+      importStep: 0,
       importLoading: false,
+      isPreviewing: false,
       importFileList: [],
       importFile: null,
+      previewData: null,
+      previewActiveTab: 'success',
+      importResult: null,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -466,29 +570,98 @@ export default {
       this.download('textbook/book/export', { ...this.queryParams }, `教材信息_${new Date().getTime()}.xlsx`);
     },
     handleImport() {
-      this.importFile = null;
-      this.importFileList = [];
+      this.resetImportState();
       this.importOpen = true;
     },
+    resetImportState() {
+      this.importStep = 0;
+      this.importFile = null;
+      this.importFileList = [];
+      this.isPreviewing = false;
+      this.importLoading = false;
+      this.previewData = null;
+      this.previewActiveTab = 'success';
+      this.importResult = null;
+      if (this.$refs.importUploadRef) this.$refs.importUploadRef.clearFiles();
+    },
     handleImportFileChange(file) {
+      const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+      const isLt10M = file.size / 1024 / 1024 < 10;
+      if (!isExcel) { this.$message.error('仅支持 .xlsx 或 .xls 格式'); this.$refs.importUploadRef.uploadFiles = []; return; }
+      if (!isLt10M) { this.$message.error('文件大小不能超过 10MB'); this.$refs.importUploadRef.uploadFiles = []; return; }
       this.importFile = file.raw;
     },
-    submitImport() {
-      if (!this.importFile) {
-        this.$modal.msgError("请先选择文件");
+    handleImportFileRemove() {
+      this.importFile = null;
+    },
+    async downloadTemplate() {
+      try {
+        const response = await downloadBookImportTemplate();
+        const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = '教材信息导入模板.xlsx';
+        link.click();
+        window.URL.revokeObjectURL(link.href);
+        this.$message.success('模板下载成功');
+      } catch (e) {
+        console.error(e);
+        this.$message.error('模板下载失败');
+      }
+    },
+    async doPreview() {
+      if (!this.importFile) { this.$message.warning('请先选择要导入的Excel文件'); return; }
+      this.isPreviewing = true;
+      try {
+        const res = await previewBookImport(this.importFile);
+        if (res.code === 200) {
+          this.previewData = res.data;
+          this.previewActiveTab = this.previewData.failCount > 0 ? 'fail' : 'success';
+          this.importStep = 2;
+          if (this.previewData.successCount === 0) this.$message.warning('所有数据校验均未通过，请修正后重新上传');
+          else if (this.previewData.failCount > 0) this.$message.warning('校验完成：' + this.previewData.successCount + '条通过，' + this.previewData.failCount + '条失败');
+          else this.$message.success('校验全部通过，共' + this.previewData.successCount + '条数据');
+        } else { this.$message.error(res.msg || '预览校验失败'); }
+      } catch (err) { console.error(err); this.$message.error('预览校验异常，请重试'); }
+      finally { this.isPreviewing = false; }
+    },
+    backToUpload() {
+      this.previewData = null;
+      this.importFile = null;
+      this.importFileList = [];
+      if (this.$refs.importUploadRef) this.$refs.importUploadRef.clearFiles();
+      this.importStep = 1;
+    },
+    async doConfirmImport() {
+      if (!this.previewData || !this.previewData.fileHash) {
+        this.$message.error('预览数据异常，请重新上传文件');
+        this.backToUpload();
         return;
       }
       this.importLoading = true;
-      const formData = new FormData();
-      formData.append('file', this.importFile);
-      import('@/api/textbook/book').then(module => {
-        module.importBook(formData).then(response => {
-          this.$modal.msgSuccess("导入成功");
-          this.importOpen = false;
-          this.getList();
-        }).catch(() => {}).finally(() => { this.importLoading = false; });
-      });
-    }
+      try {
+        const res = await confirmBookImport(this.previewData.fileHash);
+        if (res.code === 200) {
+          this.importResult = { msg: res.msg || '导入完成', successCount: this.previewData.successCount, failCount: 0 };
+          this.$message.success(res.msg || '导入成功');
+        } else {
+          this.$message.error(res.msg || '导入失败');
+        }
+      } catch (err) { console.error(err); this.$message.error('导入异常，请重试'); }
+      finally { this.importLoading = false; }
+    },
+    closeImportAndRefresh() {
+      this.importOpen = false;
+      this.getList();
+    },
+    resetImport() {
+      this.importResult = null;
+      this.previewData = null;
+      this.importFile = null;
+      this.importFileList = [];
+      this.importStep = 1;
+      if (this.$refs.importUploadRef) this.$refs.importUploadRef.clearFiles();
+    },
   }
 };
 </script>
@@ -500,4 +673,6 @@ export default {
 .el-table .danger-row {
   background-color: #fef0f0;
 }
+.upload-area { text-align: center; margin: 15px 0; }
+.import-result-area { max-height: 70vh; overflow-y: auto; }
 </style>

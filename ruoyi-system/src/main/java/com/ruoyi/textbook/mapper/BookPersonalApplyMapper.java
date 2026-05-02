@@ -7,6 +7,10 @@ public interface BookPersonalApplyMapper {
     public BookPersonalApply selectBookPersonalApplyById(Long applyId);
     public List<BookPersonalApply> selectBookPersonalApplyList(BookPersonalApply bookPersonalApply);
     public List<BookPersonalApply> selectMyApplyList(BookPersonalApply bookPersonalApply);
+    /**
+     * 批量查询个人领书申请（解决N+1问题）
+     */
+    public List<BookPersonalApply> selectBookPersonalApplyByIds(List<Long> applyIds);
     public int insertBookPersonalApply(BookPersonalApply bookPersonalApply);
     public int updateBookPersonalApply(BookPersonalApply bookPersonalApply);
     public int deleteBookPersonalApplyByIds(Long[] applyIds);

@@ -81,6 +81,30 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public int saveAndGenerate(BookNotice bookNotice) {
+        String noticeNo = "LS" + DateUtils.dateTimeNow("yyyyMMddHHmmss")
+                + IdUtils.fastSimpleUUID().substring(0, 6).toUpperCase();
+        bookNotice.setNoticeNo(noticeNo);
+        bookNotice.setStatus("1");
+        bookNotice.setTotalClasses(0);
+        bookNotice.setIssuedClasses(0);
+        bookNotice.setCreateTime(DateUtils.getNowDate());
+        int result = bookNoticeMapper.insertBookNotice(bookNotice);
+
+        if (result > 0 && bookNotice.getDetails() != null && !bookNotice.getDetails().isEmpty()) {
+            List<BookClaimForm> forms = generateClaimFormsByClass(bookNotice);
+            if (forms.isEmpty()) {
+                throw new ServiceException("生成领书单失败，请检查领书明细");
+            }
+            bookNotice.setTotalClasses(forms.size());
+            bookNoticeMapper.updateBookNotice(bookNotice);
+            log.info("【领书管理-保存并生成】通知编号={}, 学期={}, 班级数={}", noticeNo, bookNotice.getSemester(), forms.size());
+        }
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertBookNotice(BookNotice bookNotice) {
         String noticeNo = "LS" + DateUtils.dateTimeNow("yyyyMMddHHmmss")
                 + IdUtils.fastSimpleUUID().substring(0, 6).toUpperCase();
@@ -181,6 +205,7 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
 
         if (!warnings.isEmpty()) {
             log.warn("【领书通知发布】库存预警: {}", String.join("; ", warnings));
+            throw new ServiceException("库存不足，无法发布领书通知：" + String.join("; ", warnings));
         }
 
         List<BookClaimForm> forms = generateClaimFormsByClass(notice);

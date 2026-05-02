@@ -3,12 +3,10 @@ package com.ruoyi.textbook.service.impl;
 import java.util.Date;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
-import com.ruoyi.textbook.domain.BookStockFlow;
 import com.ruoyi.textbook.domain.TbBook;
 import com.ruoyi.textbook.domain.TbInventory;
 import com.ruoyi.textbook.domain.TbStockLog;
 import com.ruoyi.textbook.domain.dto.StockOperationResult;
-import com.ruoyi.textbook.mapper.BookStockFlowMapper;
 import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.textbook.mapper.TbStockLogMapper;
@@ -28,9 +26,6 @@ public class StockOperationServiceImpl implements IStockOperationService {
 
     @Autowired
     private TbInventoryMapper inventoryMapper;
-
-    @Autowired
-    private BookStockFlowMapper stockFlowMapper;
 
     @Autowired
     private TbBookMapper tbBookMapper;
@@ -62,7 +57,13 @@ public class StockOperationServiceImpl implements IStockOperationService {
             throw new ServiceException("库存数据已被其他操作修改，请刷新后重试");
         }
         int actualStock = inventoryMapper.selectStockNumByBookId(bookId);
-        recordFlow(bookId, businessType, businessNo, -deductQty, currentStock, actualStock, operator);
+
+        TbStockLog stockLog = createStockLog(bookId, -deductQty, currentStock, actualStock,
+                null, operator, businessType, businessNo, null);
+        tbStockLogMapper.insert(stockLog);
+
+        checkAndSendStockWarning(bookId, inventory.getBookName());
+
         log.info("[库存扣减] bookId={}, 扣减数量={}, 剩余库存={}, 操作人={}", bookId, deductQty, actualStock, operator);
         return true;
     }
@@ -84,7 +85,11 @@ public class StockOperationServiceImpl implements IStockOperationService {
             throw new ServiceException("库存数据已被其他操作修改，请刷新后重试");
         }
         int actualStock = inventoryMapper.selectStockNumByBookId(bookId);
-        recordFlow(bookId, businessType, businessNo, addQty, currentStock, actualStock, operator);
+
+        TbStockLog stockLog = createStockLog(bookId, addQty, currentStock, actualStock,
+                null, operator, businessType, businessNo, null);
+        tbStockLogMapper.insert(stockLog);
+
         log.info("[库存增加] bookId={}, 增加数量={}, 新库存={}, 操作人={}", bookId, addQty, actualStock, operator);
         return true;
     }
@@ -98,7 +103,7 @@ public class StockOperationServiceImpl implements IStockOperationService {
     @Transactional(rollbackFor = Exception.class)
     public StockOperationResult deductStock(Long bookId, Integer quantity,
             Long operatorId, String operatorName,
-            String refBizType, Long refBizId, String remark) {
+            String refBizType, String refBizId, String remark) {
 
         if (bookId == null) {
             return StockOperationResult.failure("教材ID不能为空");
@@ -142,7 +147,7 @@ public class StockOperationServiceImpl implements IStockOperationService {
     @Transactional(rollbackFor = Exception.class)
     public StockOperationResult addStock(Long bookId, Integer quantity,
             Long operatorId, String operatorName,
-            String refBizType, Long refBizId, String remark) {
+            String refBizType, String refBizId, String remark) {
 
         if (bookId == null) {
             return StockOperationResult.failure("教材ID不能为空");
@@ -228,7 +233,7 @@ public class StockOperationServiceImpl implements IStockOperationService {
 
     private StockOperationResult addStockWithVersion(TbInventory inventory, Integer quantity,
             Long operatorId, String operatorName,
-            String refBizType, Long refBizId, String remark) {
+            String refBizType, String refBizId, String remark) {
 
         int beforeStock = inventory.getStockNum();
         int currentVersion = inventory.getVersion() != null ? inventory.getVersion() : 0;
@@ -252,14 +257,14 @@ public class StockOperationServiceImpl implements IStockOperationService {
     }
 
     private TbStockLog createStockLog(Long bookId, Integer changeNum, Integer beforeStock, Integer afterStock,
-            Long operatorId, String operatorName, String refBizType, Long refBizId, String remark) {
+            Long operatorId, String operatorName, String refBizType, String refBizId, String remark) {
 
         TbBook book = tbBookMapper.selectTbBookByBookId(bookId);
         TbStockLog stockLog = new TbStockLog();
         stockLog.setBookId(bookId);
         stockLog.setIsbn(book != null ? book.getIsbn() : "");
         stockLog.setBookName(book != null ? book.getBookName() : "");
-        stockLog.setBizType(changeNum > 0 ? "1" : "3");
+        stockLog.setBizType(changeNum > 0 ? "1" : "2");
         stockLog.setChangeNum(changeNum);
         stockLog.setBeforeStock(beforeStock);
         stockLog.setAfterStock(afterStock);
@@ -267,21 +272,12 @@ public class StockOperationServiceImpl implements IStockOperationService {
         stockLog.setOperatorName(operatorName);
         stockLog.setRefBizType(refBizType);
         stockLog.setRefBizId(refBizId);
-        stockLog.setRemark(remark);
+        if (remark != null && refBizType != null) {
+            stockLog.setRemark("[" + refBizType + "]" + remark);
+        } else {
+            stockLog.setRemark(remark);
+        }
         return stockLog;
     }
 
-    private void recordFlow(Long bookId, String businessType, String businessNo,
-                            int changeQty, int stockBefore, int stockAfter, String operator) {
-        BookStockFlow flow = new BookStockFlow();
-        flow.setTextbookId(bookId);
-        flow.setBusinessType(businessType);
-        flow.setBusinessNo(businessNo);
-        flow.setChangeQty(changeQty);
-        flow.setStockBefore(stockBefore);
-        flow.setStockAfter(stockAfter);
-        flow.setOperator(operator);
-        flow.setOperateTime(new Date());
-        stockFlowMapper.insertBookStockFlow(flow);
-    }
 }

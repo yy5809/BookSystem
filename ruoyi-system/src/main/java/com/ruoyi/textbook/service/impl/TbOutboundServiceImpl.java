@@ -87,7 +87,7 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
                     tbOutbound.getOperatorId(),
                     tbOutbound.getOperatorName(),
                     "OUTBOUND",
-                    tbOutbound.getOutId(),
+                    String.valueOf(tbOutbound.getOutId()),
                     "出库，出库单号：" + tbOutbound.getOutboundNo()
             );
             if (!stockResult.isSuccess()) {
@@ -121,13 +121,22 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
                     SecurityUtils.getUserId(),
                     SecurityUtils.getUsername(),
                     "OUTBOUND_DELETE",
-                    outbound.getOutId(),
+                    String.valueOf(outbound.getOutId()),
                     "删除出库单，回退库存，出库单号：" + outbound.getOutboundNo()
             );
             if (!stockResult.isSuccess()) {
                 throw new ServiceException(stockResult.getErrorMessage());
             }
             log.info("【删除出库单】已回退库存并生成流水, outboundId={}", outboundId);
+        }
+
+        if (outbound.getBuyId() != null) {
+            TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(outbound.getBuyId());
+            if (purchase != null && "3".equals(purchase.getStatus())) {
+                purchase.setStatus("1");
+                tbPurchaseMapper.updateTbPurchase(purchase);
+                log.info("【删除出库单】已将采购单状态回退为'已通过', purchaseId={}", outbound.getBuyId());
+            }
         }
 
         return tbOutboundMapper.deleteTbOutboundById(outboundId);
@@ -148,13 +157,22 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
                         SecurityUtils.getUserId(),
                         SecurityUtils.getUsername(),
                         "OUTBOUND_DELETE",
-                        outbound.getOutId(),
+                        String.valueOf(outbound.getOutId()),
                         "批量删除出库单，回退库存，出库单号：" + outbound.getOutboundNo()
                 );
                 if (!stockResult.isSuccess()) {
                     throw new ServiceException(stockResult.getErrorMessage());
                 }
                 log.info("【批量删除出库单】已回退库存并生成流水, outboundId={}", outboundId);
+            }
+
+            if (outbound.getBuyId() != null) {
+                TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(outbound.getBuyId());
+                if (purchase != null && "3".equals(purchase.getStatus())) {
+                    purchase.setStatus("1");
+                    tbPurchaseMapper.updateTbPurchase(purchase);
+                    log.info("【批量删除出库单】已将采购单状态回退为'已通过', purchaseId={}", outbound.getBuyId());
+                }
             }
             tbOutboundMapper.deleteTbOutboundById(outboundId);
         }
@@ -198,7 +216,7 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
                     operatorId,
                     operatorName,
                     "PURCHASE",
-                    purchaseId,
+                    String.valueOf(purchaseId),
                     "领书出库，关联采购单号：" + purchase.getPurchaseNo()
             );
             if (!stockResult.isSuccess()) {

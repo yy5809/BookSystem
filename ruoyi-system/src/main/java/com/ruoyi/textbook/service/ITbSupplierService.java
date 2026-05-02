@@ -6,6 +6,7 @@ import com.ruoyi.textbook.domain.vo.SupplierVO;
 
 public interface ITbSupplierService {
     List<TbSupplier> selectTbSupplierList(TbSupplier tbSupplier);
+    List<SupplierVO> selectSupplierVOList(TbSupplier tbSupplier);
     SupplierVO selectSupplierVOById(Long supplierId);
     TbSupplier selectTbSupplierById(Long supplierId);
     TbSupplier selectSupplierByUserId(Long userId);

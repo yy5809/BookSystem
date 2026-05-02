@@ -208,7 +208,7 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
         }
 
         try {
-            stockOperationService.deductStock(existingApply.getTextbookId(), existingApply.getApplyQty(), "3", existingApply.getApplyNo(), SecurityUtils.getUsername());
+            stockOperationService.deductStock(existingApply.getTextbookId(), existingApply.getApplyQty(), "2", existingApply.getApplyNo(), SecurityUtils.getUsername());
         } catch (ServiceException e) {
             if (e.getMessage().contains("库存不足") || e.getMessage().contains("并发冲突")) {
                 throw new ServiceException("出库失败：" + e.getMessage() + "。该教材库存可能在审核通过后被其他操作扣减，请驳回此申请并建议教师重新提交。");

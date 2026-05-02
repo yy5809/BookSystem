@@ -9,6 +9,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbSupplier;
+import com.ruoyi.textbook.domain.vo.SupplierVO;
 import com.ruoyi.textbook.service.ITbPurchaseService;
 import com.ruoyi.textbook.service.ITbSupplierService;
 import org.slf4j.Logger;
@@ -36,7 +37,7 @@ public class TbSupplierController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(TbSupplier tbSupplier) {
         startPage();
-        List<TbSupplier> list = tbSupplierService.selectTbSupplierList(tbSupplier);
+        List<SupplierVO> list = tbSupplierService.selectSupplierVOList(tbSupplier);
         return getDataTable(list);
     }
 
@@ -67,13 +68,19 @@ public class TbSupplierController extends BaseController {
         return toAjax(tbSupplierService.deleteTbSupplierByIds(supplierIds));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:supplier:list')")
+    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
     @GetMapping("/options")
     public AjaxResult options() {
         TbSupplier query = new TbSupplier();
         query.setStatus("0");
-        List<TbSupplier> list = tbSupplierService.selectTbSupplierList(query);
-        return AjaxResult.success(list);
+        List<TbSupplier> all = tbSupplierService.selectTbSupplierList(query);
+        List<TbSupplier> active = new java.util.ArrayList<>();
+        for (TbSupplier s : all) {
+            if (s.getUserId() != null) {
+                active.add(s);
+            }
+        }
+        return AjaxResult.success(active);
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:supplier:purchase:list')")

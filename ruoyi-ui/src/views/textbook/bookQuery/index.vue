@@ -131,7 +131,7 @@ export default {
     handleApplyFromDetail() {
       this.detailOpen = false;
       this.$router.push({
-        path: '/textbook/myApply',
+        path: '/teacher/myApply',
         query: { textbookId: this.currentBook.bookId, isbn: this.currentBook.isbn, bookName: this.currentBook.bookName }
       });
     }

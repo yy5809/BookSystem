@@ -2,7 +2,7 @@
   <div class="dashboard-container">
     <el-row :gutter="20" type="flex" justify="space-between">
       <el-col :span="4" :xs="12">
-        <div class="dashboard-card" @click="$router.push({ path: '/textbook/bookManage', query: { infoStatus: '0' } })" style="cursor: pointer;">
+        <div class="dashboard-card" @click="$router.push({ path: '/warehouse/bookManage', query: { infoStatus: '0' } })" style="cursor: pointer;">
           <div class="card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
             <i class="el-icon-warning-outline"></i>
           </div>
@@ -14,7 +14,7 @@
         </div>
       </el-col>
       <el-col :span="4" :xs="12">
-        <div class="dashboard-card" @click="$router.push({ path: '/textbook/bookManage', query: { infoStatus: '0' } })" style="cursor: pointer;">
+        <div class="dashboard-card" @click="$router.push({ path: '/warehouse/bookManage', query: { infoStatus: '0' } })" style="cursor: pointer;">
           <div class="card-icon" style="background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);">
             <i class="el-icon-edit-outline"></i>
           </div>
@@ -50,7 +50,7 @@
         </div>
       </el-col>
       <el-col :span="4" :xs="12">
-        <div class="dashboard-card" @click="$router.push('/textbook/shortage')" style="cursor: pointer;">
+        <div class="dashboard-card" @click="$router.push('/warehouse/shortage')" style="cursor: pointer;">
           <div class="card-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
             <i class="el-icon-warning-outline"></i>
           </div>
@@ -68,7 +68,7 @@
         <el-card shadow="hover">
           <div slot="header">
             <span>库存预警列表</span>
-            <el-button style="float: right; padding: 3px 0" type="text" @click="$router.push('/textbook/inventory')">查看全部</el-button>
+            <el-button style="float: right; padding: 3px 0" type="text" @click="$router.push('/warehouse/inventory')">查看全部</el-button>
           </div>
           <el-table :data="warningList" size="small" v-loading="loading" max-height="300" border stripe>
             <el-table-column label="ISBN" prop="isbn" width="140" />
@@ -87,27 +87,27 @@
         <el-card shadow="hover">
           <div slot="header"><span>快捷操作</span></div>
           <div class="quick-actions">
-            <div class="action-item" @click="$router.push('/textbook/purchase')">
+            <div class="action-item" @click="$router.push('/warehouse/purchase')">
               <i class="el-icon-shopping"></i>
               <span>采购管理</span>
             </div>
-            <div class="action-item" @click="$router.push('/textbook/inbound')">
+            <div class="action-item" @click="$router.push('/warehouse/inbound')">
               <i class="el-icon-box"></i>
               <span>入库管理</span>
             </div>
-            <div class="action-item" @click="$router.push('/textbook/noticeManage')">
+            <div class="action-item" @click="$router.push('/warehouse/claimManage')
               <i class="el-icon-document"></i>
-              <span>领书通知</span>
+              <span>领书管理</span>
             </div>
-            <div class="action-item" @click="$router.push('/textbook/personalApply')">
+            <div class="action-item" @click="$router.push('/warehouse/claimManage')
               <i class="el-icon-s-check"></i>
-              <span>审核申请</span>
+              <span>领书管理</span>
             </div>
-            <div class="action-item" @click="$router.push('/textbook/shortage')">
+            <div class="action-item" @click="$router.push('/warehouse/shortage')">
               <i class="el-icon-warning-outline"></i>
               <span>缺书管理</span>
             </div>
-            <div class="action-item" @click="$router.push('/textbook/inventory')">
+            <div class="action-item" @click="$router.push('/warehouse/inventory')">
               <i class="el-icon-coin"></i>
               <span>库存查询</span>
             </div>

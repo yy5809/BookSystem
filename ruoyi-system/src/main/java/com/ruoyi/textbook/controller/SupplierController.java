@@ -42,6 +42,13 @@ public class SupplierController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasRole('supplier')")
+    @PutMapping("/purchase/accept/{purchaseId}")
+    public AjaxResult acceptOrder(@PathVariable Long purchaseId) {
+        supplierService.acceptOrder(purchaseId);
+        return AjaxResult.success("已接单");
+    }
+
+    @PreAuthorize("@ss.hasRole('supplier')")
     @GetMapping("/purchase/detail/{purchaseId}")
     public AjaxResult getSupplierPurchaseDetail(@PathVariable Long purchaseId) {
         TbPurchase purchase = supplierService.getSupplierPurchaseDetail(purchaseId);

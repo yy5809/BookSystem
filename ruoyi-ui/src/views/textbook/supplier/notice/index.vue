@@ -3,7 +3,7 @@
     <el-card>
       <template slot="header">
         <span>通知中心</span>
-        <el-button type="primary" size="small" @click="markAllAsRead" style="margin-left: 20px" v-hasPermi="['textbook:supplierNotice:read']">全部标记为已读</el-button>
+        <el-button type="primary" size="small" @click="markAllAsRead" style="margin-left: 20px">全部标记为已读</el-button>
       </template>
       
       <el-table v-loading="loading" :data="noticeList" style="width: 100%" border stripe>
@@ -82,8 +82,10 @@ export default {
     getList() {
       this.loading = true
       listSupplierNotices(this.queryParams).then(response => {
-        this.noticeList = response.data.rows
-        this.total = response.data.total
+        this.noticeList = response.rows
+        this.total = response.total
+        this.loading = false
+      }).catch(() => {
         this.loading = false
       })
     },
@@ -96,7 +98,7 @@ export default {
       }
       // 查看详情
       getSupplierNoticeDetail(notice.noticeId).then(response => {
-        this.currentNotice = response.data
+        this.currentNotice = response
         this.noticeDialogVisible = true
       })
     },

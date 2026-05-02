@@ -4,13 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum PurchaseStatusEnum {
-    PENDING("0", "待审核", Arrays.asList("1", "2")),
-    APPROVED("1", "已通过", Arrays.asList("3", "2", "6")),
-    REJECTED("2", "已驳回", Arrays.asList("0")),
-    RECEIVED("3", "已领书", Arrays.asList()),
+    WAIT_PURCHASE("0", "待采购", Arrays.asList("1")),
+    PURCHASING("1", "采购中", Arrays.asList("2", "3")),
+    ACCEPTED("2", "已接单", Arrays.asList("3")),
+    SHIPPED("3", "已发货", Arrays.asList("4")),
     ARRIVED("4", "已到货", Arrays.asList("5")),
-    INBOUND("5", "已入库", Arrays.asList()),
-    SHIPPED("6", "已发货", Arrays.asList("4"));
+    INBOUND("5", "已入库", Arrays.asList());
 
     private final String code;
     private final String desc;
@@ -22,13 +21,8 @@ public enum PurchaseStatusEnum {
         this.allowedTransitions = allowedTransitions;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
+    public String getCode() { return code; }
+    public String getDesc() { return desc; }
 
     public boolean canTransitionTo(String targetStatus) {
         return allowedTransitions.contains(targetStatus);
@@ -36,23 +30,16 @@ public enum PurchaseStatusEnum {
 
     public static PurchaseStatusEnum fromCode(String code) {
         for (PurchaseStatusEnum status : values()) {
-            if (status.code.equals(code)) {
-                return status;
-            }
+            if (status.code.equals(code)) return status;
         }
         return null;
     }
 
-    public static boolean isValid(String code) {
-        return fromCode(code) != null;
-    }
+    public static boolean isValid(String code) { return fromCode(code) != null; }
 
     public static boolean canTransition(String from, String to) {
         PurchaseStatusEnum fromStatus = fromCode(from);
-        if (fromStatus == null) {
-            return false;
-        }
-        return fromStatus.canTransitionTo(to);
+        return fromStatus != null && fromStatus.canTransitionTo(to);
     }
 
     public static String getDescByCode(String code) {
@@ -63,12 +50,8 @@ public enum PurchaseStatusEnum {
     public static String getTransitionErrorMsg(String from, String to) {
         PurchaseStatusEnum fromStatus = fromCode(from);
         PurchaseStatusEnum toStatus = fromCode(to);
-        if (fromStatus == null) {
-            return "无效的源状态: " + from;
-        }
-        if (toStatus == null) {
-            return "无效的目标状态: " + to;
-        }
+        if (fromStatus == null) return "无效的源状态: " + from;
+        if (toStatus == null) return "无效的目标状态: " + to;
         return String.format("状态从%s(%s)不能转换到%s(%s)", fromStatus.getDesc(), from, toStatus.getDesc(), to);
     }
 }

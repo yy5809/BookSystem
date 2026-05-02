@@ -16,6 +16,7 @@
         <result property="auditOpinion" column="audit_opinion"/>
         <result property="receiveTime" column="receive_time"/>
         <result property="submitTime" column="submit_time"/>
+        <result property="createTime" column="create_time"/>
         <result property="delFlag" column="del_flag"/>
         <result property="fundingSource" column="funding_source"/>
         <result property="fileHash" column="file_hash"/>
@@ -23,13 +24,16 @@
         <result property="logisticsNo" column="logistics_no"/>
         <result property="logisticsCompany" column="logistics_company"/>
         <result property="invoiceNo" column="invoice_no"/>
+        <result property="purchaseStatus" column="purchase_status"/>
     </resultMap>
 
     <sql id="selectTbPurchaseVo">
         SELECT t.buy_id, t.purchase_no, t.user_id, t.user_name, t.user_type, t.dept_name,
                t.buy_num, t.audit_status, t.audit_user_id, t.audit_time,
                t.reject_reason, t.audit_opinion, t.receive_time,
-               t.submit_time, t.del_flag, t.funding_source, t.file_hash
+               t.submit_time, t.create_time,
+               t.del_flag, t.funding_source, t.file_hash,
+               t.supplier_id, t.purchase_status
         FROM textbook_buy t WHERE t.del_flag = '0'
     </sql>
 
@@ -43,6 +47,10 @@
         <if test="userName != null and userName != ''">AND t.user_name LIKE CONCAT('%',#{userName},'%')</if>
         <if test="userType != null and userType != ''">AND t.user_type = #{userType}</if>
         <if test="status != null and status != ''">AND t.audit_status = #{status}</if>
+        <if test="params.statusIn != null and params.statusIn.size > 0">
+            AND t.audit_status IN
+            <foreach item="s" collection="params.statusIn" open="(" separator="," close=")">#{s}</foreach>
+        </if>
         <!-- 数据权限过滤 -->
         ${params.dataScope}
         ORDER BY t.submit_time DESC
@@ -67,6 +75,7 @@
             <if test="fundingSource != null and fundingSource != ''">funding_source,</if>
             <if test="fileHash != null and fileHash != ''">file_hash,</if>
             <if test="supplierId != null">supplier_id,</if>
+            <if test="purchaseStatus != null and purchaseStatus != ''">purchase_status,</if>
             <if test="logisticsNo != null and logisticsNo != ''">logistics_no,</if>
             <if test="logisticsCompany != null and logisticsCompany != ''">logistics_company,</if>
             <if test="invoiceNo != null and invoiceNo != ''">invoice_no,</if>
@@ -88,6 +97,7 @@
             <if test="fundingSource != null and fundingSource != ''">#{fundingSource},</if>
             <if test="fileHash != null and fileHash != ''">#{fileHash},</if>
             <if test="supplierId != null">#{supplierId},</if>
+            <if test="purchaseStatus != null and purchaseStatus != ''">#{purchaseStatus},</if>
             <if test="logisticsNo != null and logisticsNo != ''">#{logisticsNo},</if>
             <if test="logisticsCompany != null and logisticsCompany != ''">#{logisticsCompany},</if>
             <if test="invoiceNo != null and invoiceNo != ''">#{invoiceNo},</if>
@@ -103,6 +113,7 @@
             <if test="auditOpinion != null">audit_opinion=#{auditOpinion},</if>
             <if test="status == '3'">receive_time=NOW(),</if>
             <if test="supplierId != null">supplier_id=#{supplierId},</if>
+            <if test="purchaseStatus != null and purchaseStatus != ''">purchase_status=#{purchaseStatus},</if>
             <if test="logisticsNo != null">logistics_no=#{logisticsNo},</if>
             <if test="logisticsCompany != null">logistics_company=#{logisticsCompany},</if>
             <if test="invoiceNo != null">invoice_no=#{invoiceNo},</if>
@@ -134,6 +145,8 @@
         <result property="quantity" column="quantity"/>
         <result property="unitPrice" column="unit_price"/>
         <result property="totalPrice" column="total_price"/>
+        <result property="author" column="author"/>
+        <result property="publisher" column="publisher"/>
     </resultMap>
 
     <insert id="insertTbPurchaseDetail" useGeneratedKeys="true" keyProperty="detailId">
@@ -142,15 +155,20 @@
     </insert>
 
     <select id="selectTbPurchaseDetailListByPurchaseId" parameterType="Long" resultMap="TbPurchaseDetailResult">
-        SELECT detail_id, purchase_id, book_id, book_name, isbn, quantity, unit_price, total_price
-        FROM textbook_purchase_detail WHERE purchase_id = #{purchaseId}
+        SELECT pd.detail_id, pd.purchase_id, pd.book_id, pd.book_name, pd.isbn, pd.quantity, pd.unit_price, pd.total_price,
+               ti.author, ti.publisher
+        FROM textbook_purchase_detail pd
+        LEFT JOIN textbook_info ti ON pd.book_id = ti.book_id
+        WHERE pd.purchase_id = #{purchaseId}
     </select>
 
     <!-- 批量查询购书明细（解决N+1问题） -->
     <select id="selectTbPurchaseDetailListByPurchaseIds" parameterType="java.util.List" resultMap="TbPurchaseDetailResult">
-        SELECT detail_id, purchase_id, book_id, book_name, isbn, quantity, unit_price, total_price
-        FROM textbook_purchase_detail
-        WHERE purchase_id IN
+        SELECT pd.detail_id, pd.purchase_id, pd.book_id, pd.book_name, pd.isbn, pd.quantity, pd.unit_price, pd.total_price,
+               ti.author, ti.publisher
+        FROM textbook_purchase_detail pd
+        LEFT JOIN textbook_info ti ON pd.book_id = ti.book_id
+        WHERE pd.purchase_id IN
         <foreach item="purchaseId" collection="list" open="(" separator="," close=")">#{purchaseId}</foreach>
         ORDER BY purchase_id, detail_id
     </select>
@@ -159,19 +177,32 @@
         <include refid="selectTbPurchaseVo"/> AND t.file_hash = #{fileHash} LIMIT 1
     </select>
 
+    <select id="selectTbPurchaseByIds" parameterType="java.util.List" resultMap="TbPurchaseResult">
+        <include refid="selectTbPurchaseVo"/>
+        AND t.buy_id IN
+        <foreach item="buyId" collection="list" open="(" separator="," close=")">#{buyId}</foreach>
+        ORDER BY t.submit_time DESC
+    </select>
+
     <!-- 供应商相关查询 -->
     <select id="selectSupplierPurchases" parameterType="com.ruoyi.textbook.domain.TbPurchase" resultMap="TbPurchaseResult">
-        <include refid="selectTbPurchaseVo"/>
+        SELECT t.buy_id, t.purchase_no, t.user_id, t.user_name, t.user_type, t.dept_name,
+               t.buy_num, t.audit_status, t.audit_user_id, t.audit_time,
+               t.reject_reason, t.audit_opinion, t.receive_time,
+               t.submit_time, t.create_time, t.del_flag, t.funding_source, t.file_hash,
+               t.supplier_id, t.purchase_status, t.logistics_no, t.logistics_company, t.invoice_no
+        FROM textbook_buy t
+        WHERE t.del_flag = '0'
         <if test="supplierId != null">AND t.supplier_id = #{supplierId}</if>
         <if test="purchaseNo != null and purchaseNo != ''">AND t.purchase_no LIKE CONCAT('%',#{purchaseNo},'%')</if>
-        <if test="status != null and status != ''">AND t.audit_status = #{status}</if>
+        <if test="status != null and status != ''">AND t.purchase_status = #{status}</if>
         ORDER BY t.submit_time DESC
     </select>
 
     <select id="countPendingShipmentBySupplierId" parameterType="Long" resultType="Integer">
         SELECT COUNT(*) FROM textbook_buy 
         WHERE supplier_id = #{supplierId} 
-        AND audit_status = '1' 
+        AND purchase_status IN ('1', '2') 
         AND del_flag = '0'
     </select>
 </mapper>

@@ -26,7 +26,7 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
-          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:edit']">取消</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="isPending(scope.row)" v-hasPermi="['textbook:shortage:list']">取消</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -46,9 +46,9 @@
           <div slot="header"><span>快速新增教材</span></div>
           <el-form ref="quickAddForm" :model="quickAddForm" :rules="quickAddRules" label-width="80px" size="small">
             <el-row :gutter="20"><el-col :span="12"><el-form-item label="ISBN" prop="isbn"><el-input v-model="quickAddForm.isbn" placeholder="10位或13位数字" /></el-form-item></el-col><el-col :span="12"><el-form-item label="书名" prop="bookName"><el-input v-model="quickAddForm.bookName" placeholder="请输入书名" /></el-form-item></el-col></el-row>
-            <el-row :gutter="20"><el-col :span="12"><el-form-item label="作者" prop="author"><el-input v-model="quickAddForm.author" placeholder="请输入作者" /></el-form-item></el-col><el-col :span="12"><el-form-item label="出版社"><el-input v-model="quickAddForm.publisher" placeholder="选填" /></el-form-item></el-col></el-row>
+            <el-row :gutter="20"><el-col :span="12"><el-form-item label="作者" prop="author"><el-input v-model="quickAddForm.author" placeholder="请输入作者" /></el-form-item></el-col><el-col :span="12"><el-form-item label="出版社" prop="publisher"><el-input v-model="quickAddForm.publisher" placeholder="请输入出版社" /></el-form-item></el-col></el-row>
           </el-form>
-          <el-alert type="info" :closable="false" style="margin-top: 10px;"><template slot="default">快速新增的教材信息不完整，库管员后续会补充完善。</template></el-alert>
+          <el-alert type="info" :closable="false" style="margin-top: 10px;"><template slot="default">快速新增的教材基本信息将被录入系统，后续可由库管员补充完善其他字段。</template></el-alert>
           <div style="text-align: right; margin-top: 10px;"><el-button size="small" @click="showQuickAdd = false">取消新增</el-button><el-button type="primary" size="small" @click="handleQuickAdd" :loading="quickAddLoading">确认新增并继续</el-button></div>
         </el-card>
         <el-form-item label="ISBN"><el-input v-model="form.isbn" disabled /></el-form-item>
@@ -97,7 +97,8 @@ export default {
       quickAddRules: {
         isbn: [{ required: true, message: '请输入ISBN', trigger: 'blur' }, { pattern: /^(\d{10}|\d{13})$/, message: 'ISBN格式不正确（10或13位数字）', trigger: 'blur' }],
         bookName: [{ required: true, message: '请输入书名', trigger: 'blur' }],
-        author: [{ required: true, message: '请输入作者', trigger: 'blur' }]
+        author: [{ required: true, message: '请输入作者', trigger: 'blur' }],
+        publisher: [{ required: true, message: '请输入出版社', trigger: 'blur' }]
       }
     };
   },
@@ -138,7 +139,12 @@ export default {
     getUrgencyType(level) { return level === '2' ? 'danger' : level === '1' ? 'warning' : 'info'; },
     getUrgencyLabel(level) { return level === '2' ? '特急' : level === '1' ? '紧急' : '普通'; },
     getStatusType(status) { return status === '3' ? 'success' : status === '2' ? 'info' : status === '1' ? 'warning' : status === '4' ? 'info' : 'danger'; },
-    getStatusLabel(status) { return status === '3' ? '已完成' : status === '2' ? '已到货' : status === '1' ? '已纳入采购' : status === '4' ? '已取消' : '未处理'; }
+    getStatusLabel(status) { return status === '3' ? '已完成' : status === '2' ? '已到货' : status === '1' ? '已纳入采购' : status === '4' ? '已取消' : '未处理'; },
+    isPending(row) {
+      if (!row) return false
+      const s = row.handleStatus
+      return !s || s === '' || s === '0'
+    }
   }
 };
 </script>

@@ -53,11 +53,11 @@ export function deleteShortageByIds(ids) {
 }
 
 // 处理缺书
-export function processShortage(id, status) {
+export function processShortage(id, status, supplierId) {
   return request({
     url: '/textbook/shortage/process/' + id,
     method: 'put',
-    params: { status: status }
+    params: { status: status, supplierId: supplierId }
   })
 }
 

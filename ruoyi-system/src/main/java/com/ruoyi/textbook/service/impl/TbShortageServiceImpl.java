@@ -8,12 +8,10 @@ import com.ruoyi.common.utils.uuid.IdUtils;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.ruoyi.textbook.domain.TbBook;
-import com.ruoyi.textbook.domain.TbPending;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.mapper.TbBookMapper;
-import com.ruoyi.textbook.mapper.TbPendingMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.service.ITbShortageService;
@@ -30,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 缺书登记信息Service实现
@@ -44,8 +41,6 @@ public class TbShortageServiceImpl implements ITbShortageService
 
     @Autowired
     private TbShortageMapper tbShortageMapper;
-    @Autowired
-    private TbPendingMapper tbPendingMapper;
     @Autowired
     private TbPurchaseMapper tbPurchaseMapper;
     @Autowired
@@ -230,7 +225,7 @@ public class TbShortageServiceImpl implements ITbShortageService
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int processShortage(Long shortageId, String status)
+    public int processShortage(Long shortageId, String status, Long supplierId)
     {
         TbShortage shortage = tbShortageMapper.selectTbShortageById(shortageId);
         if (shortage == null) {
@@ -247,22 +242,40 @@ public class TbShortageServiceImpl implements ITbShortageService
         int rows = tbShortageMapper.updateTbShortage(shortage);
 
         if ("1".equals(status) && shortage.getBookId() != null) {
-            TbPending pending = new TbPending();
-            pending.setBookId(shortage.getBookId());
-            pending.setBookName(shortage.getBookName());
-            pending.setIsbn(shortage.getIsbn());
-            pending.setLackId(shortage.getLackId());
-            pending.setPurchaseNum(shortage.getLackNum());
-            pending.setSupplier("待指定供应商");
-            pending.setStatus("0");
-            pending.setRemark("由缺书登记自动创建，缺书ID:" + shortageId);
-            String pendingNo = "PEN" + DateUtils.dateTimeNow("yyyyMMddHHmmss") + IdUtils.fastSimpleUUID().substring(0, 6);
-            pending.setPendingNo(pendingNo);
-            pending.setCreateTime(DateUtils.getNowDate());
-            pending.setUpdateTime(DateUtils.getNowDate());
-            tbPendingMapper.insertTbPending(pending);
-            shortage.setPurchaseId(pending.getPendingId());
+            Long currentUserId = SecurityUtils.getUserId();
+            SysUser currentUser = sysUserMapper.selectUserById(currentUserId);
+            String operatorName = currentUser != null ? currentUser.getNickName() : "系统";
+
+            String purchaseNo = "CG" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+                    + IdUtils.fastSimpleUUID().substring(0, 6).toUpperCase();
+
+            TbPurchase purchase = new TbPurchase();
+            purchase.setPurchaseNo(purchaseNo);
+            purchase.setUserId(currentUserId);
+            purchase.setUserName(operatorName);
+            purchase.setUserType("2");
+            purchase.setDeptName(currentUser != null && currentUser.getDept() != null ? currentUser.getDept().getDeptName() : "");
+            purchase.setStatus("1");
+            purchase.setPurchaseStatus("1");
+            purchase.setSubmitTime(LocalDateTime.now());
+            purchase.setFundingSource("school");
+            purchase.setSupplierId(supplierId);
+            purchase.setBookId(shortage.getBookId());
+            purchase.setBuyNum(shortage.getLackNum());
+            tbPurchaseMapper.insertTbPurchase(purchase);
+
+            TbPurchaseDetail detail = new TbPurchaseDetail();
+            detail.setPurchaseId(purchase.getBuyId());
+            detail.setBookId(shortage.getBookId());
+            detail.setBookName(shortage.getBookName());
+            detail.setIsbn(shortage.getIsbn());
+            detail.setQuantity(shortage.getLackNum());
+            tbPurchaseMapper.insertTbPurchaseDetail(detail);
+
+            shortage.setPurchaseId(purchase.getBuyId());
             tbShortageMapper.updateTbShortage(shortage);
+
+            log.info("【缺书转采购】单条转采购完成, 缺书ID={}, 采购单号={}, 教材={}", shortageId, purchaseNo, shortage.getBookName());
         }
         return rows;
     }
@@ -323,9 +336,12 @@ public class TbShortageServiceImpl implements ITbShortageService
         purchase.setUserName(operatorName);
         purchase.setUserType("2");
         purchase.setDeptName(currentUser != null && currentUser.getDept() != null ? currentUser.getDept().getDeptName() : "");
-        purchase.setStatus("0");
+        purchase.setStatus("1");
+        purchase.setPurchaseStatus("1");
         purchase.setSubmitTime(LocalDateTime.now());
         purchase.setFundingSource("school");
+        purchase.setBookId(allShortages.get(0).getBookId());
+        purchase.setBuyNum(allShortages.stream().mapToInt(s -> s.getLackNum() != null ? s.getLackNum() : 0).sum());
 
         tbPurchaseMapper.insertTbPurchase(purchase);
 

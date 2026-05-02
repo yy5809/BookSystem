@@ -2,6 +2,7 @@ package com.ruoyi.textbook.service;
 
 import java.util.List;
 import com.ruoyi.textbook.domain.TbBook;
+import com.ruoyi.textbook.domain.TbInventory;
 
 /**
  * 教材基础信息Service接口
@@ -47,4 +48,6 @@ public interface ITbBookService
     public List<TbBook> searchBookList(String query);
 
     public int countIncompleteBook();
+
+    public TbInventory checkStockBeforeDelete(Long bookId);
 }

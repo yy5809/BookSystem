@@ -74,7 +74,7 @@ public interface ITbShortageService
      * @param status 处理状态
      * @return 结果
      */
-    public int processShortage(Long shortageId, String status);
+    public int processShortage(Long shortageId, String status, Long supplierId);
 
     public Map<String, Object> batchConvertToPurchase(Long[] shortageIds);
 

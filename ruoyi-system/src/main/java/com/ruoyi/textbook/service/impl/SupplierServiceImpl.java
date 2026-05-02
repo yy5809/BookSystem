@@ -10,6 +10,8 @@ import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.mapper.TbSupplierMapper;
 import com.ruoyi.textbook.service.ISupplierService;
 import com.ruoyi.textbook.service.NoticeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,8 @@ import java.util.Map;
 
 @Service
 public class SupplierServiceImpl implements ISupplierService {
+
+    private static final Logger log = LoggerFactory.getLogger(SupplierServiceImpl.class);
 
     @Autowired
     private TbPurchaseMapper tbPurchaseMapper;
@@ -44,7 +48,7 @@ public class SupplierServiceImpl implements ISupplierService {
         }
         
         // 计算未读通知数
-        int unreadNoticeCount = noticeService.countUnreadNoticesBySupplierId(supplier.getSupplierId());
+        int unreadNoticeCount = noticeService.countUnreadNoticesBySupplierId(supplier.getUserId());
         dashboardData.put("unreadNoticeCount", unreadNoticeCount);
         
         // 计算待确认发货的采购单数
@@ -100,6 +104,26 @@ public class SupplierServiceImpl implements ISupplierService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void acceptOrder(Long purchaseId) {
+        TbSupplier supplier = getCurrentSupplier();
+        if (supplier == null) throw new ServiceException("供应商信息不存在");
+
+        TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
+        if (purchase == null || !supplier.getSupplierId().equals(purchase.getSupplierId())) {
+            throw new ServiceException("采购单不存在或无权操作");
+        }
+
+        if (!PurchaseStatusEnum.PURCHASING.getCode().equals(purchase.getPurchaseStatus())) {
+            throw new ServiceException("采购单状态不是采购中，无法确认接单");
+        }
+
+        purchase.setPurchaseStatus(PurchaseStatusEnum.ACCEPTED.getCode());
+        tbPurchaseMapper.updateTbPurchase(purchase);
+        log.info("【供应商接单】supplierId={}, purchaseId={}, purchaseNo={}", supplier.getSupplierId(), purchaseId, purchase.getPurchaseNo());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void confirmShipment(Long purchaseId, String logisticsCompany, String logisticsNo, String remark) {
         TbSupplier supplier = getCurrentSupplier();
         if (supplier == null) {
@@ -111,15 +135,16 @@ public class SupplierServiceImpl implements ISupplierService {
             throw new ServiceException("采购单不存在或无权操作");
         }
         
-        if (!"1".equals(purchase.getStatus())) {
-            throw new ServiceException("采购单状态不是采购中，无法确认发货");
+        String currentPurchaseStatus = purchase.getPurchaseStatus();
+        if (!PurchaseStatusEnum.ACCEPTED.getCode().equals(currentPurchaseStatus)) {
+            throw new ServiceException("采购单状态不是已接单，无法确认发货，当前状态：" + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus));
         }
 
-        if (!PurchaseStatusEnum.canTransition(purchase.getStatus(), "6")) {
-            throw new ServiceException(PurchaseStatusEnum.getTransitionErrorMsg(purchase.getStatus(), "6"));
+        if (!PurchaseStatusEnum.canTransition(currentPurchaseStatus, PurchaseStatusEnum.SHIPPED.getCode())) {
+            throw new ServiceException(PurchaseStatusEnum.getTransitionErrorMsg(currentPurchaseStatus, PurchaseStatusEnum.SHIPPED.getCode()));
         }
 
-        purchase.setStatus("6");
+        purchase.setPurchaseStatus(PurchaseStatusEnum.SHIPPED.getCode());
         purchase.setLogisticsCompany(logisticsCompany);
         purchase.setLogisticsNo(logisticsNo);
         tbPurchaseMapper.updateTbPurchase(purchase);
@@ -135,7 +160,7 @@ public class SupplierServiceImpl implements ISupplierService {
             return new ArrayList<>();
         }
         
-        return noticeService.getSupplierNotices(supplier.getSupplierId());
+        return noticeService.getSupplierNotices(supplier.getUserId());
     }
 
     @Override
@@ -145,7 +170,7 @@ public class SupplierServiceImpl implements ISupplierService {
             return null;
         }
         
-        return noticeService.getSupplierNoticeDetail(noticeId, supplier.getSupplierId());
+        return noticeService.getSupplierNoticeDetail(noticeId, supplier.getUserId());
     }
 
     @Override
@@ -155,7 +180,7 @@ public class SupplierServiceImpl implements ISupplierService {
             return;
         }
         
-        noticeService.markNoticeAsRead(noticeId, supplier.getSupplierId());
+        noticeService.markNoticeAsRead(noticeId, supplier.getUserId());
     }
 
     @Override
@@ -165,7 +190,7 @@ public class SupplierServiceImpl implements ISupplierService {
             return;
         }
         
-        noticeService.markAllNoticesAsRead(supplier.getSupplierId());
+        noticeService.markAllNoticesAsRead(supplier.getUserId());
     }
 
     @Override

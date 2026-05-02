@@ -91,3 +91,30 @@ export function importBook(data) {
     data: data
   })
 }
+
+export function downloadBookImportTemplate() {
+  return request({
+    url: '/textbook/book/import/template',
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
+export function previewBookImport(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request({
+    url: '/textbook/book/import/preview',
+    method: 'post',
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}
+
+export function confirmBookImport(fileHash) {
+  return request({
+    url: '/textbook/book/import/confirm',
+    method: 'post',
+    data: { fileHash }
+  })
+}

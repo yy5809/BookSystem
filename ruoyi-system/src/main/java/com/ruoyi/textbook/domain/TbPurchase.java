@@ -80,6 +80,9 @@ public class TbPurchase extends BaseEntity {
     private String logisticsCompany;
     private String invoiceNo;
 
+    @Excel(name = "采购状态", readConverterExp = "0=待采购,1=采购中,2=已接单,3=已发货,4=已到货,5=已入库")
+    private String purchaseStatus;
+
     public Long getBuyId() { return buyId; }
     public void setBuyId(Long buyId) { this.buyId = buyId; }
     public String getPurchaseNo() { return purchaseNo; }
@@ -98,6 +101,7 @@ public class TbPurchase extends BaseEntity {
     public void setSubmitTime(LocalDateTime submitTime) { this.submitTime = submitTime; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getAuditStatus() { return status; }
     public Long getAuditUserId() { return auditUserId; }
     public void setAuditUserId(Long auditUserId) { this.auditUserId = auditUserId; }
     public LocalDateTime getAuditTime() { return auditTime; }
@@ -129,6 +133,9 @@ public class TbPurchase extends BaseEntity {
     public void setLogisticsCompany(String logisticsCompany) { this.logisticsCompany = logisticsCompany; }
     public String getInvoiceNo() { return invoiceNo; }
     public void setInvoiceNo(String invoiceNo) { this.invoiceNo = invoiceNo; }
+
+    public String getPurchaseStatus() { return purchaseStatus; }
+    public void setPurchaseStatus(String purchaseStatus) { this.purchaseStatus = purchaseStatus; }
 
     public boolean isPending() { return "0".equals(this.status); }
     public boolean isApproved() { return "1".equals(this.status); }

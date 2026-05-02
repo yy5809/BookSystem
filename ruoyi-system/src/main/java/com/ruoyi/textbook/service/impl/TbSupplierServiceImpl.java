@@ -26,11 +26,19 @@ public class TbSupplierServiceImpl implements ITbSupplierService {
     }
 
     @Override
-    public SupplierVO selectSupplierVOById(Long supplierId) {
-        TbSupplier supplier = tbSupplierMapper.selectBySupplierId(supplierId);
-        if (supplier == null) {
-            return null;
+    public List<SupplierVO> selectSupplierVOList(TbSupplier tbSupplier) {
+        List<TbSupplier> suppliers = tbSupplierMapper.selectTbSupplierList(tbSupplier);
+        List<SupplierVO> voList = new java.util.ArrayList<>();
+        if (suppliers != null) {
+            for (TbSupplier supplier : suppliers) {
+                voList.add(toSupplierVO(supplier));
+            }
         }
+        return voList;
+    }
+
+    private SupplierVO toSupplierVO(TbSupplier supplier) {
+        if (supplier == null) return null;
         SupplierVO vo = new SupplierVO();
         vo.setSupplierId(supplier.getSupplierId());
         vo.setSupplierCode(supplier.getSupplierCode());
@@ -43,6 +51,11 @@ public class TbSupplierServiceImpl implements ITbSupplierService {
         vo.setPaymentTerms(supplier.getPaymentTerms());
         vo.setStatus(supplier.getStatus());
         return vo;
+    }
+
+    @Override
+    public SupplierVO selectSupplierVOById(Long supplierId) {
+        return toSupplierVO(tbSupplierMapper.selectBySupplierId(supplierId));
     }
 
     @Override

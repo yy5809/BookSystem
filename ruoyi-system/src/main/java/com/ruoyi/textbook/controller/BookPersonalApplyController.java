@@ -22,7 +22,7 @@ public class BookPersonalApplyController extends BaseController {
     @Autowired
     private IBookPersonalApplyService bookPersonalApplyService;
 
-    @PreAuthorize("@ss.hasPermi('textbook:personalApply:list')")
+    @PreAuthorize("@ss.hasPermi('textbook:personalApply:list') and @ss.hasAnyRoles('admin,warehouse')")
     @DataScope(userAlias = "teacher_id")
     @GetMapping("/list")
     public TableDataInfo list(BookPersonalApply bookPersonalApply) {

@@ -1,6 +1,5 @@
 package com.ruoyi.textbook.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ruoyi.common.annotation.Excel;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -20,30 +19,34 @@ public class TbPurchaseImportDTO {
     @Size(max = 200, message = "教材名称长度不能超过200")
     private String bookName;
 
-    @Excel(name = "采购数量", sort = 2, width = 12)
+    @Excel(name = "作者", sort = 2, width = 15)
+    private String author;
+
+    @Excel(name = "出版社", sort = 3, width = 20)
+    private String publisher;
+
+    @Excel(name = "申请学院", sort = 4, width = 15)
+    @NotBlank(message = "申请学院不能为空")
+    private String college;
+
+    @Excel(name = "申请专业", sort = 5, width = 15)
+    @NotBlank(message = "申请专业不能为空")
+    private String major;
+
+    @Excel(name = "适用年级", sort = 6, width = 20)
+    private String grade;
+
+    @Excel(name = "采购数量", sort = 7, width = 12)
     @NotBlank(message = "采购数量不能为空")
     @Min(value = 1, message = "采购数量必须大于0")
     @Max(value = 9999, message = "采购数量不能超过9999")
     private Integer quantity;
 
-    @Excel(name = "申请学院", sort = 3, width = 15)
-    @NotBlank(message = "申请学院不能为空")
-    private String college;
-
-    @Excel(name = "申请专业", sort = 4, width = 15)
-    @NotBlank(message = "申请专业不能为空")
-    private String major;
-
-    @Excel(name = "适用班级", sort = 5, width = 20)
-    private String className;
-
-    @Excel(name = "备注", sort = 6, width = 30)
+    @Excel(name = "备注", sort = 8, width = 30)
     private String remark;
 
-    @JsonIgnore
     private int rowIndex;
 
-    @JsonIgnore
     private String errorMsg;
 
     public String getIsbn() { return isbn; }
@@ -56,10 +59,14 @@ public class TbPurchaseImportDTO {
     public void setCollege(String college) { this.college = college; }
     public String getMajor() { return major; }
     public void setMajor(String major) { this.major = major; }
-    public String getClassName() { return className; }
-    public void setClassName(String className) { this.className = className; }
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
     public String getRemark() { return remark; }
     public void setRemark(String remark) { this.remark = remark; }
+    public String getAuthor() { return author; }
+    public void setAuthor(String author) { this.author = author; }
+    public String getPublisher() { return publisher; }
+    public void setPublisher(String publisher) { this.publisher = publisher; }
     public int getRowIndex() { return rowIndex; }
     public void setRowIndex(int rowIndex) { this.rowIndex = rowIndex; }
     public String getErrorMsg() { return errorMsg; }

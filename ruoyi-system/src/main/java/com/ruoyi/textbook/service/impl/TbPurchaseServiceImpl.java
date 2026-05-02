@@ -103,13 +103,8 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
         if ("1".equals(existing.getStatus())) {
             throw new ServiceException("该订单已审核通过，禁止修改");
         }
-        if ("6".equals(existing.getStatus())) {
-            throw new ServiceException("该订单已发货，禁止修改");
-        }
-        if (tbPurchase.getStatus() != null && !tbPurchase.getStatus().equals(existing.getStatus())) {
-            if (!PurchaseStatusEnum.canTransition(existing.getStatus(), tbPurchase.getStatus())) {
-                throw new ServiceException(PurchaseStatusEnum.getTransitionErrorMsg(existing.getStatus(), tbPurchase.getStatus()));
-            }
+        if ("2".equals(existing.getStatus())) {
+            throw new ServiceException("该采购单已驳回，禁止修改");
         }
         tbPurchase.setUpdateTime(DateUtils.getNowDate());
         return tbPurchaseMapper.updateTbPurchase(tbPurchase);
@@ -184,8 +179,8 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
             throw new ServiceException("采购单状态不是待审核，无法审核");
         }
 
-        if (!PurchaseStatusEnum.canTransition(purchase.getStatus(), status)) {
-            throw new ServiceException(PurchaseStatusEnum.getTransitionErrorMsg(purchase.getStatus(), status));
+        if (!"1".equals(status) && !"2".equals(status)) {
+            throw new ServiceException("审核状态只能为1(通过)或2(驳回)");
         }
 
         purchase.setStatus(status);
@@ -258,12 +253,13 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
         if (purchase == null) {
             throw new ServiceException("采购单不存在");
         }
-        if (!"4".equals(purchase.getStatus()) && !"6".equals(purchase.getStatus())) {
-            throw new ServiceException("采购单状态不允许入库操作，仅允许已到货或已发货状态，当前状态：" + PurchaseStatusEnum.getDescByCode(purchase.getStatus()));
+        String currentPurchaseStatus = purchase.getPurchaseStatus();
+        if (!PurchaseStatusEnum.ARRIVED.getCode().equals(currentPurchaseStatus)) {
+            throw new ServiceException("采购单状态不允许入库操作，仅允许已到货状态，当前状态：" + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus));
         }
 
         purchase.setInvoiceNo(invoiceNo);
-        purchase.setStatus("5");
+        purchase.setPurchaseStatus(PurchaseStatusEnum.INBOUND.getCode());
         purchase.setUpdateTime(DateUtils.getNowDate());
         return tbPurchaseMapper.updateTbPurchase(purchase);
     }
@@ -275,8 +271,9 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
             throw new ServiceException("采购单不存在");
         }
 
-        if (!"1".equals(purchase.getStatus())) {
-            throw new ServiceException("采购单状态不允许发货确认，当前状态：" + PurchaseStatusEnum.getDescByCode(purchase.getStatus()));
+        String currentPurchaseStatus = purchase.getPurchaseStatus();
+        if (!PurchaseStatusEnum.ACCEPTED.getCode().equals(currentPurchaseStatus)) {
+            throw new ServiceException("采购单状态不允许发货确认，当前状态：" + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus));
         }
 
         if (purchase.getSupplierId() == null) {
@@ -292,7 +289,7 @@ public class TbPurchaseServiceImpl implements ITbPurchaseService
 
         purchase.setLogisticsNo(logisticsNo);
         purchase.setLogisticsCompany(logisticsCompany);
-        purchase.setStatus("6");
+        purchase.setPurchaseStatus(PurchaseStatusEnum.SHIPPED.getCode());
         purchase.setRemark("供应商确认发货：" + logisticsCompany + "，物流单号：" + logisticsNo);
         purchase.setUpdateTime(DateUtils.getNowDate());
         return tbPurchaseMapper.updateTbPurchase(purchase);

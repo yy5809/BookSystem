@@ -1,15 +1,18 @@
 package com.ruoyi.textbook.service.impl;
 
 import com.ruoyi.common.core.domain.entity.SysDictData;
+import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.uuid.IdUtils;
 import com.ruoyi.textbook.domain.TbBook;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.domain.dto.TbPurchaseImportDTO;
 import com.ruoyi.textbook.domain.TbInventory;
+import com.ruoyi.textbook.enums.PurchaseStatusEnum;
 import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbInventoryMapper;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -51,6 +55,12 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
     @Autowired
     private NoticeService noticeService;
 
+    @Autowired
+    private RedisCache redisCache;
+
+    private static final String PREVIEW_CACHE_PREFIX = "purchase_import_preview:";
+    private static final int PREVIEW_CACHE_TTL_MINUTES = 30;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> importFromExcel(List<TbPurchaseImportDTO> dataList, Long operatorId, String operatorName, String fileHash) {
@@ -66,10 +76,11 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
             throw new ServiceException("该文件已导入过，采购单号：" + existing.getPurchaseNo() + "，请勿重复导入");
         }
 
+        String logTag = "【Excel导入】";
+        int totalRows = dataList.size();
+
         List<TbPurchaseImportDTO> successList = new ArrayList<>();
         List<TbPurchaseImportDTO> failList = new ArrayList<>();
-        List<TbPurchaseImportDTO> autoCreatedList = new ArrayList<>();
-        AtomicInteger autoCreatedCount = new AtomicInteger(0);
 
         log.info("【Excel导入】开始数据校验阶段（校验阶段无数据库写入，无需事务）");
         for (int i = 0; i < dataList.size(); i++) {
@@ -89,18 +100,31 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
             }
         }
 
-        log.info("【Excel导入】数据校验完成，成功={}, 失败={}", successList.size(), failList.size());
+        log.info("{}数据校验完成，成功={}, 失败={}", logTag, successList.size(), failList.size());
 
         if (successList.isEmpty()) {
-            log.warn("【Excel导入】所有数据行校验失败");
-            return buildResult(dataList.size(), 0, failList, "所有数据行校验失败", 0, java.util.Collections.emptyList());
+            log.warn("{}所有数据行校验失败", logTag);
+            return buildResult(totalRows, 0, failList, "所有数据行校验失败", 0, Collections.emptyList());
         }
 
-        log.info("【Excel导入】开始创建采购主单");
+        return doImport(successList, failList, totalRows, fileHash, operatorId, operatorName, logTag);
+    }
+
+    private Map<String, Object> doImport(List<TbPurchaseImportDTO> successList, List<TbPurchaseImportDTO> failList,
+            int totalRows, String fileHash, Long operatorId, String operatorName, String logTag) {
+        log.info("{}开始创建采购主单", logTag);
         TbPurchase purchase = new TbPurchase();
         String purchaseNo = PurchaseNoGenerator.generateWithUUID();
         purchase.setPurchaseNo(purchaseNo);
-        purchase.setStatus("0");
+        purchase.setUserId(operatorId);
+        purchase.setUserName(operatorName);
+        purchase.setUserType("2");
+        purchase.setBookId(0L);
+        purchase.setBuyNum(0);
+        purchase.setSubmitTime(java.time.LocalDateTime.now());
+        purchase.setFundingSource("school");
+        purchase.setStatus("1"); // 库管员创建，直接审核通过
+        purchase.setPurchaseStatus(PurchaseStatusEnum.WAIT_PURCHASE.getCode());
         purchase.setFileHash(fileHash);
         purchase.setCreateBy(operatorName);
         purchase.setCreateTime(DateUtils.getNowDate());
@@ -111,9 +135,12 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
             throw new ServiceException("创建采购主单失败");
         }
         Long purchaseId = purchase.getBuyId();
-        log.info("【Excel导入】采购主单已创建: {}", purchaseNo);
+        log.info("{}采购主单已创建: {}", logTag, purchaseNo);
 
-        log.info("【Excel导入】开始处理采购明细（单行异常被catch不传播，不触发事务回滚）");
+        List<TbPurchaseImportDTO> autoCreatedList = new ArrayList<>();
+        AtomicInteger autoCreatedCount = new AtomicInteger(0);
+
+        log.info("{}开始处理采购明细（单行异常被catch不传播，不触发事务回滚）", logTag);
         int detailSuccessCount = 0;
         for (int i = 0; i < successList.size(); i++) {
             TbPurchaseImportDTO dto = successList.get(i);
@@ -126,6 +153,11 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
                     book.setInfoStatus("0");
                     book.setInfoSource("3");
                     book.setStatus("0");
+                    book.setMajor("未知");
+                    book.setGrade("未知");
+                    book.setAuthor(StringUtils.isNotEmpty(dto.getAuthor()) ? dto.getAuthor() : "未知");
+                    book.setPublisher(StringUtils.isNotEmpty(dto.getPublisher()) ? dto.getPublisher() : "未知");
+                    book.setPrice(java.math.BigDecimal.ZERO);
                     book.setCreateBy(operatorName);
                     book.setCreateTime(DateUtils.getNowDate());
                     try {
@@ -135,7 +167,7 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
                         if (book == null) {
                             throw new ServiceException("ISBN=" + dto.getIsbn() + "教材创建失败，请重试");
                         }
-                        log.info("【Excel导入】ISBN={}并发创建冲突，使用已有教材记录", dto.getIsbn());
+                        log.info("{}ISBN={}并发创建冲突，使用已有教材记录", logTag, dto.getIsbn());
                     }
 
                     TbInventory stock = new TbInventory();
@@ -145,12 +177,12 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
                     try {
                         tbInventoryMapper.insertTbInventory(stock);
                     } catch (DuplicateKeyException dke2) {
-                        log.info("【Excel导入】教材库存记录已存在，跳过创建, bookId={}", book.getBookId());
+                        log.info("{}教材库存记录已存在，跳过创建, bookId={}", logTag, book.getBookId());
                     }
 
                     autoCreatedCount.incrementAndGet();
                     autoCreatedList.add(dto);
-                    log.info("【Excel导入】自动创建教材: ISBN={}, 书名={}", dto.getIsbn(), dto.getBookName());
+                    log.info("{}自动创建教材: ISBN={}, 书名={}", logTag, dto.getIsbn(), dto.getBookName());
                 }
 
                 TbPurchaseDetail detail = new TbPurchaseDetail();
@@ -170,37 +202,148 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
                     shortage.setPurchaseId(purchaseId);
                     shortage.setRemark("已纳入采购单" + purchaseNo);
                     tbShortageMapper.updateTbShortage(shortage);
-                    log.info("【Excel导入】缺书单已关联, lackId={}, ISBN={}", shortage.getLackId(), dto.getIsbn());
+                    log.info("{}缺书单已关联, lackId={}, ISBN={}", logTag, shortage.getLackId(), dto.getIsbn());
                 }
 
                 if (i % 50 == 0) {
-                    log.info("【Excel导入】明细处理进度: {}/{}", i + 1, successList.size());
+                    log.info("{}明细处理进度: {}/{}", logTag, i + 1, successList.size());
                 }
 
             } catch (Exception e) {
                 dto.setErrorMsg("处理异常：" + e.getMessage());
                 failList.add(dto);
-                log.error("【Excel导入】第{}行处理异常: {}", dto.getRowIndex(), e.getMessage(), e);
+                log.error("{}第{}行处理异常: {}", logTag, dto.getRowIndex(), e.getMessage(), e);
             }
         }
 
-        log.info("【Excel导入】明细处理完成，成功={}, 失败={}", detailSuccessCount, successList.size() - detailSuccessCount);
+        log.info("{}明细处理完成，成功={}, 失败={}", logTag, detailSuccessCount, successList.size() - detailSuccessCount);
 
         if (detailSuccessCount == 0) {
             throw new ServiceException("所有明细处理失败，采购单未创建。请修正数据后重新导入");
         }
 
-        if (detailSuccessCount > 0) {
+        try {
+            noticeService.sendPurchaseCreateNotice(purchaseId, purchaseNo, detailSuccessCount);
+            log.info("{}采购单创建通知发送成功", logTag);
+        } catch (Exception e) {
+            log.warn("{}发送采购单创建通知失败: {}", logTag, e.getMessage(), e);
+        }
+
+        log.info("{}完成! 总记录数={}, 成功={}, 失败={}, 自动新增={}, 采购单号={}", logTag, totalRows, detailSuccessCount, failList.size(), autoCreatedCount.get(), purchaseNo);
+        return buildResult(totalRows, detailSuccessCount, failList, purchaseNo, autoCreatedCount.get(), autoCreatedList);
+    }
+
+    @Override
+    public Map<String, Object> previewFromExcel(List<TbPurchaseImportDTO> dataList, String fileHash, Long operatorId) {
+        log.info("【Excel预览】开始处理, 总行数={}, 文件哈希={}, 操作人ID={}", dataList.size(), fileHash, operatorId);
+
+        if (fileHash == null || fileHash.isEmpty()) {
+            throw new ServiceException("文件校验信息缺失，无法进行防重复检查，请重新上传");
+        }
+
+        log.info("【Excel预览】检查文件是否重复导入");
+        TbPurchase existing = tbPurchaseMapper.selectByFileHash(fileHash);
+        if (existing != null) {
+            log.warn("【Excel预览】文件重复导入，采购单号：{}", existing.getPurchaseNo());
+            throw new ServiceException("该文件已导入过，采购单号：" + existing.getPurchaseNo() + "，请勿重复导入");
+        }
+
+        List<TbPurchaseImportDTO> successList = new ArrayList<>();
+        List<TbPurchaseImportDTO> failList = new ArrayList<>();
+
+        log.info("【Excel预览】开始数据校验阶段");
+        for (int i = 0; i < dataList.size(); i++) {
+            TbPurchaseImportDTO dto = dataList.get(i);
+            dto.setRowIndex(i + 2);
+
             try {
-                noticeService.sendPurchaseCreateNotice(purchaseId, purchaseNo, detailSuccessCount);
-                log.info("【Excel导入】采购单创建通知发送成功");
+                validateRow(dto);
+                successList.add(dto);
             } catch (Exception e) {
-                log.warn("【Excel导入】发送采购单创建通知失败: {}", e.getMessage(), e);
+                dto.setErrorMsg(e.getMessage());
+                failList.add(dto);
+                log.warn("【Excel预览】第{}行校验失败: {}", dto.getRowIndex(), e.getMessage());
             }
         }
 
-        log.info("【Excel导入】完成! 总记录数={}, 成功={}, 失败={}, 自动新增={}, 采购单号={}", dataList.size(), detailSuccessCount, failList.size(), autoCreatedCount.get(), purchaseNo);
-        return buildResult(dataList.size(), detailSuccessCount, failList, purchaseNo, autoCreatedCount.get(), autoCreatedList);
+        log.info("【Excel预览】数据校验完成，成功={}, 失败={}", successList.size(), failList.size());
+
+        String previewToken = IdUtils.fastSimpleUUID();
+        Map<String, Object> previewData = new HashMap<>();
+        previewData.put("successList", successList);
+        previewData.put("failList", failList);
+        previewData.put("fileHash", fileHash);
+        previewData.put("totalRows", dataList.size());
+        previewData.put("operatorId", operatorId);
+
+        String cacheKey = PREVIEW_CACHE_PREFIX + previewToken;
+        redisCache.setCacheObject(cacheKey, previewData, PREVIEW_CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+        log.info("【Excel预览】预览数据已缓存, token={}, TTL={}分钟", previewToken, PREVIEW_CACHE_TTL_MINUTES);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("previewToken", previewToken);
+        result.put("totalRows", dataList.size());
+        result.put("successCount", successList.size());
+        result.put("failCount", failList.size());
+        result.put("successList", successList);
+        result.put("failList", failList);
+        return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> confirmImport(String previewToken, Long operatorId, String operatorName) {
+        log.info("【Excel确认导入】开始, previewToken={}, 操作人={}", previewToken, operatorName);
+
+        if (StringUtils.isEmpty(previewToken)) {
+            throw new ServiceException("预览令牌不能为空");
+        }
+
+        if (!previewToken.matches("^[a-f0-9]{32}$")) {
+            throw new ServiceException("预览令牌格式不合法");
+        }
+
+        String cacheKey = PREVIEW_CACHE_PREFIX + previewToken;
+        Map<String, Object> previewData = redisCache.getCacheObject(cacheKey);
+        if (previewData == null) {
+            throw new ServiceException("预览数据已过期，请重新上传文件预览");
+        }
+
+        redisCache.deleteObject(cacheKey);
+        log.info("【Excel确认导入】预览缓存已清除，防止重复确认");
+
+        Object operatorIdObj = previewData.get("operatorId");
+        if (operatorIdObj != null) {
+            Long previewOperatorId = ((Number) operatorIdObj).longValue();
+            if (!previewOperatorId.equals(operatorId)) {
+                log.warn("【Excel确认导入】操作人不匹配, 预览操作人={}, 当前操作人={}", previewOperatorId, operatorId);
+                throw new ServiceException("预览数据与当前操作人不匹配，请重新上传文件预览");
+            }
+        }
+
+        String fileHash = (String) previewData.get("fileHash");
+        int totalRows = ((Number) previewData.get("totalRows")).intValue();
+
+        log.info("【Excel确认导入】检查文件是否重复导入");
+        TbPurchase existing = tbPurchaseMapper.selectByFileHash(fileHash);
+        if (existing != null) {
+            log.warn("【Excel确认导入】文件重复导入，采购单号：{}", existing.getPurchaseNo());
+            throw new ServiceException("该文件已导入过，采购单号：" + existing.getPurchaseNo() + "，请勿重复导入");
+        }
+
+        @SuppressWarnings("unchecked")
+        List<TbPurchaseImportDTO> successList = (List<TbPurchaseImportDTO>) previewData.get("successList");
+        @SuppressWarnings("unchecked")
+        List<TbPurchaseImportDTO> originalFailList = (List<TbPurchaseImportDTO>) previewData.get("failList");
+
+        String logTag = "【Excel确认导入】";
+
+        if (successList == null || successList.isEmpty()) {
+            log.warn("{}没有可导入的有效数据", logTag);
+            return buildResult(totalRows, 0, originalFailList, "所有数据行校验失败", 0, Collections.emptyList());
+        }
+
+        return doImport(successList, new ArrayList<>(originalFailList), totalRows, fileHash, operatorId, operatorName, logTag);
     }
 
     private void validateRow(TbPurchaseImportDTO dto) {
@@ -237,6 +380,13 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         if (majorDict == null) {
             throw new ServiceException("申请专业[" + dto.getMajor() + "]不在系统字典中");
         }
+
+        if (StringUtils.isNotEmpty(dto.getGrade())) {
+            SysDictData gradeDict = validateDictValue("tb_grade", dto.getGrade());
+            if (gradeDict == null) {
+                throw new ServiceException("适用年级[" + dto.getGrade() + "]不在系统字典中（可选：大一/大二/大三/大四/全校）");
+            }
+        }
     }
 
     private SysDictData validateDictValue(String dictType, String dictLabel) {
@@ -265,37 +415,16 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         return null;
     }
 
-    private Map<String, Object> buildResult(int totalRows, int successCount, List<TbPurchaseImportDTO> failList, String message, int autoCreatedCount, List<TbPurchaseImportDTO> autoCreatedList) {
+    private Map<String, Object> buildResult(int totalRows, int successCount, List<TbPurchaseImportDTO> failList, String purchaseNo, int autoCreatedCount, List<TbPurchaseImportDTO> autoCreatedList) {
         Map<String, Object> result = new HashMap<>();
         result.put("totalRows", totalRows);
         result.put("successCount", successCount);
         result.put("failCount", failList.size());
         result.put("failList", failList);
-        result.put("message", message);
+        result.put("purchaseNo", purchaseNo);
         result.put("autoCreatedCount", autoCreatedCount);
         result.put("autoCreatedList", autoCreatedList);
         return result;
     }
 
-    private int countNewFailures(List<TbPurchaseImportDTO> failList, int originalSuccessSize) {
-        int newFailures = 0;
-        for (TbPurchaseImportDTO dto : failList) {
-            if (dto.getErrorMsg() != null && !dto.getErrorMsg().startsWith("ISBN") &&
-                !dto.getErrorMsg().startsWith("采购数量") && !dto.getErrorMsg().startsWith("申请")) {
-                newFailures++;
-            }
-        }
-        return newFailures;
-    }
-
-    private int getOriginalFailCount(List<TbPurchaseImportDTO> failList, int totalSize) {
-        int count = 0;
-        for (TbPurchaseImportDTO dto : failList) {
-            if (dto.getErrorMsg() != null && (dto.getErrorMsg().contains("不能为空") ||
-                dto.getErrorMsg().contains("格式错误") || dto.getErrorMsg().contains("必须在"))) {
-                count++;
-            }
-        }
-        return count;
-    }
 }
