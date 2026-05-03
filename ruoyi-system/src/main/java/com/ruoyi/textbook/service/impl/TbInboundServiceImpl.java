@@ -72,6 +72,9 @@ public class TbInboundServiceImpl implements ITbInboundService {
     private IStockOperationService stockOperationService;
 
     @Autowired
+    private PurchaseStateService purchaseStateService;
+
+    @Autowired
     private com.ruoyi.textbook.mapper.BookPersonalApplyMapper bookPersonalApplyMapper;
 
     @Override
@@ -98,8 +101,8 @@ public class TbInboundServiceImpl implements ITbInboundService {
 
         if (tbInbound.getPurchaseId() != null) {
             TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(tbInbound.getPurchaseId());
-            if (purchase != null && !"4".equals(purchase.getStatus()) && !"6".equals(purchase.getStatus())) {
-                throw new ServiceException("采购单状态不是'已到货'或'已发货'，无法入库，当前状态：" + purchase.getStatus());
+            if (purchase != null) {
+                purchaseStateService.validateCanInbound(purchase);
             }
         }
         
@@ -178,8 +181,8 @@ public class TbInboundServiceImpl implements ITbInboundService {
         if (inbound.getPurchaseId() != null) {
             TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(inbound.getPurchaseId());
             if (purchase != null && "5".equals(purchase.getStatus())) {
-                purchase.setStatus("4");
-                tbPurchaseMapper.updateTbPurchase(purchase);
+                TbPurchase rollbackPurchase = purchaseStateService.rollbackFromInboundToArrived(inbound.getPurchaseId());
+                tbPurchaseMapper.updateTbPurchase(rollbackPurchase);
                 log.info("【入库删除】已将采购单状态回退为'已到货', purchaseId={}", inbound.getPurchaseId());
             }
         }
@@ -227,8 +230,8 @@ public class TbInboundServiceImpl implements ITbInboundService {
             if (inbound.getPurchaseId() != null) {
                 TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(inbound.getPurchaseId());
                 if (purchase != null && "5".equals(purchase.getStatus())) {
-                    purchase.setStatus("4");
-                    tbPurchaseMapper.updateTbPurchase(purchase);
+                    TbPurchase rollbackPurchase = purchaseStateService.rollbackFromInboundToArrived(inbound.getPurchaseId());
+                    tbPurchaseMapper.updateTbPurchase(rollbackPurchase);
                     log.info("【批量删除入库】已将采购单状态回退为'已到货', purchaseId={}", inbound.getPurchaseId());
                 }
             }
@@ -271,8 +274,8 @@ public class TbInboundServiceImpl implements ITbInboundService {
 
         if (tbInbound.getPurchaseId() != null) {
             TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(tbInbound.getPurchaseId());
-            if (purchase != null && !"4".equals(purchase.getStatus()) && !"6".equals(purchase.getStatus())) {
-                throw new ServiceException("采购单状态不是'已到货'或'已发货'，无法入库，当前状态：" + purchase.getStatus());
+            if (purchase != null) {
+                purchaseStateService.validateCanInbound(purchase);
             }
         }
 

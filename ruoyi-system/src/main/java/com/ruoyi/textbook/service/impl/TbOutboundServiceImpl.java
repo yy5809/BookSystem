@@ -54,6 +54,9 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
     @Autowired
     private IStockOperationService stockOperationService;
 
+    @Autowired
+    private PurchaseStateService purchaseStateService;
+
     @Override
     public TbOutbound selectTbOutboundById(Long outboundId) {
         return tbOutboundMapper.selectTbOutboundById(outboundId);
@@ -133,8 +136,8 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
         if (outbound.getBuyId() != null) {
             TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(outbound.getBuyId());
             if (purchase != null && "3".equals(purchase.getStatus())) {
-                purchase.setStatus("1");
-                tbPurchaseMapper.updateTbPurchase(purchase);
+                TbPurchase rollbackPurchase = purchaseStateService.rollbackFromReceivedToApproved(outbound.getBuyId());
+                tbPurchaseMapper.updateTbPurchase(rollbackPurchase);
                 log.info("【删除出库单】已将采购单状态回退为'已通过', purchaseId={}", outbound.getBuyId());
             }
         }
@@ -169,8 +172,8 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
             if (outbound.getBuyId() != null) {
                 TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(outbound.getBuyId());
                 if (purchase != null && "3".equals(purchase.getStatus())) {
-                    purchase.setStatus("1");
-                    tbPurchaseMapper.updateTbPurchase(purchase);
+                    TbPurchase rollbackPurchase = purchaseStateService.rollbackFromReceivedToApproved(outbound.getBuyId());
+                    tbPurchaseMapper.updateTbPurchase(rollbackPurchase);
                     log.info("【批量删除出库单】已将采购单状态回退为'已通过', purchaseId={}", outbound.getBuyId());
                 }
             }
@@ -250,9 +253,9 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
         }
 
         if (failCount == 0) {
-            purchase.setStatus("3");
+            purchaseStateService.transitionToReceived(purchaseId);
         } else if (successCount > 0) {
-            purchase.setStatus("3");
+            purchaseStateService.transitionToReceived(purchaseId);
             log.warn("【出库处理】部分出库完成! 成功={}条, 失败={}条(库存不足): {}", successCount, failCount, String.join("；", failMessages));
         }
         tbPurchaseMapper.updateTbPurchase(purchase);

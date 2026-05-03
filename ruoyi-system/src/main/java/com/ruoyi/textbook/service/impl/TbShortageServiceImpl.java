@@ -50,6 +50,9 @@ public class TbShortageServiceImpl implements ITbShortageService
     @Autowired
     private NoticeService noticeService;
 
+    @Autowired
+    private PurchaseStateService purchaseStateService;
+
     /**
      * 查询缺书登记信息
      * 
@@ -255,8 +258,7 @@ public class TbShortageServiceImpl implements ITbShortageService
             purchase.setUserName(operatorName);
             purchase.setUserType("2");
             purchase.setDeptName(currentUser != null && currentUser.getDept() != null ? currentUser.getDept().getDeptName() : "");
-            purchase.setStatus("1");
-            purchase.setPurchaseStatus("1");
+            purchaseStateService.initAsApprovedWithPurchasing(purchase);
             purchase.setSubmitTime(LocalDateTime.now());
             purchase.setFundingSource("school");
             purchase.setSupplierId(supplierId);
@@ -336,8 +338,7 @@ public class TbShortageServiceImpl implements ITbShortageService
         purchase.setUserName(operatorName);
         purchase.setUserType("2");
         purchase.setDeptName(currentUser != null && currentUser.getDept() != null ? currentUser.getDept().getDeptName() : "");
-        purchase.setStatus("1");
-        purchase.setPurchaseStatus("1");
+        purchaseStateService.initAsApprovedWithPurchasing(purchase);
         purchase.setSubmitTime(LocalDateTime.now());
         purchase.setFundingSource("school");
         purchase.setBookId(allShortages.get(0).getBookId());

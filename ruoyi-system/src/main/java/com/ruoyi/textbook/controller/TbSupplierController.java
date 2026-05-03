@@ -83,7 +83,7 @@ public class TbSupplierController extends BaseController {
         return AjaxResult.success(active);
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:supplier:purchase:list')")
+    @PreAuthorize("@ss.hasPermi('textbook:supplierPurchase:list')")
     @GetMapping("/purchase/list")
     public TableDataInfo myPurchaseList(TbPurchase query) {
         Long currentUserId = SecurityUtils.getUserId();
@@ -101,7 +101,7 @@ public class TbSupplierController extends BaseController {
     }
 
     @RepeatSubmit
-    @PreAuthorize("@ss.hasPermi('textbook:supplier:ship')")
+    @PreAuthorize("@ss.hasPermi('textbook:supplierPurchase:ship')")
     @Log(title = "供应商确认发货", businessType = BusinessType.UPDATE)
     @PutMapping("/purchase/ship/{purchaseId}")
     public AjaxResult confirmShip(@PathVariable Long purchaseId,

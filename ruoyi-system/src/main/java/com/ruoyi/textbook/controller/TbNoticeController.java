@@ -25,16 +25,7 @@ public class TbNoticeController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(SysNotice notice) {
         startPage();
-        if (SecurityUtils.hasRole("admin")) {
-        } else if (SecurityUtils.hasRole("warehouse")) {
-            notice.setUserType("2");
-        } else if (SecurityUtils.hasRole("supplier")) {
-            notice.setUserType("3");
-            notice.setTargetUserId(SecurityUtils.getUserId());
-        } else {
-            notice.setUserType("1");
-            notice.setTargetUserId(SecurityUtils.getUserId());
-        }
+        applyRoleFilter(notice);
         List<SysNotice> list = noticeService.selectNoticeList(notice);
         return getDataTable(list);
     }
@@ -42,16 +33,7 @@ public class TbNoticeController extends BaseController {
     @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @GetMapping("/list/all")
     public TableDataInfo listAll(SysNotice notice) {
-        if (SecurityUtils.hasRole("admin")) {
-        } else if (SecurityUtils.hasRole("warehouse")) {
-            notice.setUserType("2");
-        } else if (SecurityUtils.hasRole("supplier")) {
-            notice.setUserType("3");
-            notice.setTargetUserId(SecurityUtils.getUserId());
-        } else {
-            notice.setUserType("1");
-            notice.setTargetUserId(SecurityUtils.getUserId());
-        }
+        applyRoleFilter(notice);
         startPage();
         List<SysNotice> list = noticeService.selectNoticeList(notice);
         return getDataTable(list);
@@ -60,18 +42,9 @@ public class TbNoticeController extends BaseController {
     @PreAuthorize("@ss.hasPermi('textbook:notice:list')")
     @GetMapping("/unread/count")
     public AjaxResult getUnreadCount() {
-        Long userId = SecurityUtils.getUserId();
         SysNotice query = new SysNotice();
-        query.setTargetUserId(userId);
         query.setReadStatus("0");
-        if (SecurityUtils.hasRole("warehouse")) {
-            query.setUserType("2");
-            query.setTargetUserId(null);
-        } else if (SecurityUtils.hasRole("supplier")) {
-            query.setUserType("3");
-        } else {
-            query.setUserType("1");
-        }
+        applyRoleFilterForRead(query);
         List<SysNotice> unreadList = noticeService.selectNoticeList(query);
         int count = unreadList != null ? unreadList.size() : 0;
         return AjaxResult.success(count);
@@ -153,18 +126,9 @@ public class TbNoticeController extends BaseController {
     @Log(title = "通知公告", businessType = BusinessType.UPDATE)
     @PutMapping("/read/all")
     public AjaxResult markAllAsRead() {
-        Long userId = SecurityUtils.getUserId();
         SysNotice query = new SysNotice();
-        query.setTargetUserId(userId);
         query.setReadStatus("0");
-        if (SecurityUtils.hasRole("warehouse")) {
-            query.setUserType("2");
-            query.setTargetUserId(null);
-        } else if (SecurityUtils.hasRole("supplier")) {
-            query.setUserType("3");
-        } else {
-            query.setUserType("1");
-        }
+        applyRoleFilterForRead(query);
         List<SysNotice> unreadList = noticeService.selectNoticeList(query);
         if (unreadList != null && !unreadList.isEmpty()) {
             int count = 0;
@@ -198,5 +162,33 @@ public class TbNoticeController extends BaseController {
     @DeleteMapping("/{noticeIds}")
     public AjaxResult remove(@PathVariable Long[] noticeIds) {
         return toAjax(noticeService.deleteNoticeByIds(noticeIds));
+    }
+
+    private void applyRoleFilter(SysNotice notice) {
+        if (SecurityUtils.hasRole("admin")) {
+            return;
+        } else if (SecurityUtils.hasRole("warehouse")) {
+            notice.setUserType("2");
+        } else if (SecurityUtils.hasRole("supplier")) {
+            notice.setUserType("3");
+            notice.setTargetUserId(SecurityUtils.getUserId());
+        } else {
+            notice.setUserType("1");
+            notice.setTargetUserId(SecurityUtils.getUserId());
+        }
+    }
+
+    private void applyRoleFilterForRead(SysNotice notice) {
+        if (SecurityUtils.hasRole("warehouse")) {
+            notice.setUserType("2");
+        } else if (SecurityUtils.hasRole("supplier")) {
+            notice.setUserType("3");
+            notice.setTargetUserId(SecurityUtils.getUserId());
+        } else if (SecurityUtils.hasRole("admin")) {
+            return;
+        } else {
+            notice.setUserType("1");
+            notice.setTargetUserId(SecurityUtils.getUserId());
+        }
     }
 }

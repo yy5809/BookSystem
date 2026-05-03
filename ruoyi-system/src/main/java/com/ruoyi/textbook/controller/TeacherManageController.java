@@ -99,6 +99,7 @@ public class TeacherManageController extends BaseController {
         return success(message);
     }
 
+    @PreAuthorize("@ss.hasPermi('textbook:teacher:import')")
     @PostMapping("/importTemplate")
     public void importTemplate(HttpServletResponse response) {
         ExcelUtil<TeacherImportDTO> util = new ExcelUtil<>(TeacherImportDTO.class);

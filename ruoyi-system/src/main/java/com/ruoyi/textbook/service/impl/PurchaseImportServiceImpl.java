@@ -56,6 +56,9 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
     private NoticeService noticeService;
 
     @Autowired
+    private PurchaseStateService purchaseStateService;
+
+    @Autowired
     private RedisCache redisCache;
 
     private static final String PREVIEW_CACHE_PREFIX = "purchase_import_preview:";
@@ -123,8 +126,7 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         purchase.setBuyNum(0);
         purchase.setSubmitTime(java.time.LocalDateTime.now());
         purchase.setFundingSource("school");
-        purchase.setStatus("1"); // 库管员创建，直接审核通过
-        purchase.setPurchaseStatus(PurchaseStatusEnum.WAIT_PURCHASE.getCode());
+        purchaseStateService.initAsApprovedWithWaitPurchase(purchase);
         purchase.setFileHash(fileHash);
         purchase.setCreateBy(operatorName);
         purchase.setCreateTime(DateUtils.getNowDate());

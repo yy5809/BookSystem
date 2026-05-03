@@ -645,7 +645,7 @@ CREATE TABLE `sys_menu`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '备注',
   PRIMARY KEY (`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2238 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2246 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '菜单权限表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_menu
@@ -803,6 +803,11 @@ INSERT INTO `sys_menu` VALUES (2119, '领书管理修改', 2116, 3, '#', '', NUL
 INSERT INTO `sys_menu` VALUES (2120, '领书管理发布', 2116, 4, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:publish', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2121, '领书管理删除', 2116, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:noticeManage:remove', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2126, '领书单出库', 2116, 6, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:outbound', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2240, '领书单查询', 2116, 7, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:list', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2241, '领书单详情', 2116, 8, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:query', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2242, '领书单新增', 2116, 9, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:add', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2243, '领书单修改', 2116, 10, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:edit', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2244, '领书单删除', 2116, 11, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:claimForm:remove', '#', 'admin', '2026-04-16 18:07:31', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2129, '教材信息管理', 2213, 2, 'bookManage', 'textbook/bookManage/index', NULL, 'TbBook', 1, 0, 'C', '0', '0', 'textbook:book:list', 'book', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2130, 'query', 2129, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2131, 'add', 2129, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:book:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
@@ -818,6 +823,7 @@ INSERT INTO `sys_menu` VALUES (2140, 'remove', 2136, 4, '#', '', NULL, '', 1, 0,
 INSERT INTO `sys_menu` VALUES (2141, 'excel_import', 2136, 5, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:import:excel', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2142, 'arrive', 2136, 6, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:audit', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2143, 'status', 2136, 7, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:status', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
+INSERT INTO `sys_menu` VALUES (2245, '领书确认', 2136, 8, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:purchase:receive', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2144, '入库管理', 2213, 4, 'inbound', 'textbook/inbound/index', NULL, 'TbInbound', 1, 0, 'C', '0', '0', 'textbook:inbound:list', 'inbox', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2145, 'query', 2144, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:query', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
 INSERT INTO `sys_menu` VALUES (2146, 'confirm', 2144, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'textbook:inbound:add', '#', 'admin', '2026-04-16 19:35:33', '', NULL, '');
@@ -1317,6 +1323,18 @@ INSERT INTO `sys_role_menu` VALUES (7, 2234);
 INSERT INTO `sys_role_menu` VALUES (7, 2235);
 INSERT INTO `sys_role_menu` VALUES (7, 2236);
 INSERT INTO `sys_role_menu` VALUES (7, 2237);
+INSERT INTO `sys_role_menu` VALUES (1, 2240);
+INSERT INTO `sys_role_menu` VALUES (1, 2241);
+INSERT INTO `sys_role_menu` VALUES (1, 2242);
+INSERT INTO `sys_role_menu` VALUES (1, 2243);
+INSERT INTO `sys_role_menu` VALUES (1, 2244);
+INSERT INTO `sys_role_menu` VALUES (1, 2245);
+INSERT INTO `sys_role_menu` VALUES (7, 2240);
+INSERT INTO `sys_role_menu` VALUES (7, 2241);
+INSERT INTO `sys_role_menu` VALUES (7, 2242);
+INSERT INTO `sys_role_menu` VALUES (7, 2243);
+INSERT INTO `sys_role_menu` VALUES (7, 2244);
+INSERT INTO `sys_role_menu` VALUES (7, 2245);
 
 -- ----------------------------
 -- Table structure for sys_user

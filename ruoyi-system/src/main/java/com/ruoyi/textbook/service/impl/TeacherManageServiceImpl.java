@@ -103,6 +103,7 @@ public class TeacherManageServiceImpl implements ITeacherManageService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public String importTeacher(List<TeacherImportDTO> teacherList, String operName) {
         if (teacherList == null || teacherList.isEmpty()) {
             throw new ServiceException("导入教师数据不能为空！");

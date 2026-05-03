@@ -35,6 +35,9 @@ public class SupplierServiceImpl implements ISupplierService {
     @Autowired
     private NoticeService noticeService;
 
+    @Autowired
+    private PurchaseStateService purchaseStateService;
+
     @Override
     public Map<String, Object> getSupplierDashboard() {
         Map<String, Object> dashboardData = new HashMap<>();
@@ -113,12 +116,8 @@ public class SupplierServiceImpl implements ISupplierService {
             throw new ServiceException("采购单不存在或无权操作");
         }
 
-        if (!PurchaseStatusEnum.PURCHASING.getCode().equals(purchase.getPurchaseStatus())) {
-            throw new ServiceException("采购单状态不是采购中，无法确认接单");
-        }
-
-        purchase.setPurchaseStatus(PurchaseStatusEnum.ACCEPTED.getCode());
-        tbPurchaseMapper.updateTbPurchase(purchase);
+        TbPurchase acceptedPurchase = purchaseStateService.transitionToAccepted(purchaseId);
+        tbPurchaseMapper.updateTbPurchase(acceptedPurchase);
         log.info("【供应商接单】supplierId={}, purchaseId={}, purchaseNo={}", supplier.getSupplierId(), purchaseId, purchase.getPurchaseNo());
     }
 
@@ -134,20 +133,11 @@ public class SupplierServiceImpl implements ISupplierService {
         if (purchase == null || !supplier.getSupplierId().equals(purchase.getSupplierId())) {
             throw new ServiceException("采购单不存在或无权操作");
         }
-        
-        String currentPurchaseStatus = purchase.getPurchaseStatus();
-        if (!PurchaseStatusEnum.ACCEPTED.getCode().equals(currentPurchaseStatus)) {
-            throw new ServiceException("采购单状态不是已接单，无法确认发货，当前状态：" + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus));
-        }
 
-        if (!PurchaseStatusEnum.canTransition(currentPurchaseStatus, PurchaseStatusEnum.SHIPPED.getCode())) {
-            throw new ServiceException(PurchaseStatusEnum.getTransitionErrorMsg(currentPurchaseStatus, PurchaseStatusEnum.SHIPPED.getCode()));
-        }
-
-        purchase.setPurchaseStatus(PurchaseStatusEnum.SHIPPED.getCode());
-        purchase.setLogisticsCompany(logisticsCompany);
-        purchase.setLogisticsNo(logisticsNo);
-        tbPurchaseMapper.updateTbPurchase(purchase);
+        TbPurchase shippedPurchase = purchaseStateService.transitionToShipped(purchaseId);
+        shippedPurchase.setLogisticsCompany(logisticsCompany);
+        shippedPurchase.setLogisticsNo(logisticsNo);
+        tbPurchaseMapper.updateTbPurchase(shippedPurchase);
         
         // 发送通知给库管员
         noticeService.sendShipmentNotice(purchaseId, purchase.getPurchaseNo(), logisticsCompany, logisticsNo);
