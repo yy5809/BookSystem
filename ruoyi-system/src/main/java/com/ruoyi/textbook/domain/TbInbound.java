@@ -10,10 +10,17 @@ public class TbInbound extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     private Long inId;
+
+    @Excel(name = "入库单号")
     private String inboundNo;
+
     private Long pendingId;
     private Long bookId;
+
+    @Excel(name = "教材名称")
     private String bookName;
+
+    @Excel(name = "ISBN")
     private String isbn;
 
     @Excel(name = "入库数量")

@@ -3,6 +3,7 @@ package com.ruoyi.textbook.controller;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.ruoyi.textbook.domain.BookClaimForm;
 import com.ruoyi.textbook.domain.BookNotice;
@@ -105,7 +106,7 @@ public class BookNoticeController extends BaseController {
         query.setStatus("0");
         List<SysDictData> dictList = dictDataMapper.selectDictDataList(query);
         for (SysDictData dict : dictList) {
-            Map<String, Object> college = new java.util.HashMap<>();
+            Map<String, Object> college = new HashMap<>();
             college.put("id", dict.getDictCode());
             college.put("name", dict.getDictLabel());
             colleges.add(college);
@@ -143,7 +144,7 @@ public class BookNoticeController extends BaseController {
         String prefix = collegeName + "|";
         for (SysDictData dict : dictList) {
             if (dict.getDictValue() != null && dict.getDictValue().startsWith(prefix)) {
-                Map<String, Object> major = new java.util.HashMap<>();
+                Map<String, Object> major = new HashMap<>();
                 major.put("id", dict.getDictCode());
                 major.put("name", dict.getDictLabel());
                 majors.add(major);
@@ -168,7 +169,7 @@ public class BookNoticeController extends BaseController {
         query.setStatus("0");
         List<SysDictData> dictList = dictDataMapper.selectDictDataList(query);
         for (SysDictData dict : dictList) {
-            Map<String, Object> cls = new java.util.HashMap<>();
+            Map<String, Object> cls = new HashMap<>();
             cls.put("id", dict.getDictCode());
             cls.put("name", dict.getDictLabel());
             classes.add(cls);

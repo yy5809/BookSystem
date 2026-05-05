@@ -30,10 +30,10 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd">登记缺书</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['textbook:shortage:add']">登记缺书</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="success" plain icon="el-icon-download" size="mini" @click="handleExport">导出</el-button>
+        <el-button type="success" plain icon="el-icon-download" size="mini" @click="handleExport" v-hasPermi="['textbook:shortage:export']">导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -61,11 +61,11 @@
       <el-table-column label="登记时间" align="center" prop="registerTime" width="160" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
-          <el-button size="mini" type="text" icon="el-icon-s-claim" style="color:#E6A23A" @click="handleProcess(scope.row)" v-if="scope.row.handleStatus === '0'">转采购</el-button>
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleEdit(scope.row)" v-if="scope.row.handleStatus === '0'">编辑</el-button>
-          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.handleStatus === '0'">取消</el-button>
-          <el-button size="mini" type="text" icon="el-icon-delete" style="color:#F56C6C" @click="handleDelete(scope.row)" v-if="scope.row.handleStatus === '0'">删除</el-button>
+          <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)" v-hasPermi="['textbook:shortage:query']">详情</el-button>
+          <el-button size="mini" type="text" icon="el-icon-s-claim" style="color:#E6A23A" @click="handleProcess(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:process']">转采购</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleEdit(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:edit']">编辑</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:edit']">取消</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" style="color:#F56C6C" @click="handleDelete(scope.row)" v-if="scope.row.handleStatus === '0'" v-hasPermi="['textbook:shortage:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

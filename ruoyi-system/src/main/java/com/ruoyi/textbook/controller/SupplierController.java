@@ -6,7 +6,6 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.textbook.domain.TbPurchase;
-import com.ruoyi.textbook.domain.TbSupplier;
 import com.ruoyi.textbook.service.ISupplierService;
 import com.ruoyi.textbook.service.ITbSupplierService;
 import org.springframework.beans.factory.annotation.Autowired;

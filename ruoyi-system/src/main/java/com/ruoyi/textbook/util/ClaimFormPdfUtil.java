@@ -53,6 +53,16 @@ public class ClaimFormPdfUtil {
         addInfoCell(infoTable, "\u73ed\u7ea7\uff1a", form.getClassName());
         addInfoCell(infoTable, "\u72b6\u6001\uff1a", getStatusText(form.getStatus()));
         addInfoCell(infoTable, "\u9886\u4e66\u4eba\uff1a", form.getReceiverName() != null ? form.getReceiverName() : "");
+        if (form.getCollegeId() != null && form.getCollegeId() > 0) {
+            addInfoCell(infoTable, "\u5b66\u9662\uff1a", form.getCollegeId().toString());
+        } else {
+            addInfoCell(infoTable, "\u5b66\u9662\uff1a", "-");
+        }
+        if (form.getMajorId() != null && form.getMajorId() > 0) {
+            addInfoCell(infoTable, "\u4e13\u4e1a\uff1a", form.getMajorId().toString());
+        } else {
+            addInfoCell(infoTable, "\u4e13\u4e1a\uff1a", "-");
+        }
         addInfoCell(infoTable, "\u5e94\u53d1\u603b\u6570\uff1a", form.getPlannedQty() != null ? form.getPlannedQty() + " \u672c" : "");
         addInfoCell(infoTable, "\u5b9e\u53d1\u603b\u6570\uff1a", form.getIssuedQty() != null ? form.getIssuedQty() + " \u672c" : "");
         addInfoCell(infoTable, "\u51fa\u5e93\u65f6\u95f4\uff1a", form.getIssueTime() != null ? new SimpleDateFormat("yyyy-MM-dd HH:mm").format(form.getIssueTime()) : "");
@@ -61,11 +71,11 @@ public class ClaimFormPdfUtil {
         document.add(infoTable);
         document.add(Chunk.NEWLINE);
 
-        PdfPTable detailTable = new PdfPTable(7);
+        PdfPTable detailTable = new PdfPTable(8);
         detailTable.setWidthPercentage(100);
-        detailTable.setWidths(new float[]{0.6f, 1.5f, 2.5f, 1f, 1.2f, 0.8f, 0.8f});
+        detailTable.setWidths(new float[]{0.6f, 1.5f, 2.5f, 1f, 1.2f, 0.7f, 0.8f, 0.8f});
 
-        String[] headers = {"\u5e8f\u53f7", "ISBN", "\u6559\u6750\u540d\u79f0", "\u4f5c\u8005", "\u51fa\u7248\u793e", "\u5e94\u53d1", "\u5b9e\u53d1"};
+        String[] headers = {"\u5e8f\u53f7", "ISBN", "\u6559\u6750\u540d\u79f0", "\u4f5c\u8005", "\u51fa\u7248\u793e", "\u5b9a\u4ef7", "\u5e94\u53d1", "\u5b9e\u53d1"};
         for (String h : headers) {
             PdfPCell cell = new PdfPCell(new Phrase(h, headerFont));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -82,6 +92,7 @@ public class ClaimFormPdfUtil {
             addDetailCell(detailTable, d.getBookName() != null ? d.getBookName() : "", Element.ALIGN_LEFT);
             addDetailCell(detailTable, d.getAuthor() != null ? d.getAuthor() : "", Element.ALIGN_CENTER);
             addDetailCell(detailTable, d.getPublisher() != null ? d.getPublisher() : "", Element.ALIGN_CENTER);
+            addDetailCell(detailTable, d.getPrice() != null ? "¥" + d.getPrice().toString() : "", Element.ALIGN_RIGHT);
             addDetailCell(detailTable, d.getPlannedQty() != null ? d.getPlannedQty().toString() : "0", Element.ALIGN_CENTER);
             addDetailCell(detailTable, d.getIssuedQty() != null ? d.getIssuedQty().toString() : "0", Element.ALIGN_CENTER);
             if (d.getPrice() != null && d.getIssuedQty() != null) {

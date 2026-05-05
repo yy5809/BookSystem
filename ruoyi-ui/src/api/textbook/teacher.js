@@ -39,7 +39,7 @@ export function delTeacher(userIds) {
 }
 
 export function resetTeacherPwd(userId, password) {
-  const data = { userId, password }
+  const data = { userId: String(userId), password }
   return request({
     url: '/textbook/teacher/resetPwd',
     method: 'put',

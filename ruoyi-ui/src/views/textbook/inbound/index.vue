@@ -33,8 +33,8 @@
       <el-table-column label="到货时间" align="center" prop="receiveTime" width="160" />
       <el-table-column label="操作" align="center" width="160">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
-          <el-button size="mini" type="text" icon="el-icon-box-plug" @click="handleInbound(scope.row)" v-if="scope.row.status === '4'">确认入库</el-button>
+          <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)" v-hasPermi="['textbook:inbound:query']">详情</el-button>
+          <el-button size="mini" type="text" icon="el-icon-box-plug" @click="handleInbound(scope.row)" v-if="scope.row.status === '4'" v-hasPermi="['textbook:inbound:add']">确认入库</el-button>
         </template>
       </el-table-column>
     </el-table>

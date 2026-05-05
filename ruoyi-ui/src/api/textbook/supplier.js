@@ -1,21 +1,32 @@
 import request from '@/utils/request'
 
-// 供应商管理相关
-export function listSupplier(query) {
-  return request({ url: '/textbook/tbSupplier/list', method: 'get', params: query })
+// 供应商账号管理（新接口，含sys_user账号）
+export function listSupplierAccount(query) {
+  return request({ url: '/textbook/supplierAccount/list', method: 'get', params: query })
 }
-export function getSupplier(supplierId) {
-  return request({ url: `/textbook/tbSupplier/${supplierId}`, method: 'get' })
+export function getSupplierAccount(supplierId) {
+  return request({ url: `/textbook/supplierAccount/${supplierId}`, method: 'get' })
 }
-export function addSupplier(data) {
-  return request({ url: '/textbook/tbSupplier', method: 'post', data })
+export function addSupplierAccount(data) {
+  return request({ url: '/textbook/supplierAccount', method: 'post', data })
 }
-export function updateSupplier(data) {
-  return request({ url: '/textbook/tbSupplier', method: 'put', data })
+export function updateSupplierAccount(data) {
+  return request({ url: '/textbook/supplierAccount', method: 'put', data })
 }
-export function delSupplier(supplierIds) {
-  return request({ url: `/textbook/tbSupplier/${supplierIds}`, method: 'delete' })
+export function delSupplierAccount(supplierIds) {
+  return request({ url: `/textbook/supplierAccount/${supplierIds}`, method: 'delete' })
 }
+export function resetSupplierPwd(userId, password) {
+  return request({ url: '/textbook/supplierAccount/resetPwd', method: 'put', data: { userId: String(userId), password } })
+}
+export function changeSupplierStatus(userId, status) {
+  return request({ url: '/textbook/supplierAccount/changeStatus', method: 'put', data: { userId: String(userId), status } })
+}
+export function exportSupplierAccount(query) {
+  return request({ url: '/textbook/supplierAccount/export', method: 'post', params: query })
+}
+
+// 供应商管理查询（老接口：下拉选项用）
 export function listSupplierOptions() {
   return request({ url: '/textbook/tbSupplier/options', method: 'get' })
 }

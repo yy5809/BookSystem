@@ -33,4 +33,7 @@ public interface TbSupplierMapper {
 
     // 查询供应商的采购单列表
     List<TbPurchase> selectSupplierPurchases(TbPurchase purchase);
+
+    // 联表查询供应商账号列表（含sys_user信息）
+    List<java.util.Map<String, Object>> selectSupplierAccountList(TbSupplier supplier);
 }

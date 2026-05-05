@@ -1,7 +1,10 @@
 package com.ruoyi.textbook.controller;
 
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -76,7 +79,12 @@ public class TeacherManageController extends BaseController {
     @PreAuthorize("@ss.hasPermi('textbook:teacher:resetPwd')")
     @Log(title = "教师管理", businessType = BusinessType.UPDATE)
     @PutMapping("/resetPwd")
-    public AjaxResult resetPwd(@RequestBody SysUser user) {
+    public AjaxResult resetPwd(@RequestBody Map<String, String> params) {
+        Long userId = Long.valueOf(params.get("userId"));
+        String password = params.get("password");
+        SysUser user = new SysUser();
+        user.setUserId(userId);
+        user.setPassword(password);
         user.setUpdateBy(getUsername());
         return toAjax(teacherManageService.resetTeacherPwd(user));
     }
@@ -101,8 +109,69 @@ public class TeacherManageController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('textbook:teacher:import')")
     @PostMapping("/importTemplate")
-    public void importTemplate(HttpServletResponse response) {
-        ExcelUtil<TeacherImportDTO> util = new ExcelUtil<>(TeacherImportDTO.class);
-        util.importTemplateExcel(response, "教师数据");
+    public void importTemplate(HttpServletResponse response) throws Exception {
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+        headerStyle.setFillForegroundColor(IndexedColors.LIGHT_CORNFLOWER_BLUE.getIndex());
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+
+        Sheet sheet1 = workbook.createSheet("教师导入");
+        String[] headers = {"姓名", "职工号", "密码", "所属部门"};
+        Row headerRow = sheet1.createRow(0);
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+        int[] widths = {15, 20, 15, 25};
+        for (int i = 0; i < widths.length; i++) {
+            sheet1.setColumnWidth(i, widths[i] * 256);
+        }
+
+        Sheet sheet2 = workbook.createSheet("填写须知");
+        String[] instructions = {
+                "【教师账号导入模板 — 填写须知】",
+                "",
+                "一、基本要求",
+                "  · 请严格按照模板格式填写，不要修改表头顺序和名称",
+                "  · 建议使用 .xlsx 格式，文件大小不超过10MB",
+                "",
+                "二、列说明",
+                "  · 姓名（必填）：教师的真实姓名，长度不超过30个字符",
+                "  · 职工号（必填）：教师的唯一工号/账号，用于登录系统，长度不超过30个字符",
+                "  ·       职工号不可与系统中已有账号重复，重复将跳过该行",
+                "  · 密码（必填）：教师登录系统的初始密码，长度5-20位",
+                "  ·       不能包含非法字符：<  >  \"  '  \\  |",
+                "  · 所属部门（必填）：教师归属的学院/部门，必须从以下8个学院中选择：",
+                "  ·       环境科学与工程学院、智能制造学院、土木工程学院、",
+                "  ·       管理学院、艺术学院、语言文化学院、公共教学部、",
+                "  ·       马克思主义学院",
+                "",
+                "三、注意事项",
+                "  · 密码将在导入后自动加密存储，Excel中的明文密码不会留存",
+                "  · 教师首次登录后建议修改密码",
+                "  · 导入结果会显示成功/失败明细，失败行会附带原因说明",
+                "  · 导入成功后教师即可使用职工号和密码登录系统"
+        };
+        for (int i = 0; i < instructions.length; i++) {
+            Row row = sheet2.createRow(i);
+            row.createCell(0).setCellValue(instructions[i]);
+        }
+        sheet2.setColumnWidth(0, 120 * 256);
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("UTF-8");
+        String fileName = "教师导入模板.xlsx";
+        response.setHeader("Content-Disposition",
+                "attachment; filename=" + java.net.URLEncoder.encode(fileName, "UTF-8"));
+        workbook.write(response.getOutputStream());
+        workbook.close();
     }
 }

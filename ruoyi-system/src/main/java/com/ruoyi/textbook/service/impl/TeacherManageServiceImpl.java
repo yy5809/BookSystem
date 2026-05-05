@@ -1,6 +1,7 @@
 package com.ruoyi.textbook.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +44,9 @@ public class TeacherManageServiceImpl implements ITeacherManageService {
 
     @Override
     public List<SysUser> selectTeacherList(SysUser user) {
+        if (user.getParams() == null) {
+            user.setParams(new HashMap<>());
+        }
         user.getParams().put("roleKey", "teacher");
         return userMapper.selectTeacherList(user);
     }

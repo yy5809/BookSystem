@@ -69,12 +69,6 @@ public class BookImportUtil {
             cell.setCellStyle(headerStyle);
         }
 
-        String[] exampleData = {"9787040589818", "高等数学（第八版）上册", "同济大学数学科学学院", "高等教育出版社", "第8版", "56.80", "1", "高等数学", "未知", "大一"};
-        Row exampleRow = sheet.createRow(DATA_START_ROW);
-        for (int i = 0; i < exampleData.length; i++) {
-            exampleRow.createCell(i).setCellValue(exampleData[i]);
-        }
-
         int[] widths = {18, 30, 15, 20, 10, 10, 12, 15, 15, 10};
         for (int i = 0; i < widths.length; i++) {
             sheet.setColumnWidth(i, widths[i] * 256);

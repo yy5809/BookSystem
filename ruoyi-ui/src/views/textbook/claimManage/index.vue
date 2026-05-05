@@ -21,7 +21,7 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd">新建领书计划</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd" v-hasPermi="['textbook:noticeManage:add']">新建领书计划</el-button>
       </el-col>
     </el-row>
 
@@ -45,9 +45,9 @@
               <el-table-column label="领书人" prop="receiverName" width="65" />
               <el-table-column label="操作" width="155" align="center">
                 <template slot-scope="s">
-                  <el-button size="mini" type="text" icon="el-icon-view" @click.stop="viewFormDetail(s.row)">明细</el-button>
-                  <el-button size="mini" type="text" icon="el-icon-sold-out" @click.stop="handleOutbound(s.row)" v-if="s.row.status !== '2'">出库</el-button>
-                  <el-button size="mini" type="text" icon="el-icon-printer" @click.stop="handlePrint(s.row)">打印</el-button>
+                  <el-button size="mini" type="text" icon="el-icon-view" @click.stop="viewFormDetail(s.row)" v-hasPermi="['textbook:noticeManage:query']">明细</el-button>
+                  <el-button size="mini" type="text" icon="el-icon-sold-out" @click.stop="handleOutbound(s.row)" v-if="s.row.status !== '2'" v-hasPermi="['textbook:claimForm:outbound']">出库</el-button>
+                  <el-button size="mini" type="text" icon="el-icon-printer" @click.stop="handlePrint(s.row)" v-hasPermi="['textbook:noticeManage:query']">打印</el-button>
                 </template>
               </el-table-column>
             </el-table>
@@ -72,7 +72,7 @@
       <el-table-column label="创建时间" prop="createTime" width="160" />
       <el-table-column label="操作" width="140" align="center" fixed="right">
         <template slot-scope="scope">
-          <el-button size="mini" type="danger" icon="el-icon-delete" @click.stop="handleDelete(scope.row)">删除</el-button>
+          <el-button size="mini" type="danger" icon="el-icon-delete" @click.stop="handleDelete(scope.row)" v-hasPermi="['textbook:noticeManage:remove']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -246,8 +246,8 @@
           <el-table-column label="操作" width="160" align="center">
             <template slot-scope="s">
               <el-button size="mini" type="text" icon="el-icon-view" @click="paView(s.row)">详情</el-button>
-              <el-button size="mini" type="text" icon="el-icon-check" style="color:#67C23A" @click="paAudit(s.row)" v-if="s.row.status==='0'">审核</el-button>
-              <el-button size="mini" type="text" icon="el-icon-sold-out" @click="paIssue(s.row)" v-if="s.row.status==='1'">出库</el-button>
+              <el-button size="mini" type="text" icon="el-icon-check" style="color:#67C23A" @click="paAudit(s.row)" v-if="s.row.status==='0'" v-hasPermi="['textbook:personalApply:audit']">审核</el-button>
+              <el-button size="mini" type="text" icon="el-icon-sold-out" @click="paIssue(s.row)" v-if="s.row.status==='1'" v-hasPermi="['textbook:personalApply:issue']">出库</el-button>
             </template>
           </el-table-column>
         </el-table>

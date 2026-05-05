@@ -86,12 +86,6 @@ public class ExcelImportUtil {
             cell.setCellStyle(headerStyle);
         }
 
-        String[] exampleData = {"9787111111111", "Java程序设计", "张三", "高等教育出版社", "智能制造学院", "计算机", "大一", "50", "示例数据，请删除后填写实际内容"};
-        Row exampleRow = sheet.createRow(DATA_START_ROW);
-        for (int i = 0; i < exampleData.length; i++) {
-            exampleRow.createCell(i).setCellValue(exampleData[i]);
-        }
-
         sheet.setColumnWidth(COL_ISBN, 18 * 256);
         sheet.setColumnWidth(COL_BOOK_NAME, 30 * 256);
         sheet.setColumnWidth(COL_AUTHOR, 12 * 256);

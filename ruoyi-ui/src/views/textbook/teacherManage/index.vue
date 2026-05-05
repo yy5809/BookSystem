@@ -280,7 +280,7 @@ export default {
       this.upload.open = true
     },
     importTemplate() {
-      this.download('textbook/teacher/importTemplate', {}, `teacher_template_${new Date().getTime()}.xlsx`)
+      this.download('textbook/teacher/importTemplate', {}, '教师导入模板.xlsx')
     },
     handleFileUploadProgress(event, file, fileList) {
       this.upload.isUploading = true

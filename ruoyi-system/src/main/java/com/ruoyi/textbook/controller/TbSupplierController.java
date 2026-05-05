@@ -18,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -74,13 +73,7 @@ public class TbSupplierController extends BaseController {
         TbSupplier query = new TbSupplier();
         query.setStatus("0");
         List<TbSupplier> all = tbSupplierService.selectTbSupplierList(query);
-        List<TbSupplier> active = new java.util.ArrayList<>();
-        for (TbSupplier s : all) {
-            if (s.getUserId() != null) {
-                active.add(s);
-            }
-        }
-        return AjaxResult.success(active);
+        return AjaxResult.success(all);
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:supplierPurchase:list')")

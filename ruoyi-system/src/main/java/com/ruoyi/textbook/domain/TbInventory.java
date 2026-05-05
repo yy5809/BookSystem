@@ -10,7 +10,11 @@ public class TbInventory extends BaseEntity {
 
     private Long stockId;
     private Long bookId;
+
+    @Excel(name = "教材名称")
     private String bookName;
+
+    @Excel(name = "ISBN")
     private String isbn;
 
     @Excel(name = "作者")

@@ -48,7 +48,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-check" size="mini" @click="handleMarkAllRead">全部标为已读</el-button>
+        <el-button type="primary" icon="el-icon-check" size="mini" @click="handleMarkAllRead" v-hasPermi="['textbook:notice:edit']">全部标为已读</el-button>
       </el-form-item>
     </el-form>
 
@@ -72,7 +72,7 @@
       <el-table-column label="发送时间" align="center" prop="createTime" width="160" />
       <el-table-column label="操作" align="center" width="100">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" v-if="scope.row.readStatus === '0'" @click.stop="handleMarkRead(scope.row)">标记已读</el-button>
+          <el-button size="mini" type="text" v-if="scope.row.readStatus === '0'" @click.stop="handleMarkRead(scope.row)" v-hasPermi="['textbook:notice:edit']">标记已读</el-button>
         </template>
       </el-table-column>
     </el-table>

@@ -43,15 +43,6 @@ export function deleteShortage(id) {
   })
 }
 
-// 批量删除缺书
-export function deleteShortageByIds(ids) {
-  return request({
-    url: '/textbook/shortage/batch',
-    method: 'delete',
-    data: ids
-  })
-}
-
 // 处理缺书
 export function processShortage(id, status, supplierId) {
   return request({
