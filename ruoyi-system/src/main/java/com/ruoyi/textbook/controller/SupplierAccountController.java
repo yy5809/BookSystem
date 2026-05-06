@@ -49,8 +49,19 @@ public class SupplierAccountController extends BaseController {
     @Log(title = "供应商管理", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody Map<String, Object> params) {
+        String supplierCode = objToStr(params.get("supplierCode"));
+        String supplierName = objToStr(params.get("supplierName"));
+        String password = objToStr(params.get("password"));
+        if (supplierCode == null || supplierCode.isEmpty()) {
+            return error("供应商编码不能为空");
+        }
+        if (supplierName == null || supplierName.isEmpty()) {
+            return error("供应商名称不能为空");
+        }
+        if (password == null || password.isEmpty()) {
+            return error("密码不能为空");
+        }
         TbSupplier supplier = buildSupplier(params);
-        String password = (String) params.get("password");
         supplier.setCreateBy(getUsername());
         return toAjax(supplierAccountService.insertSupplierAccount(supplier, password));
     }

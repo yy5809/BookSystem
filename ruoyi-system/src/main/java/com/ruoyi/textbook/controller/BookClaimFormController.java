@@ -61,6 +61,12 @@ public class BookClaimFormController extends BaseController {
     @RateLimiter(count = 10, time = 60)
     @PutMapping("/confirmOutbound")
     public AjaxResult confirmOutbound(@RequestBody BookClaimForm bookClaimForm) {
+        if (bookClaimForm.getFormId() == null) {
+            return AjaxResult.error("领书单ID不能为空");
+        }
+        if (bookClaimForm.getIssuedQty() == null) {
+            return AjaxResult.error("出库数量不能为空");
+        }
         try {
             Long operatorId = SecurityUtils.getUserId();
             String operatorName = SecurityUtils.getUsername();
@@ -96,6 +102,7 @@ public class BookClaimFormController extends BaseController {
         try {
             BookClaimForm form = bookClaimFormService.selectBookClaimFormById(formId);
             if (form == null) {
+                response.setContentType("text/plain;charset=UTF-8");
                 response.setStatus(404);
                 response.getWriter().write("领书单不存在");
                 return;
@@ -107,7 +114,10 @@ public class BookClaimFormController extends BaseController {
             ClaimFormPdfUtil.generatePdf(form, details, response.getOutputStream());
         } catch (Exception e) {
             try {
-                response.reset();
+                if (!response.isCommitted()) {
+                    response.reset();
+                }
+                response.setContentType("text/plain;charset=UTF-8");
                 response.setStatus(500);
                 response.getWriter().write("PDF生成失败: " + e.getMessage());
             } catch (Exception ignored) {

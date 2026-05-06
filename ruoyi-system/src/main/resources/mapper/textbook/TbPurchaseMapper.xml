@@ -128,14 +128,7 @@
         <foreach item="buyId" collection="array" open="(" separator="," close=")">#{buyId}</foreach>
     </delete>
 
-    <update id="updateTbPurchaseStatus">
-        UPDATE textbook_buy SET audit_status=#{arg1} WHERE buy_id=#{arg0} AND del_flag='0'
-    </update>
-    <select id="selectTbPurchaseListByUserId" parameterType="Long" resultMap="TbPurchaseResult">
-        <include refid="selectTbPurchaseVo"/> AND t.user_id = #{userId} ORDER BY t.submit_time DESC
-    </select>
-
-    <!-- ========== 购书明细 SQL（之前缺失）========== -->
+    <!-- ========== 购书明细 SQL ========== -->
     <resultMap type="com.ruoyi.textbook.domain.TbPurchaseDetail" id="TbPurchaseDetailResult">
         <id property="detailId" column="detail_id"/>
         <result property="purchaseId" column="purchase_id"/>
