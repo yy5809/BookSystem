@@ -17,41 +17,6 @@ export function getInventoryInfo(id) {
   })
 }
 
-// 新增库存
-export function addInventory(data) {
-  return request({
-    url: '/textbook/inventory',
-    method: 'post',
-    data: data
-  })
-}
-
-// 修改库存
-export function updateInventory(data) {
-  return request({
-    url: '/textbook/inventory',
-    method: 'put',
-    data: data
-  })
-}
-
-// 删除库存
-export function deleteInventory(id) {
-  return request({
-    url: '/textbook/inventory/' + id,
-    method: 'delete'
-  })
-}
-
-// 批量删除库存
-export function deleteInventoryByIds(ids) {
-  return request({
-    url: '/textbook/inventory/batch',
-    method: 'delete',
-    data: ids
-  })
-}
-
 // 查询库存预警列表
 export function getInventoryWarningList() {
   return request({

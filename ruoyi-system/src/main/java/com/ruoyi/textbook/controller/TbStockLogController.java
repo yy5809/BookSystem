@@ -18,14 +18,14 @@ public class TbStockLogController extends BaseController {
     @Autowired
     private ITbStockLogService tbStockLogService;
 
-    @PreAuthorize("@ss.hasPermi('textbook:inventory:query')")
+    @PreAuthorize("@ss.hasPermi('textbook:stockFlow:list')")
     @GetMapping("/list")
     public TableDataInfo list(TbStockLog tbStockLog) {
         startPage();
         return getDataTable(tbStockLogService.selectList(tbStockLog));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:inventory:query')")
+    @PreAuthorize("@ss.hasPermi('textbook:stockFlow:list')")
     @GetMapping("/byBook/{bookId}")
     public TableDataInfo listByBookId(@PathVariable Long bookId) {
         startPage();
