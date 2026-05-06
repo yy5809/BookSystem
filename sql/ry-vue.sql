@@ -1,4 +1,4 @@
-/*
+﻿/*
  Navicat Premium Data Transfer
 
  Source Server         : localhost
@@ -1078,6 +1078,13 @@ INSERT INTO `sys_role_menu` VALUES (7, 2210);
 INSERT INTO `sys_role_menu` VALUES (7, 2211);
 INSERT INTO `sys_role_menu` VALUES (7, 2212);
 INSERT INTO `sys_role_menu` VALUES (7, 2213);
+INSERT INTO `sys_role_menu` VALUES (7, 2098);
+INSERT INTO `sys_role_menu` VALUES (7, 2099);
+INSERT INTO `sys_role_menu` VALUES (7, 2100);
+INSERT INTO `sys_role_menu` VALUES (7, 2101);
+INSERT INTO `sys_role_menu` VALUES (7, 2102);
+INSERT INTO `sys_role_menu` VALUES (7, 2103);
+INSERT INTO `sys_role_menu` VALUES (7, 2104);
 INSERT INTO `sys_role_menu` VALUES (7, 2230);
 INSERT INTO `sys_role_menu` VALUES (7, 2231);
 INSERT INTO `sys_role_menu` VALUES (7, 2232);

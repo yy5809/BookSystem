@@ -1,70 +1,56 @@
 <template>
-  <div class="supplier-purchase-detail">
-    <el-card>
+  <div class="app-container">
+    <el-row :gutter="10" class="mb8">
+      <el-col :span="1.5">
+        <el-button type="default" plain icon="el-icon-back" size="mini" @click="$router.push('/supplier/supplierPurchase')">返回</el-button>
+      </el-col>
+    </el-row>
+
+    <el-descriptions :column="2" border size="small">
+      <el-descriptions-item label="采购单号">{{ purchaseInfo.purchaseNo }}</el-descriptions-item>
+      <el-descriptions-item label="申请部门">{{ purchaseInfo.deptName }}</el-descriptions-item>
+      <el-descriptions-item label="状态">
+        <el-tag :type="statusType(purchaseInfo.purchaseStatus)" size="mini">{{ statusText(purchaseInfo.purchaseStatus) }}</el-tag>
+      </el-descriptions-item>
+      <el-descriptions-item label="创建时间">{{ purchaseInfo.createTime }}</el-descriptions-item>
+      <el-descriptions-item label="物流公司" v-if="purchaseInfo.logisticsCompany">{{ purchaseInfo.logisticsCompany }}</el-descriptions-item>
+      <el-descriptions-item label="物流单号" v-if="purchaseInfo.logisticsNo">{{ purchaseInfo.logisticsNo }}</el-descriptions-item>
+    </el-descriptions>
+
+    <el-card class="mt15">
       <template slot="header">
-        <span>采购单详情</span>
-        <el-button type="primary" size="small" @click="goBack" style="margin-left: 20px">返回列表</el-button>
+        <span>采购明细</span>
       </template>
-      
-      <el-form :model="purchaseInfo" label-width="120px" size="small">
-        <el-form-item label="采购单号">
-          <el-input v-model="purchaseInfo.purchaseNo" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="申请部门">
-          <el-input v-model="purchaseInfo.deptName" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-tag :type="getStatusType(purchaseInfo.purchaseStatus)">
-            {{ getStatusText(purchaseInfo.purchaseStatus) }}
-          </el-tag>
-        </el-form-item>
-        <el-form-item label="创建时间">
-          <el-input v-model="purchaseInfo.createTime" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="物流公司" v-if="purchaseInfo.logisticsCompany">
-          <el-input v-model="purchaseInfo.logisticsCompany" disabled></el-input>
-        </el-form-item>
-        <el-form-item label="物流单号" v-if="purchaseInfo.logisticsNo">
-          <el-input v-model="purchaseInfo.logisticsNo" disabled></el-input>
-        </el-form-item>
-      </el-form>
-      
-      <el-card class="purchase-details-card">
-        <template slot="header">
-          <span>采购明细</span>
-        </template>
-        <el-table :data="purchaseDetails" style="width: 100%" border stripe>
-          <el-table-column prop="bookName" label="教材名称"></el-table-column>
-          <el-table-column prop="isbn" label="ISBN" width="150"></el-table-column>
-          <el-table-column prop="quantity" label="数量" width="100"></el-table-column>
-        </el-table>
-      </el-card>
-      
-      <div class="action-buttons" v-if="purchaseInfo.purchaseStatus === '1' || purchaseInfo.purchaseStatus === '2'">
-        <el-button type="success" @click="handleAccept" v-if="purchaseInfo.purchaseStatus === '1'">确认接单</el-button>
-        <el-button type="primary" @click="confirmShipment" v-if="purchaseInfo.purchaseStatus === '2'">确认发货</el-button>
-      </div>
+      <el-table :data="purchaseDetails" border stripe>
+        <el-table-column label="教材名称" align="center" prop="bookName" min-width="180" show-overflow-tooltip />
+        <el-table-column label="ISBN" align="center" prop="isbn" width="150" />
+        <el-table-column label="数量" align="center" prop="quantity" width="80" />
+      </el-table>
     </el-card>
-    
-    <!-- 确认发货对话框 -->
-    <el-dialog title="确认发货" :visible.sync="shipmentDialogVisible" width="500px" :close-on-click-modal="false">
-      <el-form :model="shipmentForm" :rules="shipmentRules" ref="shipmentForm">
-        <el-form-item label="采购单号" prop="purchaseNo">
-          <el-input v-model="shipmentForm.purchaseNo" disabled></el-input>
+
+    <div style="text-align: right; margin-top: 15px;" v-if="purchaseInfo.purchaseStatus === '1' || purchaseInfo.purchaseStatus === '2'">
+      <el-button type="success" icon="el-icon-check" size="mini" @click="handleAccept" v-if="purchaseInfo.purchaseStatus === '1'">确认接单</el-button>
+      <el-button type="primary" icon="el-icon-truck" size="mini" @click="handleShipment" v-if="purchaseInfo.purchaseStatus === '2'">确认发货</el-button>
+    </div>
+
+    <el-dialog title="确认发货" :visible.sync="open" width="450px" append-to-body :close-on-click-modal="false">
+      <el-form ref="shipmentForm" :model="shipmentForm" :rules="shipmentRules" label-width="80px">
+        <el-form-item label="采购单号">
+          <el-input v-model="shipmentForm.purchaseNo" disabled />
         </el-form-item>
         <el-form-item label="物流公司" prop="logisticsCompany">
-          <el-input v-model="shipmentForm.logisticsCompany" placeholder="请输入物流公司"></el-input>
+          <el-input v-model="shipmentForm.logisticsCompany" placeholder="请输入物流公司" />
         </el-form-item>
         <el-form-item label="物流单号" prop="logisticsNo">
-          <el-input v-model="shipmentForm.logisticsNo" placeholder="请输入物流单号"></el-input>
+          <el-input v-model="shipmentForm.logisticsNo" placeholder="请输入物流单号" />
         </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="shipmentForm.remark" type="textarea" placeholder="请输入备注"></el-input>
+        <el-form-item label="备注">
+          <el-input v-model="shipmentForm.remark" type="textarea" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="shipmentDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitShipment">确认发货</el-button>
+        <el-button type="primary" @click="submitShipment">确 定</el-button>
+        <el-button @click="open = false">取 消</el-button>
       </div>
     </el-dialog>
   </div>
@@ -74,95 +60,70 @@
 import { getSupplierPurchaseDetail, acceptOrder, confirmShipment } from '@/api/textbook/supplier'
 
 export default {
-  name: 'SupplierPurchaseDetail',
+  name: "SupplierPurchaseDetail",
   data() {
     return {
       purchaseInfo: {},
       purchaseDetails: [],
-      shipmentDialogVisible: false,
+      open: false,
       shipmentForm: {
-        purchaseId: '',
+        purchaseId: undefined,
         purchaseNo: '',
-        logisticsCompany: '',
-        logisticsNo: '',
-        remark: ''
+        logisticsCompany: undefined,
+        logisticsNo: undefined,
+        remark: undefined
       },
       shipmentRules: {
-        logisticsCompany: [
-          { required: true, message: '请输入物流公司', trigger: 'blur' }
-        ],
-        logisticsNo: [
-          { required: true, message: '请输入物流单号', trigger: 'blur' }
-        ]
+        logisticsCompany: [{ required: true, message: '请输入物流公司', trigger: 'blur' }],
+        logisticsNo: [{ required: true, message: '请输入物流单号', trigger: 'blur' }]
       }
     }
   },
   created() {
-    this.getPurchaseDetail()
+    this.loadDetail()
   },
   methods: {
-    getPurchaseDetail() {
-      const purchaseId = this.$route.params.id
-      getSupplierPurchaseDetail(purchaseId).then(response => {
+    loadDetail() {
+      getSupplierPurchaseDetail(this.$route.params.id).then(response => {
         this.purchaseInfo = response.data
         this.purchaseDetails = response.data.details || []
       })
     },
-    goBack() {
-      this.$router.push('/supplier/supplierPurchase')
+    statusType(status) {
+      const m = { '0': 'info', '1': 'warning', '2': '', '3': '', '4': 'info', '5': 'success' }
+      return m[status] || 'info'
     },
-    getStatusType(status) {
-      const typeMap = {
-        '0': 'info',
-        '1': 'warning',
-        '2': 'success',
-        '3': '',
-        '4': 'info',
-        '5': 'success'
-      }
-      return typeMap[status] || 'info'
-    },
-    getStatusText(status) {
-      const textMap = {
-        '0': '待采购',
-        '1': '采购中',
-        '2': '已接单',
-        '3': '已发货',
-        '4': '已到货',
-        '5': '已入库'
-      }
-      return textMap[status] || '未知'
+    statusText(status) {
+      const m = { '0': '待采购', '1': '采购中', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }
+      return m[status] || '未知'
     },
     handleAccept() {
-      this.$confirm('确认接单该采购单？', '确认接单', {
-        confirmButtonText: '确认接单', cancelButtonText: '取消', type: 'success'
-      }).then(() => {
+      this.$modal.confirm('确认接单该采购单？').then(() => {
         return acceptOrder(this.purchaseInfo.buyId)
       }).then(() => {
-        this.$message.success('已接单')
-        this.getPurchaseDetail()
+        this.$modal.msgSuccess('已接单')
+        this.loadDetail()
       }).catch(() => {})
     },
-    confirmShipment() {
+    handleShipment() {
       this.shipmentForm = {
         purchaseId: this.purchaseInfo.buyId,
         purchaseNo: this.purchaseInfo.purchaseNo,
-        logisticsCompany: '',
-        logisticsNo: '',
-        remark: ''
+        logisticsCompany: undefined,
+        logisticsNo: undefined,
+        remark: undefined
       }
-      this.shipmentDialogVisible = true
+      this.resetForm("shipmentForm")
+      this.open = true
     },
     submitShipment() {
-      this.$refs.shipmentForm.validate((valid) => {
+      this.$refs["shipmentForm"].validate(valid => {
         if (valid) {
-          confirmShipment(this.shipmentForm).then(response => {
-            this.$message.success('发货确认成功')
-            this.shipmentDialogVisible = false
-            this.getPurchaseDetail()
-          }).catch(() => {
-            this.$message.error('发货确认失败')
-          })
+          confirmShipment(this.shipmentForm).then(() => {
+            this.$modal.msgSuccess('发货确认成功')
+            this.open = false
+            this.loadDetail()
+          }).catch(() => {})
         }
       })
     }
@@ -171,16 +132,5 @@ export default {
 </script>
 
 <style scoped>
-.supplier-purchase-detail {
-  padding: 20px;
-}
-
-.purchase-details-card {
-  margin-top: 20px;
-}
-
-.action-buttons {
-  margin-top: 20px;
-  text-align: right;
-}
+.mt15 { margin-top: 15px; }
 </style>

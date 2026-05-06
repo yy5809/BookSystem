@@ -1,52 +1,50 @@
 <template>
-  <div class="supplier-home">
-    <el-card class="stats-card">
-      <h3>供应商工作台</h3>
-      <div class="stats-grid">
-        <el-card class="stat-item">
-          <div class="stat-icon">
-            <i class="el-icon-message"></i>
+  <div class="app-container">
+    <el-row :gutter="10" class="mb8">
+      <el-col :span="1.5">
+        <el-button type="primary" plain icon="el-icon-bell" size="mini" @click="$router.push('/supplier/supplierNotice')">我的通知</el-button>
+      </el-col>
+      <el-col :span="1.5">
+        <el-button type="success" plain icon="el-icon-s-order" size="mini" @click="$router.push('/supplier/supplierPurchase')">我的采购单</el-button>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="20">
+      <el-col :span="8">
+        <div class="dashboard-card" style="background: #fdf6ec;">
+          <i class="el-icon-message dashboard-icon" style="color: #E6A23C;"></i>
+          <div class="dashboard-info">
+            <div class="dashboard-title">未读通知</div>
+            <div class="dashboard-num">{{ unreadNoticeCount }}</div>
           </div>
-          <div class="stat-info">
-            <h4>未读通知</h4>
-            <p class="stat-number">{{ unreadNoticeCount }}</p>
+        </div>
+      </el-col>
+      <el-col :span="8">
+        <div class="dashboard-card" style="background: #ecf5ff;">
+          <i class="el-icon-truck dashboard-icon" style="color: #409EFF;"></i>
+          <div class="dashboard-info">
+            <div class="dashboard-title">待确认发货</div>
+            <div class="dashboard-num">{{ pendingShipmentCount }}</div>
           </div>
-        </el-card>
-        <el-card class="stat-item">
-          <div class="stat-icon">
-            <i class="el-icon-sell"></i>
-          </div>
-          <div class="stat-info">
-            <h4>待确认发货</h4>
-            <p class="stat-number">{{ pendingShipmentCount }}</p>
-          </div>
-        </el-card>
-      </div>
-    </el-card>
-    
-    <el-card class="recent-purchases">
+        </div>
+      </el-col>
+    </el-row>
+
+    <el-card class="mt20">
       <template slot="header">
         <span>最近采购单</span>
-        <el-button type="primary" size="small" @click="goToPurchaseList">查看全部</el-button>
       </template>
-      <el-table :data="recentPurchases" style="width: 100%" border stripe>
-        <el-table-column prop="purchaseNo" label="采购单号" width="180"></el-table-column>
-        <el-table-column prop="purchaseStatus" label="状态">
+      <el-table :data="recentPurchases" border stripe v-loading="loading">
+        <el-table-column label="采购单号" align="center" prop="purchaseNo" width="200" show-overflow-tooltip />
+        <el-table-column label="状态" align="center" width="100">
           <template slot-scope="scope">
-            <el-tag :type="getStatusType(scope.row.purchaseStatus)">
-              {{ getStatusText(scope.row.purchaseStatus) }}
-            </el-tag>
+            <el-tag :type="statusType(scope.row.purchaseStatus)" size="mini">{{ statusText(scope.row.purchaseStatus) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="创建时间" width="180"></el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column label="创建时间" align="center" prop="createTime" width="160" />
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="100">
           <template slot-scope="scope">
-            <el-button type="primary" size="small" @click="viewPurchase(scope.row)" v-if="scope.row.purchaseStatus === '1'">
-              确认发货
-            </el-button>
-            <el-button type="info" size="small" @click="viewPurchase(scope.row)" v-else>
-              查看详情
-            </el-button>
+            <el-button size="mini" type="text" icon="el-icon-view" @click="viewPurchase(scope.row)">详情</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -58,104 +56,58 @@
 import { getSupplierDashboard, listSupplierPurchases } from '@/api/textbook/supplier'
 
 export default {
-  name: 'SupplierHome',
+  name: "SupplierHome",
   data() {
     return {
+      loading: false,
       unreadNoticeCount: 0,
       pendingShipmentCount: 0,
       recentPurchases: []
     }
   },
   created() {
-    this.loadDashboardData()
+    this.loadData()
   },
   methods: {
-    loadDashboardData() {
-      // 获取仪表盘数据
+    loadData() {
+      this.loading = true
       getSupplierDashboard().then(response => {
         this.unreadNoticeCount = response.unreadNoticeCount || 0
         this.pendingShipmentCount = response.pendingShipmentCount || 0
-      })
-      
-      // 获取最近采购单
+      }).catch(() => {})
       listSupplierPurchases({ pageSize: 5 }).then(response => {
         this.recentPurchases = response.rows || []
-      })
+        this.loading = false
+      }).catch(() => { this.loading = false })
     },
-    getStatusType(status) {
-      const typeMap = {
-        '0': 'info',
-        '1': 'warning',
-        '2': 'success',
-        '3': '',
-        '4': 'info',
-        '5': 'success'
-      }
-      return typeMap[status] || 'info'
+    statusType(status) {
+      const m = { '0': 'info', '1': 'warning', '2': '', '3': '', '4': 'info', '5': 'success' }
+      return m[status] || 'info'
     },
-    getStatusText(status) {
-      const textMap = {
-        '0': '待采购',
-        '1': '采购中',
-        '2': '已接单',
-        '3': '已发货',
-        '4': '已到货',
-        '5': '已入库'
-      }
-      return textMap[status] || '未知'
+    statusText(status) {
+      const m = { '0': '待采购', '1': '采购中', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }
+      return m[status] || '未知'
     },
     viewPurchase(purchase) {
       this.$router.push(`/supplier/supplierPurchase/${purchase.buyId}`)
-    },
-    goToPurchaseList() {
-      this.$router.push('/supplier/supplierPurchase')
     }
   }
 }
 </script>
 
 <style scoped>
-.supplier-home {
-  padding: 20px;
-}
-
-.stats-card {
-  margin-bottom: 20px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.stat-item {
+.dashboard-card {
   display: flex;
   align-items: center;
   padding: 20px;
+  border-radius: 4px;
+  margin-bottom: 10px;
 }
-
-.stat-icon {
-  font-size: 36px;
-  color: #409EFF;
+.dashboard-icon {
+  font-size: 40px;
   margin-right: 20px;
 }
-
-.stat-info h4 {
-  margin: 0 0 10px 0;
-  color: #606266;
-  font-size: 16px;
-}
-
-.stat-number {
-  margin: 0;
-  font-size: 24px;
-  font-weight: bold;
-  color: #303133;
-}
-
-.recent-purchases {
-  margin-top: 20px;
-}
+.dashboard-title { font-size: 14px; color: #606266; }
+.dashboard-num { font-size: 28px; font-weight: bold; color: #303133; }
+.mt20 { margin-top: 20px; }
 </style>

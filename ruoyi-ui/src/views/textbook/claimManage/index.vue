@@ -204,7 +204,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button type="primary" :loading="submitLoading" @click="submitOutbound">确认出库</el-button>
+        <el-button type="primary" @click="submitOutbound">确认出库</el-button>
         <el-button @click="outboundOpen = false">取 消</el-button>
       </div>
     </el-dialog>

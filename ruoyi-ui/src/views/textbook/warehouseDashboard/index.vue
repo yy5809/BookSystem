@@ -95,12 +95,8 @@
               <i class="el-icon-box"></i>
               <span>入库管理</span>
             </div>
-            <div class="action-item" @click="$router.push('/warehouse/claimManage')
+            <div class="action-item" @click="$router.push('/warehouse/claimManage')">
               <i class="el-icon-document"></i>
-              <span>领书管理</span>
-            </div>
-            <div class="action-item" @click="$router.push('/warehouse/claimManage')
-              <i class="el-icon-s-check"></i>
               <span>领书管理</span>
             </div>
             <div class="action-item" @click="$router.push('/warehouse/shortage')">

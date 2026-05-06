@@ -119,7 +119,7 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm" :loading="submitLoading">提 交</el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -314,11 +314,7 @@ export default {
       this.viewOpen = true;
     },
     handleCancel(row) {
-      this.$confirm('确认取消该领书申请?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
+      this.$modal.confirm('确认取消该领书申请?').then(() => {
         return cancelApply(row.applyId);
       }).then(() => {
         this.getList();

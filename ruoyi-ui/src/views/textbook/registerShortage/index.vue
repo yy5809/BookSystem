@@ -56,7 +56,7 @@
         <el-form-item label="紧急程度" prop="urgency"><el-radio-group v-model="form.urgency"><el-radio label="0">普通</el-radio><el-radio label="1">紧急</el-radio><el-radio label="2">特急</el-radio></el-radio-group></el-form-item>
         <el-form-item label="备注说明" prop="remark"><el-input v-model="form.remark" type="textarea" placeholder="请输入缺书原因或补充说明" :rows="3" /></el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer"><el-button type="primary" @click="submitForm" :loading="submitLoading">确 定</el-button><el-button @click="cancel">取 消</el-button></div>
+      <div slot="footer" class="dialog-footer"><el-button type="primary" @click="submitForm">确 定</el-button><el-button @click="cancel">取 消</el-button></div>
     </el-dialog>
 
     <el-dialog title="缺书详情" :visible.sync="viewOpen" width="600px" append-to-body>

@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-container">
+  <div class="app-container">
     <el-row :gutter="20">
       <el-col :span="6" :xs="24">
         <div class="dashboard-card">
@@ -151,46 +151,44 @@ export default {
 </script>
 
 <style scoped>
-.dashboard-container { padding: 20px; }
 .dashboard-card {
   display: flex;
   align-items: center;
   padding: 20px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  margin-bottom: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 15px;
 }
 .card-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 28px;
+  font-size: 24px;
   flex-shrink: 0;
-  margin-right: 16px;
+  margin-right: 14px;
 }
 .card-info { flex: 1; }
-.card-title { font-size: 14px; color: #909399; margin-bottom: 4px; }
-.card-number { font-size: 28px; font-weight: bold; color: #303133; line-height: 1.2; }
+.card-title { font-size: 13px; color: #909399; margin-bottom: 4px; }
+.card-number { font-size: 26px; font-weight: bold; color: #303133; line-height: 1.2; }
 .card-desc { font-size: 12px; color: #C0C4CC; margin-top: 4px; }
 
-.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .action-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 18px 10px;
+  padding: 16px 10px;
   background: #f5f7fa;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s;
 }
-.action-item:hover { background: #e6e8eb; transform: translateY(-2px); }
-.action-item i { font-size: 24px; color: #409EFF; margin-bottom: 8px; }
+.action-item:hover { background: #e6e8eb; }
+.action-item i { font-size: 22px; color: #409EFF; margin-bottom: 6px; }
 .action-item span { font-size: 13px; color: #303133; }
 </style>
