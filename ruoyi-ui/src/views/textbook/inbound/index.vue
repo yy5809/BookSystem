@@ -31,7 +31,7 @@
       </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createTime" width="160" />
       <el-table-column label="到货时间" align="center" prop="receiveTime" width="160" />
-      <el-table-column label="操作" align="center" width="160">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="160">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)" v-hasPermi="['textbook:inbound:query']">详情</el-button>
           <el-button size="mini" type="text" icon="el-icon-box-plug" @click="handleInbound(scope.row)" v-if="scope.row.status === '4'" v-hasPermi="['textbook:inbound:add']">确认入库</el-button>
@@ -122,9 +122,7 @@ export default {
       });
     },
     handleInbound(row) {
-      this.$confirm('确认将采购单 ' + row.purchaseNo + ' 验收入库？库存将自动增加。', '确认入库', {
-        confirmButtonText: '确认入库', cancelButtonText: '取消', type: 'success'
-      }).then(() => {
+      this.$modal.confirm('确认将采购单 ' + row.purchaseNo + ' 验收入库？库存将自动增加。').then(() => {
         return confirmInbound(row.buyId);
       }).then(() => {
         this.$modal.msgSuccess('已验收入库，库存已更新');

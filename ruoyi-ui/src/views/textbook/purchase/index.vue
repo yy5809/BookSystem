@@ -23,7 +23,7 @@
           </template>
         </el-table-column>
         <el-table-column label="提交时间" prop="submitTime" width="160" align="center"/>
-        <el-table-column label="操作" align="center" width="380">
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="380">
           <template slot-scope="scope">
             <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
             <el-button size="mini" type="text" icon="el-icon-check" style="color:#67C23A" @click="handleAudit(scope.row)" v-if="scope.row.auditStatus === '0'" v-hasRole="['admin','warehouse']">通过</el-button>
@@ -328,11 +328,7 @@ export default {
       this.$router.push({ path: '/warehouse/purchase/detail', query: { id: row.buyId } })
     },
     handleAudit(row) {
-      this.$confirm('确认审核通过采购单 ' + row.purchaseNo + ' ？', '审核通过', {
-        confirmButtonText: '确定通过',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
+      this.$modal.confirm('确认审核通过采购单 ' + row.purchaseNo + ' ？').then(() => {
         return auditPurchase({ buyId: row.buyId, status: '1' })
       }).then(() => {
         this.$modal.msgSuccess('审核通过')
@@ -373,9 +369,7 @@ export default {
       }).catch(() => {})
     },
     handleConfirmArrived(row) {
-      this.$confirm('确认采购单 ' + row.purchaseNo + ' 已到货？', '确认到货', {
-        confirmButtonText: '确认到货', cancelButtonText: '取消', type: 'success'
-      }).then(() => {
+      this.$modal.confirm('确认采购单 ' + row.purchaseNo + ' 已到货？').then(() => {
         return confirmArrived(row.buyId)
       }).then(() => {
         this.$modal.msgSuccess('已确认到货')
@@ -383,9 +377,7 @@ export default {
       }).catch(() => {})
     },
     handleConfirmInbound(row) {
-      this.$confirm('确认将采购单 ' + row.purchaseNo + ' 的教材验收入库？入库后将增加库存。', '确认入库', {
-        confirmButtonText: '确认入库', cancelButtonText: '取消', type: 'success'
-      }).then(() => {
+      this.$modal.confirm('确认将采购单 ' + row.purchaseNo + ' 的教材验收入库？入库后将增加库存。').then(() => {
         return confirmInbound(row.buyId)
       }).then(() => {
         this.$modal.msgSuccess('已验收入库，库存已更新')

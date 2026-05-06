@@ -2,10 +2,10 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="教材名称" prop="bookName">
-        <el-input v-model="queryParams.bookName" placeholder="请输入教材名称" clearable @keyup.enter.native="handleQuery" />
+        <el-input v-model="queryParams.bookName" placeholder="请输入教材名�? clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+      <el-form-item label="状�? prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状�? clearable>
           <el-option v-for="dict in dict.type.tb_personal_apply_status" :key="dict.value" :label="dict.label" :value="dict.value" />
         </el-select>
       </el-form-item>
@@ -27,8 +27,8 @@
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip />
       <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
       <el-table-column label="申请数量" align="center" prop="applyQty" width="80" />
-      <el-table-column label="用途说明" align="center" prop="purpose" show-overflow-tooltip />
-      <el-table-column label="状态" align="center" prop="status" width="90">
+      <el-table-column label="用途说�? align="center" prop="purpose" show-overflow-tooltip />
+      <el-table-column label="状�? align="center" prop="status" width="90">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.tb_personal_apply_status" :value="scope.row.status" />
         </template>
@@ -51,37 +51,37 @@
     <el-dialog title="提交领书申请" :visible.sync="open" width="700px" append-to-body :close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="选择教材" prop="textbookId">
-          <el-select v-model="form.textbookId" filterable remote reserve-keyword :remote-method="searchBook" :loading="bookSearching" placeholder="输入ISBN或书名搜索" style="width: 100%" @change="handleBookSelect">
+          <el-select v-model="form.textbookId" filterable remote reserve-keyword :remote-method="searchBook" :loading="bookSearching" placeholder="输入ISBN或书名搜�? style="width: 100%" @change="handleBookSelect">
             <el-option v-for="book in bookOptions" :key="book.bookId" :label="book.isbn + ' - ' + book.bookName + (book.author ? ' - ' + book.author : '')" :value="book.bookId" />
           </el-select>
         </el-form-item>
         <div v-if="bookOptions.length === 0 && searchKeyword && !bookSearching" style="margin: -10px 0 10px 100px;">
-          <el-button type="text" icon="el-icon-plus" @click="showQuickAdd = true" style="color: #E6A23C;">该教材不存在，点击快速新增</el-button>
+          <el-button type="text" icon="el-icon-plus" @click="showQuickAdd = true" style="color: #E6A23C;">该教材不存在，点击快速新�?/el-button>
         </div>
 
         <el-card v-if="showQuickAdd" shadow="hover" style="margin-bottom: 15px;">
-          <div slot="header"><span>快速新增教材</span></div>
+          <div slot="header"><span>快速新增教�?/span></div>
           <el-form ref="quickAddForm" :model="quickAddForm" :rules="quickAddRules" label-width="80px" size="small">
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="ISBN" prop="isbn">
-                  <el-input v-model="quickAddForm.isbn" placeholder="10位或13位数字" />
+                  <el-input v-model="quickAddForm.isbn" placeholder="10位或13位数�? />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="书名" prop="bookName">
-                  <el-input v-model="quickAddForm.bookName" placeholder="请输入书名" />
+                  <el-input v-model="quickAddForm.bookName" placeholder="请输入书�? />
                 </el-form-item>
               </el-col>
             </el-row>
             <el-row :gutter="20">
               <el-col :span="12">
-                <el-form-item label="作者" prop="author">
-                  <el-input v-model="quickAddForm.author" placeholder="请输入作者" />
+                <el-form-item label="作�? prop="author">
+                  <el-input v-model="quickAddForm.author" placeholder="请输入作�? />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="出版社">
+                <el-form-item label="出版�?>
                   <el-input v-model="quickAddForm.publisher" placeholder="选填" />
                 </el-form-item>
               </el-col>
@@ -100,11 +100,11 @@
             </el-row>
           </el-form>
           <el-alert type="info" :closable="false" style="margin-top: 10px;">
-            <template slot="default">快速新增的教材信息不完整，库管员后续会补充完善。</template>
+            <template slot="default">快速新增的教材信息不完整，库管员后续会补充完善�?/template>
           </el-alert>
           <div style="text-align: right; margin-top: 10px;">
             <el-button size="small" @click="showQuickAdd = false">取消新增</el-button>
-            <el-button type="primary" size="small" @click="handleQuickAdd" :loading="quickAddLoading">确认新增并继续</el-button>
+            <el-button type="primary" size="small" @click="handleQuickAdd" :loading="quickAddLoading">确认新增并继�?/el-button>
           </div>
         </el-card>
 
@@ -114,33 +114,33 @@
         <el-form-item label="申请数量" prop="applyQty">
           <el-input-number v-model="form.applyQty" :min="1" :max="9999" />
         </el-form-item>
-        <el-form-item label="用途说明" prop="purpose">
-          <el-input v-model="form.purpose" type="textarea" placeholder="请输入申请原因/用途（如：教学参考、个人学习等）" :rows="3" />
+        <el-form-item label="用途说�? prop="purpose">
+          <el-input v-model="form.purpose" type="textarea" placeholder="请输入申请原�?用途（如：教学参考、个人学习等�? :rows="3" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="submitForm">�?�?/el-button>
+        <el-button @click="cancel">�?�?/el-button>
       </div>
     </el-dialog>
 
     <el-dialog title="申请详情" :visible.sync="viewOpen" width="650px" append-to-body>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="申请编号">{{ viewData.applyNo }}</el-descriptions-item>
-        <el-descriptions-item label="状态">
+        <el-descriptions-item label="状�?>
           <dict-tag :options="dict.type.tb_personal_apply_status" :value="viewData.status" />
         </el-descriptions-item>
         <el-descriptions-item label="教材名称" :span="2">{{ viewData.bookName }}</el-descriptions-item>
         <el-descriptions-item label="ISBN" :span="2">{{ viewData.isbn }}</el-descriptions-item>
-        <el-descriptions-item label="申请数量">{{ viewData.applyQty }} 本</el-descriptions-item>
-        <el-descriptions-item label="用途说明" :span="2">{{ viewData.purpose || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="审核人">{{ viewData.auditBy || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="申请数量">{{ viewData.applyQty }} �?/el-descriptions-item>
+        <el-descriptions-item label="用途说�? :span="2">{{ viewData.purpose || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="审核�?>{{ viewData.auditBy || '-' }}</el-descriptions-item>
         <el-descriptions-item label="审核时间">{{ viewData.auditTime || '-' }}</el-descriptions-item>
         <el-descriptions-item label="审核意见" :span="2">{{ viewData.auditOpinion || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="出库时间" :span="2">{{ viewData.issueTime || '未出库' }}</el-descriptions-item>
+        <el-descriptions-item label="出库时间" :span="2">{{ viewData.issueTime || '未出�? }}</el-descriptions-item>
       </el-descriptions>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="viewOpen = false">关 闭</el-button>
+        <el-button @click="viewOpen = false">�?�?/el-button>
       </div>
     </el-dialog>
   </div>
@@ -156,7 +156,6 @@ export default {
   data() {
     return {
       loading: true,
-      submitLoading: false,
       quickAddLoading: false,
       bookSearching: false,
       total: 0,
@@ -185,16 +184,16 @@ export default {
       },
       rules: {
         textbookId: [{ required: true, message: "请选择教材", trigger: "change" }],
-        applyQty: [{ required: true, message: "请输入申请数量", trigger: "blur" }],
-        purpose: [{ required: true, message: "请输入用途说明", trigger: "blur" }]
+        applyQty: [{ required: true, message: "请输入申请数�?, trigger: "blur" }],
+        purpose: [{ required: true, message: "请输入用途说�?, trigger: "blur" }]
       },
       quickAddRules: {
         isbn: [
           { required: true, message: '请输入ISBN', trigger: 'blur' },
-          { pattern: /^(\d{10}|\d{13})$/, message: 'ISBN格式不正确（10或13位数字）', trigger: 'blur' }
+          { pattern: /^(\d{10}|\d{13})$/, message: 'ISBN格式不正确（10�?3位数字）', trigger: 'blur' }
         ],
-        bookName: [{ required: true, message: '请输入书名', trigger: 'blur' }],
-        author: [{ required: true, message: '请输入作者', trigger: 'blur' }]
+        bookName: [{ required: true, message: '请输入书�?, trigger: 'blur' }],
+        author: [{ required: true, message: '请输入作�?, trigger: 'blur' }]
       }
     };
   },
@@ -251,7 +250,7 @@ export default {
         if (valid) {
           this.quickAddLoading = true;
           quickAddBook(this.quickAddForm).then(res => {
-            this.$modal.msgSuccess("教材快速新增成功");
+            this.$modal.msgSuccess("教材快速新增成�?);
             this.showQuickAdd = false;
             const newBook = res.data;
             this.bookOptions.push(newBook);
@@ -298,13 +297,11 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          this.submitLoading = true;
           addPersonalApply(this.form).then(response => {
             this.$modal.msgSuccess("申请提交成功，等待库管员审核");
             this.open = false;
             this.getList();
           }).finally(() => {
-            this.submitLoading = false;
           });
         }
       });
@@ -314,11 +311,11 @@ export default {
       this.viewOpen = true;
     },
     handleCancel(row) {
-      this.$modal.confirm('确认取消该领书申请?').then(() => {
+      this.$modal.confirm('确认取消该领书申�?').then(() => {
         return cancelApply(row.applyId);
       }).then(() => {
         this.getList();
-        this.$modal.msgSuccess("已取消");
+        this.$modal.msgSuccess("已取�?);
       });
     },
     handleReapply(row) {

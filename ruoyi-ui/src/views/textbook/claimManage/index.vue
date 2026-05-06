@@ -5,12 +5,12 @@
       <el-tab-pane label="班级领书" name="class">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="学期" prop="semester">
-        <el-input v-model="queryParams.semester" placeholder="如 2025-2026-2" clearable @keyup.enter.native="handleQuery" />
+        <el-input v-model="queryParams.semester" placeholder="�?2025-2026-2" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
+      <el-form-item label="状�? prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择" clearable>
-          <el-option label="进行中" value="1" />
-          <el-option label="已完成" value="3" />
+          <el-option label="进行�? value="1" />
+          <el-option label="已完�? value="3" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -37,13 +37,13 @@
               </el-table-column>
               <el-table-column label="应发" prop="plannedQty" width="55" align="center" />
               <el-table-column label="已发" prop="issuedQty" width="55" align="center" />
-              <el-table-column label="状态" width="70" align="center">
+              <el-table-column label="状�? width="70" align="center">
                 <template slot-scope="s">
-                  <el-tag :type="s.row.status==='2'?'success':s.row.status==='1'?'warning':''" size="mini">{{ s.row.status==='2'?'已出库':s.row.status==='1'?'部分':'待领' }}</el-tag>
+                  <el-tag :type="s.row.status==='2'?'success':s.row.status==='1'?'warning':''" size="mini">{{ s.row.status==='2'?'已出�?:s.row.status==='1'?'部分':'待领' }}</el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="领书人" prop="receiverName" width="65" />
-              <el-table-column label="操作" width="155" align="center">
+              <el-table-column label="领书�? prop="receiverName" width="65" />
+              <el-table-column label="操作" class-name="small-padding fixed-width" width="155" align="center">
                 <template slot-scope="s">
                   <el-button size="mini" type="text" icon="el-icon-view" @click.stop="viewFormDetail(s.row)" v-hasPermi="['textbook:noticeManage:query']">明细</el-button>
                   <el-button size="mini" type="text" icon="el-icon-sold-out" @click.stop="handleOutbound(s.row)" v-if="s.row.status !== '2'" v-hasPermi="['textbook:claimForm:outbound']">出库</el-button>
@@ -51,7 +51,7 @@
                 </template>
               </el-table-column>
             </el-table>
-            <el-empty v-else description="暂无领书单" :image-size="60" />
+            <el-empty v-else description="暂无领书�? :image-size="60" />
           </div>
         </template>
       </el-table-column>
@@ -61,16 +61,16 @@
         <template slot-scope="s">{{ (s.row.pickupStart||'') + ' ~ ' + (s.row.pickupEnd||'') }}</template>
       </el-table-column>
       <el-table-column label="领取地点" prop="pickupLocation" show-overflow-tooltip />
-      <el-table-column label="状态" width="80" align="center">
+      <el-table-column label="状�? width="80" align="center">
         <template slot-scope="s">
-          <el-tag :type="s.row.status==='3'?'success':''" size="small">{{ s.row.status==='3'?'已完成':'进行中' }}</el-tag>
+          <el-tag :type="s.row.status==='3'?'success':''" size="small">{{ s.row.status==='3'?'已完�?:'进行�? }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="班级进度" width="100" align="center">
         <template slot-scope="s">{{ s.row.issuedClasses||0 }} / {{ s.row.totalClasses||0 }}</template>
       </el-table-column>
       <el-table-column label="创建时间" prop="createTime" width="160" />
-      <el-table-column label="操作" width="140" align="center" fixed="right">
+      <el-table-column label="操作" class-name="small-padding fixed-width" width="140" align="center" fixed="right">
         <template slot-scope="scope">
           <el-button size="mini" type="danger" icon="el-icon-delete" @click.stop="handleDelete(scope.row)" v-hasPermi="['textbook:noticeManage:remove']">删除</el-button>
         </template>
@@ -84,19 +84,19 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="学期" prop="semester">
-              <el-input v-model="form.semester" placeholder="如 2025-2026-2" />
+              <el-input v-model="form.semester" placeholder="�?2025-2026-2" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="领取地点" prop="pickupLocation">
-              <el-input v-model="form.pickupLocation" placeholder="如 图书馆一楼大厅" />
+              <el-input v-model="form.pickupLocation" placeholder="�?图书馆一楼大�? />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="领取开始" prop="pickupStart">
-              <el-date-picker v-model="form.pickupStart" type="datetime" placeholder="选择开始时间" value-format="yyyy-MM-dd HH:mm:ss" style="width:100%" />
+            <el-form-item label="领取开�? prop="pickupStart">
+              <el-date-picker v-model="form.pickupStart" type="datetime" placeholder="选择开始时�? value-format="yyyy-MM-dd HH:mm:ss" style="width:100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -120,19 +120,19 @@
             <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip/>
             <el-table-column label="ISBN" prop="isbn" width="150"/>
             <el-table-column label="数量" prop="plannedQty" width="80" align="center"/>
-            <el-table-column label="操作" width="140" align="center">
+            <el-table-column label="操作" class-name="small-padding fixed-width" width="140" align="center">
               <template slot-scope="scope">
                 <el-button type="primary" size="mini" @click="editDetail(scope.$index)"><i class="el-icon-edit"></i></el-button>
                 <el-button type="danger" size="mini" @click="removeDetail(scope.$index)"><i class="el-icon-delete"></i></el-button>
               </template>
             </el-table-column>
           </el-table>
-          <el-alert v-else type="info" title="请添加领书明细" :closable="false"/>
+          <el-alert v-else type="info" title="请添加领书明�? :closable="false"/>
         </el-form-item>
       </el-form>
       <div slot="footer">
         <el-button type="primary" @click="submitForm">保存并生成领书单</el-button>
-        <el-button @click="open = false">取 消</el-button>
+        <el-button @click="open = false">�?�?/el-button>
       </div>
     </el-dialog>
 
@@ -150,10 +150,10 @@
           </el-select>
         </el-form-item>
         <el-form-item label="年级">
-          <el-input v-model="detailForm.grade" placeholder="如：2024级" />
+          <el-input v-model="detailForm.grade" placeholder="如：2024�? />
         </el-form-item>
         <el-form-item label="班级">
-          <el-input v-model="detailForm.className" placeholder="如：1班" />
+          <el-input v-model="detailForm.className" placeholder="如：1�? />
         </el-form-item>
         <el-form-item label="教材" prop="textbookIds">
           <el-select v-model="detailForm.textbookIds" placeholder="选择教材（可多选）" style="width:100%" filterable multiple collapse-tags>
@@ -165,13 +165,13 @@
         </el-form-item>
       </el-form>
       <div slot="footer">
-        <el-button type="primary" @click="confirmAddDetail">确 定</el-button>
-        <el-button @click="detailDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="confirmAddDetail">�?�?/el-button>
+        <el-button @click="detailDialogVisible = false">�?�?/el-button>
       </div>
     </el-dialog>
 
-    <!-- 领书单明细弹窗 -->
-    <el-dialog title="领书单明细" :visible.sync="formDetailVisible" width="800px" append-to-body>
+    <!-- 领书单明细弹�?-->
+    <el-dialog title="领书单明�? :visible.sync="formDetailVisible" width="800px" append-to-body>
       <el-descriptions :column="2" border>
         <el-descriptions-item label="领书单号">{{ formDetailData.formNo }}</el-descriptions-item>
         <el-descriptions-item label="班级">{{ formDetailData.collegeName }} {{ formDetailData.majorName }} {{ formDetailData.className }}</el-descriptions-item>
@@ -184,7 +184,7 @@
         <el-table-column label="应发" prop="plannedQty" width="70" align="center" />
         <el-table-column label="已发" prop="issuedQty" width="70" align="center" />
       </el-table>
-      <div slot="footer"><el-button @click="formDetailVisible = false">关 闭</el-button></div>
+      <div slot="footer"><el-button @click="formDetailVisible = false">�?�?/el-button></div>
     </el-dialog>
 
     <!-- 确认出库弹窗 -->
@@ -199,13 +199,13 @@
         <el-form-item label="实发数量" required>
           <el-input-number v-model="outboundForm.issuedQty" :min="1" :max="outboundForm.plannedQty - (outboundForm._origIssued||0)" />
         </el-form-item>
-        <el-form-item label="领书人" required>
+        <el-form-item label="领书�? required>
           <el-input v-model="outboundForm.receiverName" placeholder="班委姓名" />
         </el-form-item>
       </el-form>
       <div slot="footer">
         <el-button type="primary" @click="submitOutbound">确认出库</el-button>
-        <el-button @click="outboundOpen = false">取 消</el-button>
+        <el-button @click="outboundOpen = false">�?�?/el-button>
       </div>
     </el-dialog>
       </el-tab-pane>
@@ -214,13 +214,13 @@
       <el-tab-pane label="个人领书申请" name="personal">
         <el-form :model="paParams" ref="paQueryForm" size="small" :inline="true" label-width="68px">
           <el-form-item label="申请编号"><el-input v-model="paParams.applyNo" placeholder="申请编号" clearable @keyup.enter.native="getPaList"/></el-form-item>
-          <el-form-item label="申请人"><el-input v-model="paParams.teacherName" placeholder="申请人" clearable @keyup.enter.native="getPaList"/></el-form-item>
-          <el-form-item label="状态">
+          <el-form-item label="申请�?><el-input v-model="paParams.teacherName" placeholder="申请�? clearable @keyup.enter.native="getPaList"/></el-form-item>
+          <el-form-item label="状�?>
             <el-select v-model="paParams.status" placeholder="请选择" clearable>
-              <el-option label="待审核" value="0"/>
+              <el-option label="待审�? value="0"/>
               <el-option label="已通过" value="1"/>
-              <el-option label="已驳回" value="2"/>
-              <el-option label="已出库" value="3"/>
+              <el-option label="已驳�? value="2"/>
+              <el-option label="已出�? value="3"/>
             </el-select>
           </el-form-item>
           <el-form-item>
@@ -231,19 +231,19 @@
 
         <el-table v-loading="paLoading" :data="paList" border stripe>
           <el-table-column label="申请编号" prop="applyNo" width="200"/>
-          <el-table-column label="申请人" prop="teacherName" width="100"/>
+          <el-table-column label="申请�? prop="teacherName" width="100"/>
           <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip/>
           <el-table-column label="ISBN" prop="isbn" width="150"/>
           <el-table-column label="数量" prop="applyQty" width="70" align="center"/>
-          <el-table-column label="用途" prop="purpose" show-overflow-tooltip width="120"/>
-          <el-table-column label="状态" width="80" align="center">
+          <el-table-column label="用�? prop="purpose" show-overflow-tooltip width="120"/>
+          <el-table-column label="状�? width="80" align="center">
             <template slot-scope="s">
               <el-tag :type="paStatusType(s.row.status)" size="small">{{ paStatusText(s.row.status) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column label="审核意见" prop="auditOpinion" show-overflow-tooltip width="120"/>
           <el-table-column label="申请时间" prop="createTime" width="160"/>
-          <el-table-column label="操作" width="160" align="center">
+          <el-table-column label="操作" class-name="small-padding fixed-width" width="160" align="center">
             <template slot-scope="s">
               <el-button size="mini" type="text" icon="el-icon-view" @click="paView(s.row)">详情</el-button>
               <el-button size="mini" type="text" icon="el-icon-check" style="color:#67C23A" @click="paAudit(s.row)" v-if="s.row.status==='0'" v-hasPermi="['textbook:personalApply:audit']">审核</el-button>
@@ -256,10 +256,10 @@
         <!-- 个人领书审核弹窗 -->
         <el-dialog title="审核申请" :visible.sync="paAuditOpen" width="500px" append-to-body>
           <el-descriptions :column="1" border>
-            <el-descriptions-item label="申请人">{{ paForm.teacherName }}</el-descriptions-item>
+            <el-descriptions-item label="申请�?>{{ paForm.teacherName }}</el-descriptions-item>
             <el-descriptions-item label="教材">{{ paForm.bookName }}</el-descriptions-item>
-            <el-descriptions-item label="数量">{{ paForm.applyQty }} 本</el-descriptions-item>
-            <el-descriptions-item label="用途">{{ paForm.purpose || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="数量">{{ paForm.applyQty }} �?/el-descriptions-item>
+            <el-descriptions-item label="用�?>{{ paForm.purpose || '-' }}</el-descriptions-item>
           </el-descriptions>
           <el-form ref="paAuditForm" :model="paForm" label-width="80px" style="margin-top:15px">
             <el-form-item label="审核结果" required>
@@ -276,31 +276,31 @@
             </el-form-item>
             <template v-if="paForm.status==='2' && paForm.registerShortage">
               <el-form-item label="缺书数量"><el-input-number v-model="paForm.shortageQty" :min="1"/></el-form-item>
-              <el-form-item label="紧急程度">
-                <el-select v-model="paForm.shortageUrgency"><el-option label="普通" value="0"/><el-option label="紧急" value="1"/><el-option label="特急" value="2"/></el-select>
+              <el-form-item label="紧急程�?>
+                <el-select v-model="paForm.shortageUrgency"><el-option label="普�? value="0"/><el-option label="紧�? value="1"/><el-option label="特�? value="2"/></el-select>
               </el-form-item>
               <el-form-item label="缺书备注"><el-input v-model="paForm.shortageRemark"/></el-form-item>
             </template>
           </el-form>
-          <div slot="footer"><el-button type="primary" @click="paSubmitAudit">确 定</el-button><el-button @click="paAuditOpen=false">取 消</el-button></div>
+          <div slot="footer"><el-button type="primary" @click="paSubmitAudit">�?�?/el-button><el-button @click="paAuditOpen=false">�?�?/el-button></div>
         </el-dialog>
 
         <!-- 个人领书详情弹窗 -->
         <el-dialog title="申请详情" :visible.sync="paViewOpen" width="550px" append-to-body>
           <el-descriptions :column="2" border>
             <el-descriptions-item label="申请编号" :span="2">{{ paForm.applyNo }}</el-descriptions-item>
-            <el-descriptions-item label="申请人">{{ paForm.teacherName }}</el-descriptions-item>
+            <el-descriptions-item label="申请�?>{{ paForm.teacherName }}</el-descriptions-item>
             <el-descriptions-item label="教材">{{ paForm.bookName }}</el-descriptions-item>
             <el-descriptions-item label="ISBN">{{ paForm.isbn }}</el-descriptions-item>
             <el-descriptions-item label="数量">{{ paForm.applyQty }}</el-descriptions-item>
-            <el-descriptions-item label="用途" :span="2">{{ paForm.purpose || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="状态">{{ paStatusText(paForm.status) }}</el-descriptions-item>
+            <el-descriptions-item label="用�? :span="2">{{ paForm.purpose || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="状�?>{{ paStatusText(paForm.status) }}</el-descriptions-item>
             <el-descriptions-item label="审核意见">{{ paForm.auditOpinion || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="审核人">{{ paForm.auditBy || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="审核�?>{{ paForm.auditBy || '-' }}</el-descriptions-item>
             <el-descriptions-item label="审核时间">{{ paForm.auditTime || '-' }}</el-descriptions-item>
             <el-descriptions-item label="出库时间">{{ paForm.issueTime || '-' }}</el-descriptions-item>
           </el-descriptions>
-          <div slot="footer"><el-button @click="paViewOpen=false">关 闭</el-button></div>
+          <div slot="footer"><el-button @click="paViewOpen=false">�?�?/el-button></div>
         </el-dialog>
       </el-tab-pane>
     </el-tabs>
@@ -323,7 +323,6 @@ export default {
       editingIndex: -1,
       formDetailVisible: false,
       outboundOpen: false,
-      submitLoading: false,
       formDetailData: {},
       formDetails: [],
       outboundForm: {},
@@ -334,15 +333,15 @@ export default {
       detailRules: {
         collegeId: [{ required: true, message: '请选择学院', trigger: 'change' }],
         majorId: [{ required: true, message: '请选择专业', trigger: 'change' }],
-        textbookIds: [{ required: true, message: '请至少选择一本教材', trigger: 'change' }],
-        plannedQty: [{ required: true, message: '请输入数量', trigger: 'blur' }]
+        textbookIds: [{ required: true, message: '请至少选择一本教�?, trigger: 'change' }],
+        plannedQty: [{ required: true, message: '请输入数�?, trigger: 'blur' }]
       },
       queryParams: { pageNum: 1, pageSize: 10, semester: null, status: null },
       form: { noticeId: null, semester: '', pickupLocation: '', pickupStart: '', pickupEnd: '', remark: '', details: [] },
       rules: {
-        semester: [{ required: true, message: '请输入学期', trigger: 'blur' }],
-        pickupLocation: [{ required: true, message: '请输入领取地点', trigger: 'blur' }],
-        pickupStart: [{ required: true, message: '请选择开始时间', trigger: 'change' }],
+        semester: [{ required: true, message: '请输入学�?, trigger: 'blur' }],
+        pickupLocation: [{ required: true, message: '请输入领取地�?, trigger: 'blur' }],
+        pickupStart: [{ required: true, message: '请选择开始时�?, trigger: 'change' }],
         pickupEnd: [{ required: true, message: '请选择结束时间', trigger: 'change' }]
       },
       activeTab: 'class',
@@ -391,7 +390,7 @@ export default {
         }).catch(() => { this.$set(row, '_loading', false) })
       }
     },
-    handleDelete(row) { this.$confirm('删除该批次？相关领书单也需要删除', '确认').then(() => delNotice(row.noticeId).then(() => { this.$modal.msgSuccess('已删除'); this.getList() })).catch(() => {}) },
+    handleDelete(row) { this.$modal.confirm('删除该批次？相关领书单也需要删�?).then(() => delNotice(row.noticeId).then(() => { this.$modal.msgSuccess('已删�?); this.getList() })).catch(()=>{}) },
     handleCollegeChange() {
       if (this.detailForm.collegeId) {
         getMajors(this.detailForm.collegeId).then(res => { this.majors = res.data || []; this.detailForm.majorId = undefined })
@@ -428,16 +427,16 @@ export default {
             if (this.editingIndex >= 0) {
               const b = this.books.find(x => x.bookId === this.detailForm.textbookIds[0])
               if (b) this.form.details[this.editingIndex] = { collegeId: college.id, majorId: major.id, textbookId: b.bookId, plannedQty: this.detailForm.plannedQty, collegeName: college.name, majorName: major.name, grade: this.detailForm.grade||'', className: this.detailForm.className||'', bookName: b.bookName, isbn: b.isbn }
-              this.$modal.msgSuccess('已更新')
+              this.$modal.msgSuccess('已更�?)
             } else {
               this.detailForm.textbookIds.forEach(bid => {
                 const b = this.books.find(x => x.bookId === bid)
                 if (b) this.form.details.push({ collegeId: college.id, majorId: major.id, textbookId: bid, plannedQty: this.detailForm.plannedQty, collegeName: college.name, majorName: major.name, grade: this.detailForm.grade||'', className: this.detailForm.className||'', bookName: b.bookName, isbn: b.isbn })
               })
-              this.$modal.msgSuccess('已添加 ' + this.detailForm.textbookIds.length + ' 本教材')
+              this.$modal.msgSuccess('已添�?' + this.detailForm.textbookIds.length + ' 本教�?)
             }
             this.detailDialogVisible = false
-          } else { this.$modal.msgError('请完善信息') }
+          } else { this.$modal.msgError('请完善信�?) }
         }
       })
     },
@@ -445,7 +444,7 @@ export default {
     submitForm() {
       this.$refs.form.validate(valid => {
         if (valid) {
-          if (this.form.details.length === 0) { this.$modal.msgError('请添加领书明细'); return }
+          if (this.form.details.length === 0) { this.$modal.msgError('请添加领书明�?); return }
           saveAndGenerate(this.form).then(() => { this.$modal.msgSuccess('已保存，领书单已生成'); this.open = false; this.getList() })
         }
       })
@@ -459,7 +458,6 @@ export default {
     },
     submitOutbound() {
       if (!this.outboundForm.receiverName || !this.outboundForm.receiverName.trim()) { this.$modal.msgError('请填写领书人姓名'); return }
-      this.submitLoading = true
       confirmOutbound({ formId: this.outboundForm.formId, issuedQty: this.outboundForm.issuedQty, receiverName: this.outboundForm.receiverName }).then(() => {
         this.$modal.msgSuccess('出库成功')
         this.outboundOpen = false
@@ -471,7 +469,7 @@ export default {
             this.$set(noticedRow, '_loading', false)
           }).catch(() => { this.$set(noticedRow, '_loading', false) })
         }
-      }).catch(() => {}).finally(() => { this.submitLoading = false })
+      }).catch(() => {})
     },
     handlePrint(row) { window.open('/dev-api/textbook/claimForm/pdf/' + row.formId, '_blank') },
     // -- 个人领书申请 --
@@ -484,7 +482,7 @@ export default {
     },
     onPaSearch() { this.paParams.pageNum = 1; this.getPaList() },
     onPaReset() { this.resetForm('paQueryForm'); this.onPaSearch() },
-    paStatusText(s) { return {'0':'待审核','1':'已通过','2':'已驳回','3':'已出库'}[s] || '-' },
+    paStatusText(s) { return {'0':'待审�?,'1':'已通过','2':'已驳�?,'3':'已出�?}[s] || '-' },
     paStatusType(s) { return {'0':'warning','1':'success','2':'danger','3':''}[s] || 'info' },
     paView(row) { getPersonalApply(row.applyId).then(res => { this.paForm = res.data || {}; this.paViewOpen = true }) },
     paAudit(row) {
@@ -497,12 +495,12 @@ export default {
         data.registerShortage = true; data.shortageQty = this.paForm.shortageQty; data.shortageUrgency = this.paForm.shortageUrgency; data.shortageRemark = this.paForm.shortageRemark
       }
       auditApply(data).then(() => {
-        this.$modal.msgSuccess(this.paForm.status==='1'?'已通过':'已驳回')
+        this.$modal.msgSuccess(this.paForm.status==='1'?'已通过':'已驳�?)
         this.paAuditOpen = false; this.getPaList()
       })
     },
     paIssue(row) {
-      this.$confirm('确认将该申请出库发放？将扣减库存。', '确认出库', { type: 'success' }).then(() => {
+      this.$modal.confirm('确认将该申请出库发放？将扣减库存�?).then(() => {
         issuePersonalApply(row.applyId).then(() => { this.$modal.msgSuccess('出库成功'); this.getPaList() })
       }).catch(() => {})
     },

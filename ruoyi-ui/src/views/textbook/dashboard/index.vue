@@ -3,7 +3,7 @@
     <el-row :gutter="20">
       <el-col :span="6" :xs="24">
         <div class="dashboard-card">
-          <div class="card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <div class="card-icon" style="background: #409EFF;">
             <i class="el-icon-document"></i>
           </div>
           <div class="card-info">
@@ -15,7 +15,7 @@
       </el-col>
       <el-col :span="6" :xs="24">
         <div class="dashboard-card">
-          <div class="card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+          <div class="card-icon" style="background: #E6A23C;">
             <i class="el-icon-warning"></i>
           </div>
           <div class="card-info">
@@ -27,7 +27,7 @@
       </el-col>
       <el-col :span="6" :xs="24">
         <div class="dashboard-card">
-          <div class="card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+          <div class="card-icon" style="background: #67C23A;">
             <i class="el-icon-reading"></i>
           </div>
           <div class="card-info">
@@ -39,7 +39,7 @@
       </el-col>
       <el-col :span="6" :xs="24">
         <div class="dashboard-card">
-          <div class="card-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+          <div class="card-icon" style="background: #F56C6C;">
             <i class="el-icon-bell"></i>
           </div>
           <div class="card-info">

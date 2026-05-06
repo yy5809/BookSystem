@@ -1,9 +1,9 @@
 <template>
-  <div class="dashboard-container">
+  <div class="app-container">
     <el-row :gutter="20" type="flex" justify="space-between">
       <el-col :span="4" :xs="12">
         <div class="dashboard-card" @click="$router.push({ path: '/warehouse/bookManage', query: { infoStatus: '0' } })" style="cursor: pointer;">
-          <div class="card-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <div class="card-icon" style="background: #409EFF;">
             <i class="el-icon-warning-outline"></i>
           </div>
           <div class="card-info">
@@ -15,7 +15,7 @@
       </el-col>
       <el-col :span="4" :xs="12">
         <div class="dashboard-card" @click="$router.push({ path: '/warehouse/bookManage', query: { infoStatus: '0' } })" style="cursor: pointer;">
-          <div class="card-icon" style="background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);">
+          <div class="card-icon" style="background: #E6A23C;">
             <i class="el-icon-edit-outline"></i>
           </div>
           <div class="card-info">
@@ -27,7 +27,7 @@
       </el-col>
       <el-col :span="4" :xs="12">
         <div class="dashboard-card">
-          <div class="card-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+          <div class="card-icon" style="background: #67C23A;">
             <i class="el-icon-s-check"></i>
           </div>
           <div class="card-info">
@@ -39,7 +39,7 @@
       </el-col>
       <el-col :span="4" :xs="12">
         <div class="dashboard-card">
-          <div class="card-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+          <div class="card-icon" style="background: #909399;">
             <i class="el-icon-box"></i>
           </div>
           <div class="card-info">
@@ -51,7 +51,7 @@
       </el-col>
       <el-col :span="4" :xs="12">
         <div class="dashboard-card" @click="$router.push('/warehouse/shortage')" style="cursor: pointer;">
-          <div class="card-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+          <div class="card-icon" style="background: #F56C6C;">
             <i class="el-icon-warning-outline"></i>
           </div>
           <div class="card-info">
@@ -176,7 +176,6 @@ export default {
 </script>
 
 <style scoped>
-.dashboard-container { padding: 20px; }
 .dashboard-card {
   display: flex;
   align-items: center;
