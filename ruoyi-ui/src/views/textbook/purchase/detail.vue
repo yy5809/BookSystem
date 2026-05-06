@@ -1,5 +1,5 @@
 <template>
-  <div class="purchase-detail">
+  <div class="app-container">
     <el-card>
       <template slot="header">
         <span>采购单详情</span>
@@ -71,6 +71,5 @@ export default {
 </script>
 
 <style scoped>
-.purchase-detail { padding: 20px; }
 .detail-card { margin-top: 20px; }
 </style>
