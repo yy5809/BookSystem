@@ -52,10 +52,10 @@ public class TbInventoryCheckServiceImpl implements ITbInventoryCheckService {
 
     private void generateCheckDetails(Long checkId) {
         String sql = "INSERT INTO textbook_inventory_check_detail (check_id, book_id, book_name, isbn, location, book_quantity, unit_price) " +
-                     "SELECT ?, i.book_id, b.book_name, b.isbn, l.location_name, i.stock_num, COALESCE(b.price, 0) " +
+                     "SELECT ?, i.book_id, b.book_name, b.isbn, NULL, i.stock_num, COALESCE(b.price, 0) " +
                      "FROM textbook_inventory i " +
                      "LEFT JOIN textbook_info b ON i.book_id = b.book_id " +
-                     "LEFT JOIN tb_location l ON 1=1 WHERE i.del_flag='0'";
+                     "WHERE i.del_flag='0'";
         jdbcTemplate.update(sql, checkId);
     }
 

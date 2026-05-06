@@ -17,11 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 缺书登记信息Controller
- * 
- * @author ruoyi
- */
 @RestController
 @RequestMapping("/textbook/shortage")
 public class TbShortageController extends BaseController
@@ -29,10 +24,7 @@ public class TbShortageController extends BaseController
     @Autowired
     private ITbShortageService tbShortageService;
 
-    /**
-     * 查询缺书登记信息列表
-     */
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse,teacher')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:list')")
     @GetMapping("/list")
     public TableDataInfo list(TbShortage tbShortage)
     {
@@ -44,10 +36,8 @@ public class TbShortageController extends BaseController
         return getDataTable(list);
     }
 
-    /**
-     * 导出缺书登记信息列表
-     */
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:export')")
+    @Log(title = "缺书登记", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, TbShortage tbShortage)
     {
@@ -59,10 +49,7 @@ public class TbShortageController extends BaseController
         util.exportExcel(response, list, "缺书登记信息数据");
     }
 
-    /**
-     * 获取缺书登记信息详细信息
-     */
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse,teacher')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:query')")
     @GetMapping(value = "/{shortageId}")
     public AjaxResult getInfo(@PathVariable("shortageId") Long shortageId)
     {
@@ -74,10 +61,8 @@ public class TbShortageController extends BaseController
         return AjaxResult.success(shortage);
     }
 
-    /**
-     * 新增缺书登记信息
-     */
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse,teacher')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:add')")
+    @Log(title = "缺书登记", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbShortage tbShortage)
     {
@@ -85,30 +70,24 @@ public class TbShortageController extends BaseController
         return toAjax(tbShortageService.insertTbShortage(tbShortage));
     }
 
-    /**
-     * 修改缺书登记信息
-     */
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:edit')")
+    @Log(title = "缺书登记", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbShortage tbShortage)
     {
         return toAjax(tbShortageService.updateTbShortage(tbShortage));
     }
 
-    /**
-     * 删除缺书登记信息
-     */
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:remove')")
+    @Log(title = "缺书登记", businessType = BusinessType.DELETE)
     @DeleteMapping("/{shortageIds}")
     public AjaxResult remove(@PathVariable Long[] shortageIds)
     {
         return toAjax(tbShortageService.deleteTbShortageByIds(shortageIds));
     }
 
-    /**
-     * 处理缺书
-     */
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:process')")
+    @Log(title = "处理缺书", businessType = BusinessType.UPDATE)
     @PutMapping("/process/{shortageId}")
     public AjaxResult process(@PathVariable Long shortageId, @RequestParam String status,
                               @RequestParam(required = false) Long supplierId)
@@ -116,18 +95,15 @@ public class TbShortageController extends BaseController
         return toAjax(tbShortageService.processShortage(shortageId, status, supplierId));
     }
 
-    /**
-     * 根据教材ID查询缺书登记信息
-     */
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:query')")
     @GetMapping("/byBook/{bookId}")
     public AjaxResult getByBookId(@PathVariable Long bookId)
     {
         return AjaxResult.success(tbShortageService.selectTbShortageByBookId(bookId));
     }
 
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse')")
-    @Log(title = "缺书批量转采购")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:process')")
+    @Log(title = "缺书批量转采购", businessType = BusinessType.UPDATE)
     @PostMapping("/convertToPurchase")
     public AjaxResult convertToPurchase(@RequestBody Long[] shortageIds)
     {
@@ -138,11 +114,8 @@ public class TbShortageController extends BaseController
         return AjaxResult.success((String) result.get("msg"), result);
     }
 
-    /**
-     * 取消缺书登记
-     */
-    @PreAuthorize("@ss.hasAnyRoles('admin,warehouse,teacher')")
-    @Log(title = "取消缺书登记")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:edit')")
+    @Log(title = "取消缺书登记", businessType = BusinessType.UPDATE)
     @PutMapping("/cancel/{shortageId}")
     public AjaxResult cancel(@PathVariable Long shortageId)
     {

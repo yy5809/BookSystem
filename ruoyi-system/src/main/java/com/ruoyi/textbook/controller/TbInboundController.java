@@ -66,6 +66,7 @@ public class TbInboundController extends BaseController
      * 新增入库信息
      */
     @PreAuthorize("@ss.hasPermi('textbook:inbound:add') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "入库信息", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbInbound tbInbound)
     {
@@ -86,6 +87,7 @@ public class TbInboundController extends BaseController
      * 删除入库信息
      */
     @PreAuthorize("@ss.hasPermi('textbook:inbound:remove') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "入库信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/{inboundIds}")
     public AjaxResult remove(@PathVariable Long[] inboundIds)
     {
@@ -96,6 +98,7 @@ public class TbInboundController extends BaseController
      * 处理教材入库
      */
     @PreAuthorize("@ss.hasPermi('textbook:inbound:process') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "入库处理", businessType = BusinessType.UPDATE)
     @RateLimiter(count = 10, time = 60)
     @PostMapping("/process")
     public AjaxResult process(@RequestBody TbInbound tbInbound)
