@@ -423,12 +423,12 @@ export default {
       const isLt10M = file.size / 1024 / 1024 < 10
 
       if (!isExcel) {
-        this.$message.error('仅支持 .xlsx 或 .xls 格式')
+        this.$modal.msgError('仅支持 .xlsx 或 .xls 格式')
         this.$refs.uploadRef.uploadFiles = []
         return
       }
       if (!isLt10M) {
-        this.$message.error('文件大小不能超过 10MB')
+        this.$modal.msgError('文件大小不能超过 10MB')
         this.$refs.uploadRef.uploadFiles = []
         return
       }
@@ -450,16 +450,16 @@ export default {
         link.download = '教材采购单导入模板.xlsx'
         link.click()
         window.URL.revokeObjectURL(link.href)
-        this.$message.success('模板下载成功')
+        this.$modal.msgSuccess('模板下载成功')
       } catch (e) {
         console.error(e)
-        this.$message.error('模板下载失败')
+        this.$modal.msgError('模板下载失败')
       }
     },
 
     async doPreview() {
       if (!this.selectedFile) {
-        this.$message.warning('请先选择要导入的Excel文件')
+        this.$modal.msgWarning('请先选择要导入的Excel文件')
         return
       }
 
@@ -472,18 +472,18 @@ export default {
           this.importStep = 2
 
           if (this.previewData.successCount === 0) {
-            this.$message.warning('所有数据校验均未通过，请修正后重新上传')
+            this.$modal.msgWarning('所有数据校验均未通过，请修正后重新上传')
           } else if (this.previewData.failCount > 0) {
-            this.$message.warning(`校验完成：${this.previewData.successCount}条通过，${this.previewData.failCount}条失败`)
+            this.$modal.msgWarning(`校验完成：${this.previewData.successCount}条通过，${this.previewData.failCount}条失败`)
           } else {
-            this.$message.success(`校验全部通过，共${this.previewData.successCount}条数据`)
+            this.$modal.msgSuccess(`校验全部通过，共${this.previewData.successCount}条数据`)
           }
         } else {
-          this.$message.error(res.msg || '预览校验失败')
+          this.$modal.msgError(res.msg || '预览校验失败')
         }
       } catch (err) {
         console.error('Preview error:', err)
-        this.$message.error(err.message || '预览校验异常，请重试')
+        this.$modal.msgError(err.message || '预览校验异常，请重试')
       } finally {
         this.isPreviewing = false
       }
@@ -499,7 +499,7 @@ export default {
 
     async doConfirmImport() {
       if (!this.previewData || !this.previewData.previewToken) {
-        this.$message.error('预览数据异常，请重新上传文件')
+        this.$modal.msgError('预览数据异常，请重新上传文件')
         this.backToUpload()
         return
       }
@@ -523,16 +523,16 @@ export default {
 
           if (this.importResult.failCount === 0 && this.importResult.successCount > 0) {
             const autoMsg = this.importResult.autoCreatedCount > 0 ? `，自动新增${this.importResult.autoCreatedCount}本教材` : ''
-            this.$message.success(`导入成功！共 ${this.importResult.successCount} 条${autoMsg}，请到教材信息管理中补充完善。`)
+            this.$modal.msgSuccess(`导入成功！共 ${this.importResult.successCount} 条${autoMsg}，请到教材信息管理中补充完善。`)
           } else if (this.importResult.failCount > 0) {
-            this.$message.warning(`部分数据导入失败，请查看错误明细`)
+            this.$modal.msgWarning(`部分数据导入失败，请查看错误明细`)
           }
         } else {
-          this.$message.error(res.msg || '导入失败')
+          this.$modal.msgError(res.msg || '导入失败')
         }
       } catch (err) {
         console.error('Confirm import error:', err)
-        this.$message.error(err.message || '导入异常，请重试')
+        this.$modal.msgError(err.message || '导入异常，请重试')
       } finally {
         this.isUploading = false
       }

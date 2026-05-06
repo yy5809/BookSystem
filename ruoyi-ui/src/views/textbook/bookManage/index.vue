@@ -587,8 +587,8 @@ export default {
     handleImportFileChange(file) {
       const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
       const isLt10M = file.size / 1024 / 1024 < 10;
-      if (!isExcel) { this.$message.error('仅支持 .xlsx 或 .xls 格式'); this.$refs.importUploadRef.uploadFiles = []; return; }
-      if (!isLt10M) { this.$message.error('文件大小不能超过 10MB'); this.$refs.importUploadRef.uploadFiles = []; return; }
+      if (!isExcel) { this.$modal.msgError('仅支持 .xlsx 或 .xls 格式'); this.$refs.importUploadRef.uploadFiles = []; return; }
+      if (!isLt10M) { this.$modal.msgError('文件大小不能超过 10MB'); this.$refs.importUploadRef.uploadFiles = []; return; }
       this.importFile = file.raw;
     },
     handleImportFileRemove() {
@@ -603,14 +603,14 @@ export default {
         link.download = '教材信息导入模板.xlsx';
         link.click();
         window.URL.revokeObjectURL(link.href);
-        this.$message.success('模板下载成功');
+        this.$modal.msgSuccess('模板下载成功');
       } catch (e) {
         console.error(e);
-        this.$message.error('模板下载失败');
+        this.$modal.msgError('模板下载失败');
       }
     },
     async doPreview() {
-      if (!this.importFile) { this.$message.warning('请先选择要导入的Excel文件'); return; }
+      if (!this.importFile) { this.$modal.msgWarning('请先选择要导入的Excel文件'); return; }
       this.isPreviewing = true;
       try {
         const res = await previewBookImport(this.importFile);
@@ -618,11 +618,11 @@ export default {
           this.previewData = res.data;
           this.previewActiveTab = this.previewData.failCount > 0 ? 'fail' : 'success';
           this.importStep = 2;
-          if (this.previewData.successCount === 0) this.$message.warning('所有数据校验均未通过，请修正后重新上传');
-          else if (this.previewData.failCount > 0) this.$message.warning('校验完成：' + this.previewData.successCount + '条通过，' + this.previewData.failCount + '条失败');
-          else this.$message.success('校验全部通过，共' + this.previewData.successCount + '条数据');
-        } else { this.$message.error(res.msg || '预览校验失败'); }
-      } catch (err) { console.error(err); this.$message.error('预览校验异常，请重试'); }
+          if (this.previewData.successCount === 0) this.$modal.msgWarning('所有数据校验均未通过，请修正后重新上传');
+          else if (this.previewData.failCount > 0) this.$modal.msgWarning('校验完成：' + this.previewData.successCount + '条通过，' + this.previewData.failCount + '条失败');
+          else this.$modal.msgSuccess('校验全部通过，共' + this.previewData.successCount + '条数据');
+        } else { this.$modal.msgError(res.msg || '预览校验失败'); }
+      } catch (err) { console.error(err); this.$modal.msgError('预览校验异常，请重试'); }
       finally { this.isPreviewing = false; }
     },
     backToUpload() {
@@ -634,7 +634,7 @@ export default {
     },
     async doConfirmImport() {
       if (!this.previewData || !this.previewData.fileHash) {
-        this.$message.error('预览数据异常，请重新上传文件');
+        this.$modal.msgError('预览数据异常，请重新上传文件');
         this.backToUpload();
         return;
       }
@@ -643,11 +643,11 @@ export default {
         const res = await confirmBookImport(this.previewData.fileHash);
         if (res.code === 200) {
           this.importResult = { msg: res.msg || '导入完成', successCount: this.previewData.successCount, failCount: 0 };
-          this.$message.success(res.msg || '导入成功');
+          this.$modal.msgSuccess(res.msg || '导入成功');
         } else {
-          this.$message.error(res.msg || '导入失败');
+          this.$modal.msgError(res.msg || '导入失败');
         }
-      } catch (err) { console.error(err); this.$message.error('导入异常，请重试'); }
+      } catch (err) { console.error(err); this.$modal.msgError('导入异常，请重试'); }
       finally { this.importLoading = false; }
     },
     closeImportAndRefresh() {
