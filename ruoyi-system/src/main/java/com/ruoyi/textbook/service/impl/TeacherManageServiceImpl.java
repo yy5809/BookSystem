@@ -70,6 +70,7 @@ public class TeacherManageServiceImpl implements ITeacherManageService {
     @Transactional
     public int insertTeacher(SysUser user) {
         user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
+        user.setCreateBy(SecurityUtils.getUsername());
         int rows = userMapper.insertUser(user);
         bindTeacherRole(user.getUserId());
         return rows;
@@ -81,6 +82,7 @@ public class TeacherManageServiceImpl implements ITeacherManageService {
         Long userId = user.getUserId();
         userRoleMapper.deleteUserRoleByUserId(userId);
         bindTeacherRole(userId);
+        user.setUpdateBy(SecurityUtils.getUsername());
         return userMapper.updateUser(user);
     }
 
@@ -97,12 +99,14 @@ public class TeacherManageServiceImpl implements ITeacherManageService {
     @Transactional
     public int resetTeacherPwd(SysUser user) {
         user.setPassword(SecurityUtils.encryptPassword(user.getPassword()));
+        user.setUpdateBy(SecurityUtils.getUsername());
         return userMapper.updateUser(user);
     }
 
     @Override
     @Transactional
     public int changeTeacherStatus(SysUser user) {
+        user.setUpdateBy(SecurityUtils.getUsername());
         return userMapper.updateUser(user);
     }
 

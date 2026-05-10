@@ -21,15 +21,15 @@
     </el-form>
 
     <el-table v-loading="loading" :data="purchaseList" border stripe>
-      <el-table-column label="采购单号" align="center" prop="purchaseNo" width="200" show-overflow-tooltip />
-      <el-table-column label="申请部门" align="center" prop="deptName" width="150" />
-      <el-table-column label="状态" align="center" width="100">
+      <el-table-column label="采购单号" align="center" prop="purchaseNo" width="185" show-overflow-tooltip />
+      <el-table-column label="申请人" align="center" prop="userName" width="85" />
+      <el-table-column label="状态" align="center" width="80">
         <template slot-scope="scope">
           <el-tag :type="statusType(scope.row.purchaseStatus)" size="mini">{{ statusText(scope.row.purchaseStatus) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createTime" width="160" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
+      <el-table-column label="创建时间" align="center" prop="createTime" width="145" />
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="185">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-check" @click="handleAccept(scope.row)" v-if="scope.row.purchaseStatus === '1'">确认接单</el-button>
           <el-button size="mini" type="text" icon="el-icon-truck" @click="handleShipment(scope.row)" v-if="scope.row.purchaseStatus === '2'">确认发货</el-button>
@@ -123,7 +123,7 @@ export default {
       return m[status] || '未知'
     },
     handleDetail(purchase) {
-      this.$router.push(`/supplier/supplierPurchase/${purchase.buyId}`)
+      this.$router.push(`/textbook/supplierPurchase/${purchase.buyId}`)
     },
     handleAccept(purchase) {
       this.$modal.confirm('确认接单采购单 ' + purchase.purchaseNo + ' ？').then(() => {

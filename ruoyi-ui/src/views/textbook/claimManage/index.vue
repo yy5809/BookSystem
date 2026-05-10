@@ -28,18 +28,18 @@
             <template slot-scope="scope">
               <div style="padding: 10px 20px;" v-loading="scope.row._loading">
                 <el-table v-if="scope.row._forms && scope.row._forms.length" :data="scope.row._forms" border stripe size="small" style="margin: 0;">
-                  <el-table-column label="领书单号" prop="formNo" width="190" />
-                  <el-table-column label="班级信息" min-width="160">
+                  <el-table-column label="领书单号" prop="formNo" width="180" />
+                  <el-table-column label="班级信息" min-width="140">
                     <template slot-scope="s">{{ s.row.collegeName }} {{ s.row.majorName }} {{ s.row.grade }}{{ s.row.className }}</template>
                   </el-table-column>
-                  <el-table-column label="应发" prop="plannedQty" width="55" />
-                  <el-table-column label="已发" prop="issuedQty" width="55" />
-                  <el-table-column label="状态" width="70" align="center">
+                  <el-table-column label="应发" prop="plannedQty" width="50" />
+                  <el-table-column label="已发" prop="issuedQty" width="50" />
+                  <el-table-column label="状态" width="65" align="center">
                     <template slot-scope="s">
                       <el-tag :type="s.row.status==='2'?'success':s.row.status==='1'?'warning':''" size="mini">{{ s.row.status==='2'?'已出库':s.row.status==='1'?'部分':'待领' }}</el-tag>
                     </template>
                   </el-table-column>
-                  <el-table-column label="领书人" prop="receiverName" width="65" />
+                  <el-table-column label="领书人" prop="receiverName" width="60" />
                   <el-table-column label="操作" class-name="small-padding fixed-width" width="155" align="center">
                     <template slot-scope="s">
                       <el-button size="mini" type="text" icon="el-icon-view" @click.stop="viewFormDetail(s.row)" v-hasPermi="['textbook:noticeManage:query']">明细</el-button>
@@ -52,20 +52,20 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column label="批次编号" prop="noticeNo" width="210" />
-          <el-table-column label="学期" prop="semester" width="110" />
-          <el-table-column label="领取时间" width="220">
+          <el-table-column label="批次编号" prop="noticeNo" width="195" />
+          <el-table-column label="学期" prop="semester" width="105" />
+          <el-table-column label="领取时间" width="210">
             <template slot-scope="s">{{ (s.row.pickupStart||'') + ' ~ ' + (s.row.pickupEnd||'') }}</template>
           </el-table-column>
-          <el-table-column label="领取地点" prop="pickupLocation" show-overflow-tooltip />
-          <el-table-column label="状态" width="80" align="center">
+          <el-table-column label="领取地点" prop="pickupLocation" min-width="120" show-overflow-tooltip />
+          <el-table-column label="状态" width="70" align="center">
             <template slot-scope="s">
               <el-tag :type="s.row.status==='3'?'success':''" size="small">{{ s.row.status==='3'?'已完成':'进行中' }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="班级进度" prop="classProgress" width="90" align="center" />
-          <el-table-column label="创建时间" prop="createTime" width="160" />
-          <el-table-column label="操作" class-name="small-padding fixed-width" width="140" align="center" fixed="right">
+          <el-table-column label="班级进度" prop="classProgress" width="80" align="center" />
+          <el-table-column label="创建时间" prop="createTime" width="145" />
+          <el-table-column label="操作" class-name="small-padding fixed-width" width="90" align="center" fixed="right">
             <template slot-scope="scope">
               <el-button size="mini" type="danger" icon="el-icon-delete" @click.stop="handleDelete(scope.row)" v-hasPermi="['textbook:noticeManage:remove']">删除</el-button>
             </template>
@@ -91,19 +91,19 @@
           </el-form-item>
         </el-form>
         <el-table v-loading="paLoading" :data="paList" border stripe>
-          <el-table-column label="申请编号" prop="applyNo" min-width="180" show-overflow-tooltip />
-          <el-table-column label="申请人" prop="teacherName" width="100" />
+          <el-table-column label="申请编号" prop="applyNo" min-width="170" show-overflow-tooltip />
+          <el-table-column label="申请人" prop="teacherName" width="85" />
           <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip min-width="120" />
           <el-table-column label="申请数量" prop="applyQty" width="70" align="center" />
-          <el-table-column label="用途" prop="purpose" show-overflow-tooltip width="120" />
-          <el-table-column label="状态" width="80" align="center">
+          <el-table-column label="用途" prop="purpose" show-overflow-tooltip min-width="100" />
+          <el-table-column label="状态" width="75" align="center">
             <template slot-scope="s">
               <el-tag :type="{0:'warning',1:'success',2:'danger',3:''}[s.row.status]" size="mini">{{ paStatusText(s.row.status) }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="审核意见" prop="auditOpinion" show-overflow-tooltip width="120" />
-          <el-table-column label="申请时间" prop="createTime" width="160" />
-          <el-table-column label="操作" class-name="small-padding fixed-width" width="160" align="center">
+          <el-table-column label="审核意见" prop="auditOpinion" show-overflow-tooltip width="110" />
+          <el-table-column label="申请时间" prop="createTime" width="145" />
+          <el-table-column label="操作" class-name="small-padding fixed-width" width="155" align="center">
             <template slot-scope="s">
               <el-button size="mini" type="text" icon="el-icon-view" @click="paView(s.row)">详情</el-button>
               <el-button size="mini" type="text" icon="el-icon-check" style="color:#67C23A" @click="paAuditOpen=true;paForm=s.row" v-if="s.row.status==='0'" v-hasPermi="['textbook:personalApply:audit']">审核</el-button>
@@ -132,10 +132,10 @@
         </el-form-item>
         <el-divider>领书明细</el-divider>
         <el-table :data="form.details" border stripe size="small" v-if="form.details && form.details.length">
-          <el-table-column label="班级" prop="className" width="130" />
-          <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip />
-          <el-table-column label="ISBN" prop="isbn" width="150" />
-          <el-table-column label="数量" prop="plannedQty" width="80" align="center" />
+          <el-table-column label="班级" prop="className" width="100" />
+          <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip min-width="140" />
+          <el-table-column label="ISBN" prop="isbn" width="130" />
+          <el-table-column label="数量" prop="plannedQty" width="70" align="center" />
           <el-table-column label="操作" class-name="small-padding fixed-width" width="140" align="center">
             <template slot-scope="scope">
               <el-button type="primary" size="mini" @click="editDetail(scope.$index)"><i class="el-icon-edit"></i></el-button>
@@ -181,12 +181,12 @@
     <!-- 领书单明细 -->
     <el-dialog title="领书单明细" :visible.sync="formDetailVisible" width="800px" append-to-body>
       <el-table :data="formDetailList" border stripe size="small">
-        <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip />
-        <el-table-column label="ISBN" prop="isbn" width="150" />
-        <el-table-column label="作者" prop="author" width="100" />
-        <el-table-column label="出版社" prop="publisher" width="150" show-overflow-tooltip />
-        <el-table-column label="应发" prop="plannedQty" width="60" align="center" />
-        <el-table-column label="实发" prop="issuedQty" width="60" align="center" />
+        <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip min-width="140" />
+        <el-table-column label="ISBN" prop="isbn" width="130" />
+        <el-table-column label="作者" prop="author" width="85" />
+        <el-table-column label="出版社" prop="publisher" width="120" show-overflow-tooltip />
+        <el-table-column label="应发" prop="plannedQty" width="55" align="center" />
+        <el-table-column label="实发" prop="issuedQty" width="55" align="center" />
       </el-table>
       <div slot="footer"><el-button @click="formDetailVisible = false">关 闭</el-button></div>
     </el-dialog>
@@ -258,10 +258,10 @@
 </template>
 
 <script>
-import { listNotice, getNotice, addNotice, updateNotice, delNotice, getClaimForms } from "@/api/textbook/claimManage";
+import { listNotice, getNotice, saveAndGenerate, updateNotice, delNotice, getClaimForms } from "@/api/textbook/claimManage";
 import { listBook } from "@/api/textbook/book";
 import { confirmOutbound } from "@/api/textbook/claimManage";
-import { listPersonalApply, auditPersonalApply, issuePersonalApply, getPersonalApply } from "@/api/textbook/personalApply";
+import { listPersonalApply, auditApply, issueApply, getPersonalApply } from "@/api/textbook/personalApply";
 
 export default {
   name: "ClaimManage",
@@ -347,7 +347,7 @@ export default {
             this.getList()
           })
         } else {
-          addNotice(data).then(() => {
+          saveAndGenerate(data).then(() => {
             this.$modal.msgSuccess('创建成功')
             this.open = false
             this.getList()
@@ -448,15 +448,17 @@ export default {
     paStatusText(s) { return { '0': '待审核', '1': '已通过', '2': '已驳回', '3': '已出库' }[s] || '-' },
     paSubmitAudit() {
       const approved = this.paForm.status === '1'
-      auditPersonalApply({ applyId: this.paForm.applyId, status: this.paForm.status, auditOpinion: this.paForm.auditOpinion, shortageUrgency: this.paForm.shortageUrgency }).then(() => {
+      auditApply({ applyId: this.paForm.applyId, status: this.paForm.status, auditOpinion: this.paForm.auditOpinion, shortageUrgency: this.paForm.shortageUrgency }).then(() => {
         this.$modal.msgSuccess(approved ? '已通过' : '已驳回')
         this.paAuditOpen = false
+        this.getPaList()
+      }).catch(() => {
         this.getPaList()
       })
     },
     paIssue(row) {
       this.$modal.confirm('确认将该申请出库发放？将扣减库存。').then(() => {
-        issuePersonalApply(row.applyId).then(() => {
+        issueApply(row.applyId).then(() => {
           this.$modal.msgSuccess('出库成功')
           this.getPaList()
         })

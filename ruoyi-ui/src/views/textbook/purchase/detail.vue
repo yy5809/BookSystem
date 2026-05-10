@@ -27,11 +27,18 @@
       <el-card class="detail-card">
         <template slot="header"><span>采购明细</span></template>
         <el-table :data="purchaseDetails" border stripe>
-          <el-table-column label="ISBN" prop="isbn" width="150" align="center" />
-          <el-table-column label="教材名称" prop="bookName" min-width="200" show-overflow-tooltip />
-          <el-table-column label="数量" prop="quantity" width="100" align="center" />
-          <el-table-column label="单价" prop="unitPrice" width="100" align="center"><template slot-scope="scope">{{ scope.row.unitPrice || '-' }}</template></el-table-column>
-          <el-table-column label="总价" prop="totalPrice" width="100" align="center"><template slot-scope="scope">{{ scope.row.totalPrice || '-' }}</template></el-table-column>
+          <el-table-column label="ISBN" prop="isbn" width="135" align="center" />
+          <el-table-column label="教材名称" prop="bookName" min-width="150" show-overflow-tooltip />
+          <el-table-column label="版次" prop="edition" width="70" align="center" />
+          <el-table-column label="作者" prop="author" width="70" show-overflow-tooltip />
+          <el-table-column label="出版社" prop="publisher" width="90" show-overflow-tooltip />
+          <el-table-column label="类型" prop="textbookType" width="65" align="center" />
+          <el-table-column label="学院" prop="college" width="80" show-overflow-tooltip />
+          <el-table-column label="专业" prop="major" width="80" show-overflow-tooltip />
+          <el-table-column label="年级" prop="grade" width="55" align="center" />
+          <el-table-column label="数量" prop="quantity" width="55" align="center" />
+          <el-table-column label="单价" prop="unitPrice" width="70" align="center"><template slot-scope="scope">{{ scope.row.unitPrice || '-' }}</template></el-table-column>
+          <el-table-column label="总价" prop="totalPrice" width="70" align="center"><template slot-scope="scope">{{ scope.row.totalPrice || '-' }}</template></el-table-column>
         </el-table>
       </el-card>
     </el-card>
@@ -57,7 +64,7 @@ export default {
         this.purchaseDetails = response.data.details || []
       })
     },
-    goBack() { this.$router.push('/warehouse/purchase') },
+    goBack() { this.$router.go(-1) },
     statusText(status) {
       const map = { '0': '待审核', '1': '已通过', '2': '已驳回', '3': '已领书', '4': '已到货', '5': '已入库', '6': '已发货' }
       return map[status] || '未知'

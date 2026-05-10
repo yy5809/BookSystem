@@ -159,7 +159,8 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
                     book.setGrade("未知");
                     book.setAuthor(StringUtils.isNotEmpty(dto.getAuthor()) ? dto.getAuthor() : "未知");
                     book.setPublisher(StringUtils.isNotEmpty(dto.getPublisher()) ? dto.getPublisher() : "未知");
-                    book.setPrice(java.math.BigDecimal.ZERO);
+                    book.setEdition(dto.getEdition());
+                    book.setPrice(dto.getPrice() != null ? dto.getPrice() : java.math.BigDecimal.ZERO);
                     book.setCreateBy(operatorName);
                     book.setCreateTime(DateUtils.getNowDate());
                     try {
@@ -193,6 +194,15 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
                 detail.setBookName(book.getBookName());
                 detail.setIsbn(dto.getIsbn());
                 detail.setQuantity(dto.getQuantity());
+                detail.setUnitPrice(dto.getPrice());
+                detail.setTotalPrice(dto.getPrice() != null && dto.getQuantity() != null
+                        ? dto.getPrice().multiply(java.math.BigDecimal.valueOf(dto.getQuantity())) : null);
+                detail.setEdition(dto.getEdition());
+                detail.setTextbookType(dto.getTextbookType());
+                detail.setCollege(dto.getCollege());
+                detail.setMajor(dto.getMajor());
+                detail.setGrade(dto.getGrade());
+                detail.setRemark(dto.getRemark());
                 detail.setCreateTime(DateUtils.getNowDate());
 
                 tbPurchaseMapper.insertTbPurchaseDetail(detail);

@@ -19,7 +19,7 @@
           <el-option label="未处理" value="0" />
           <el-option label="已纳入采购" value="1" />
           <el-option label="已到货" value="2" />
-          <el-option label="已完成" value="3" />
+          <el-option label="已入库" value="3" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -36,25 +36,25 @@
     </el-row>
 
     <el-table v-loading="loading" :data="shortageList" border stripe>
-      <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
-      <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="180" />
-      <el-table-column label="缺书数量" align="center" prop="lackNum" width="90" />
-      <el-table-column label="紧急程度" align="center" prop="urgency" width="90">
+      <el-table-column label="ISBN" align="center" prop="isbn" width="130" />
+      <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="140" />
+      <el-table-column label="缺书数量" align="center" prop="lackNum" width="80" />
+      <el-table-column label="紧急程度" align="center" prop="urgency" width="85">
         <template slot-scope="scope">
           <el-tag :type="getUrgencyType(scope.row.urgency)" size="mini">{{ getUrgencyLabel(scope.row.urgency) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="handleStatus" width="100">
+      <el-table-column label="状态" align="center" prop="handleStatus" width="90">
         <template slot-scope="scope">
           <el-tag :type="getStatusType(scope.row.handleStatus)" size="mini">{{ getStatusLabel(scope.row.handleStatus) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="登记人" align="center" prop="createBy" width="90" />
-      <el-table-column label="登记时间" align="center" prop="registerTime" width="160" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
+      <el-table-column label="登记人" align="center" prop="registerName" width="80" />
+      <el-table-column label="登记时间" align="center" prop="registerTime" width="145" />
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="110">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
-          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="isPending(scope.row)" v-hasPermi="['textbook:shortage:list']">取消</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="isPending(scope.row)" v-hasPermi="['textbook:shortage:add']">取消</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -142,7 +142,7 @@
           <el-descriptions-item label="状态">
             <el-tag :type="getStatusType(viewData.handleStatus)" size="mini">{{ getStatusLabel(viewData.handleStatus) }}</el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="登记人">{{ viewData.createBy }}</el-descriptions-item>
+          <el-descriptions-item label="登记人">{{ viewData.registerName }}</el-descriptions-item>
           <el-descriptions-item label="登记时间">{{ viewData.registerTime }}</el-descriptions-item>
           <el-descriptions-item label="备注">{{ viewData.remark || '-' }}</el-descriptions-item>
         </el-descriptions>
@@ -301,7 +301,7 @@ export default {
       return status === '3' ? 'success' : status === '2' ? '' : status === '1' ? 'warning' : status === '4' ? 'info' : 'danger'
     },
     getStatusLabel(status) {
-      return status === '3' ? '已完成' : status === '2' ? '已到货' : status === '1' ? '已纳入采购' : status === '4' ? '已取消' : '未处理'
+      return status === '3' ? '已入库' : status === '2' ? '已到货' : status === '1' ? '已纳入采购' : status === '4' ? '已取消' : '未处理'
     },
     isPending(row) {
       if (!row) return false

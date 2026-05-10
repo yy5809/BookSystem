@@ -196,7 +196,7 @@ public class TbPendingServiceImpl implements ITbPendingService
         stockLog.setBeforeStock(beforeStock);
         stockLog.setAfterStock(afterStock);
         stockLog.setOperatorId(SecurityUtils.getUserId());
-        stockLog.setOperatorName(SecurityUtils.getUsername());
+        stockLog.setOperatorName(SecurityUtils.getLoginUser().getUser().getNickName());
         stockLog.setRefBizType("PENDING_INBOUND");
         stockLog.setRefBizId(String.valueOf(id));
         stockLog.setRemark("待购入库，待购单号：" + pending.getPendingNo());
@@ -207,7 +207,7 @@ public class TbPendingServiceImpl implements ITbPendingService
         inbound.setInboundNo("IN" + DateUtils.dateTimeNow("yyyyMMddHHmmss"));
         inbound.setInNum(pending.getPurchaseNum());
         inbound.setOperatorId(SecurityUtils.getUserId());
-        inbound.setOperatorName(SecurityUtils.getUsername());
+        inbound.setOperatorName(SecurityUtils.getLoginUser().getUser().getNickName());
         tbInboundMapper.insertTbInbound(inbound);
 
         pending.setStatus("3");

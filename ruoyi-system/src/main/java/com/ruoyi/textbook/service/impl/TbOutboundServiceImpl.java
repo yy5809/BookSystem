@@ -122,7 +122,7 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
                     outbound.getBookId(),
                     outbound.getOutNum(),
                     SecurityUtils.getUserId(),
-                    SecurityUtils.getUsername(),
+                    SecurityUtils.getLoginUser().getUser().getNickName(),
                     "OUTBOUND_DELETE",
                     String.valueOf(outbound.getOutId()),
                     "删除出库单，回退库存，出库单号：" + outbound.getOutboundNo()
@@ -158,7 +158,7 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
                         outbound.getBookId(),
                         outbound.getOutNum(),
                         SecurityUtils.getUserId(),
-                        SecurityUtils.getUsername(),
+                        SecurityUtils.getLoginUser().getUser().getNickName(),
                         "OUTBOUND_DELETE",
                         String.valueOf(outbound.getOutId()),
                         "批量删除出库单，回退库存，出库单号：" + outbound.getOutboundNo()
@@ -252,13 +252,16 @@ public class TbOutboundServiceImpl implements ITbOutboundService {
             successCount++;
         }
 
+        TbPurchase updatedPurchase;
         if (failCount == 0) {
-            purchaseStateService.transitionToReceived(purchaseId);
+            updatedPurchase = purchaseStateService.transitionToReceived(purchaseId);
         } else if (successCount > 0) {
-            purchaseStateService.transitionToReceived(purchaseId);
+            updatedPurchase = purchaseStateService.transitionToReceived(purchaseId);
             log.warn("【出库处理】部分出库完成! 成功={}条, 失败={}条(库存不足): {}", successCount, failCount, String.join("；", failMessages));
+        } else {
+            updatedPurchase = purchase;
         }
-        tbPurchaseMapper.updateTbPurchase(purchase);
+        tbPurchaseMapper.updateTbPurchase(updatedPurchase);
 
         if (successCount > 0 && purchase.getUserId() != null) {
             noticeService.sendOrderApproveNotice(

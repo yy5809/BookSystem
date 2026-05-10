@@ -94,7 +94,7 @@ public class PurchaseImportController extends BaseController {
         Map<String, Object> result = purchaseImportService.confirmImport(
                 previewToken,
                 SecurityUtils.getUserId(),
-                SecurityUtils.getUsername()
+                SecurityUtils.getLoginUser().getUser().getNickName()
         );
 
         return success(result);
@@ -134,7 +134,7 @@ public class PurchaseImportController extends BaseController {
         Map<String, Object> result = purchaseImportService.importFromExcel(
                 dataList,
                 SecurityUtils.getUserId(),
-                SecurityUtils.getUsername(),
+                SecurityUtils.getLoginUser().getUser().getNickName(),
                 fileHash
         );
 

@@ -122,15 +122,15 @@
     <select id="countPendingShipmentBySupplierId" parameterType="Long" resultType="Integer">
         SELECT COUNT(*) FROM textbook_buy 
         WHERE supplier_id = #{supplierId} 
-        AND purchase_status = '1' 
+        AND purchase_status IN ('1', '2') 
         AND del_flag = '0'
     </select>
 
     <select id="selectSupplierPurchases" parameterType="com.ruoyi.textbook.domain.TbPurchase" resultMap="com.ruoyi.textbook.mapper.TbPurchaseMapper.TbPurchaseResult">
         SELECT t.buy_id, t.purchase_no, t.user_id, t.user_name, t.user_type, t.dept_name, 
                t.buy_num, t.audit_status, t.audit_user_id, t.audit_time, 
-               t.reject_reason, t.audit_opinion, t.receive_status, t.receive_time, 
-               t.submit_time, t.del_flag, t.funding_source, t.file_hash, 
+               t.reject_reason, t.audit_opinion, t.receive_time, 
+               t.submit_time, t.create_time, t.del_flag, t.funding_source, t.file_hash, 
                t.supplier_id, t.purchase_status, t.logistics_no, t.logistics_company, t.invoice_no
         FROM textbook_buy t 
         WHERE t.del_flag = '0' 
@@ -142,5 +142,27 @@
             AND t.purchase_status = #{purchaseStatus}
         </if>
         ORDER BY t.submit_time DESC
+    </select>
+
+    <select id="selectSupplierAccountList" parameterType="com.ruoyi.textbook.domain.TbSupplier" resultType="java.util.Map">
+        SELECT s.supplier_id as supplierId, s.supplier_code as supplierCode, s.supplier_name as supplierName,
+               s.contact_person as contactPerson, s.contact_phone as contactPhone,
+               s.contact_email as contactEmail, s.address,
+               s.discount_rate as discountRate, s.payment_terms as paymentTerms,
+               s.status, s.user_id as userId,
+               u.user_name as userName, u.nick_name as nickName, u.status as userStatus
+        FROM textbook_supplier s
+        LEFT JOIN sys_user u ON s.user_id = u.user_id AND u.del_flag = '0'
+        WHERE s.del_flag = '0'
+        <if test="supplierName != null and supplierName != ''">
+            AND s.supplier_name LIKE CONCAT('%', #{supplierName}, '%')
+        </if>
+        <if test="supplierCode != null and supplierCode != ''">
+            AND s.supplier_code LIKE CONCAT('%', #{supplierCode}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            AND s.status = #{status}
+        </if>
+        ORDER BY s.supplier_id DESC
     </select>
 </mapper>

@@ -140,15 +140,21 @@
         <result property="totalPrice" column="total_price"/>
         <result property="author" column="author"/>
         <result property="publisher" column="publisher"/>
+        <result property="edition" column="edition"/>
+        <result property="textbookType" column="textbook_type"/>
+        <result property="college" column="college"/>
+        <result property="major" column="major"/>
+        <result property="grade" column="grade"/>
     </resultMap>
 
     <insert id="insertTbPurchaseDetail" useGeneratedKeys="true" keyProperty="detailId">
-        INSERT INTO textbook_purchase_detail(purchase_id, book_id, book_name, isbn, quantity, unit_price, total_price)
-        VALUES(#{purchaseId}, #{bookId}, #{bookName}, #{isbn}, #{quantity}, #{unitPrice}, #{totalPrice})
+        INSERT INTO textbook_purchase_detail(purchase_id, book_id, book_name, isbn, quantity, unit_price, total_price, edition, textbook_type, college, major, grade)
+        VALUES(#{purchaseId}, #{bookId}, #{bookName}, #{isbn}, #{quantity}, #{unitPrice}, #{totalPrice}, #{edition}, #{textbookType}, #{college}, #{major}, #{grade})
     </insert>
 
     <select id="selectTbPurchaseDetailListByPurchaseId" parameterType="Long" resultMap="TbPurchaseDetailResult">
         SELECT pd.detail_id, pd.purchase_id, pd.book_id, pd.book_name, pd.isbn, pd.quantity, pd.unit_price, pd.total_price,
+               pd.edition, pd.textbook_type, pd.college, pd.major, pd.grade,
                ti.author, ti.publisher
         FROM textbook_purchase_detail pd
         LEFT JOIN textbook_info ti ON pd.book_id = ti.book_id
@@ -158,6 +164,7 @@
     <!-- 批量查询购书明细（解决N+1问题） -->
     <select id="selectTbPurchaseDetailListByPurchaseIds" parameterType="java.util.List" resultMap="TbPurchaseDetailResult">
         SELECT pd.detail_id, pd.purchase_id, pd.book_id, pd.book_name, pd.isbn, pd.quantity, pd.unit_price, pd.total_price,
+               pd.edition, pd.textbook_type, pd.college, pd.major, pd.grade,
                ti.author, ti.publisher
         FROM textbook_purchase_detail pd
         LEFT JOIN textbook_info ti ON pd.book_id = ti.book_id

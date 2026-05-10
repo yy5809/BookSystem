@@ -54,6 +54,28 @@ public class TbPurchaseDetail extends BaseEntity
     @Excel(name = "出版社")
     private String publisher;
 
+    /** 版次 */
+    @Excel(name = "版次")
+    private String edition;
+
+    /** 教材类型 */
+    @Excel(name = "教材类型")
+    private String textbookType;
+
+    /** 申请学院 */
+    @Excel(name = "申请学院")
+    private String college;
+
+    /** 适用专业 */
+    @Excel(name = "适用专业")
+    private String major;
+
+    /** 适用年级 */
+    @Excel(name = "适用年级")
+    private String grade;
+
+    // remark inherited from BaseEntity
+
     public void setDetailId(Long detailId)
     {
         this.detailId = detailId;
@@ -154,6 +176,17 @@ public class TbPurchaseDetail extends BaseEntity
         return publisher;
     }
 
+    public void setEdition(String edition) { this.edition = edition; }
+    public String getEdition() { return edition; }
+    public void setTextbookType(String textbookType) { this.textbookType = textbookType; }
+    public String getTextbookType() { return textbookType; }
+    public void setCollege(String college) { this.college = college; }
+    public String getCollege() { return college; }
+    public void setMajor(String major) { this.major = major; }
+    public String getMajor() { return major; }
+    public void setGrade(String grade) { this.grade = grade; }
+    public String getGrade() { return grade; }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
@@ -167,6 +200,11 @@ public class TbPurchaseDetail extends BaseEntity
             .append("totalPrice", getTotalPrice())
             .append("author", getAuthor())
             .append("publisher", getPublisher())
+            .append("edition", getEdition())
+            .append("textbookType", getTextbookType())
+            .append("college", getCollege())
+            .append("major", getMajor())
+            .append("grade", getGrade())
             .toString();
     }
 }

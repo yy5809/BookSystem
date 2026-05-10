@@ -30,6 +30,8 @@ public class TbShortageController extends BaseController
     {
         if (SecurityUtils.hasRole("teacher")) {
             tbShortage.setRegisterId(SecurityUtils.getUserId());
+        } else {
+            tbShortage.setDelFlag("0");
         }
         startPage();
         List<TbShortage> list = tbShortageService.selectTbShortageList(tbShortage);
@@ -43,6 +45,8 @@ public class TbShortageController extends BaseController
     {
         if (SecurityUtils.hasRole("teacher")) {
             tbShortage.setRegisterId(SecurityUtils.getUserId());
+        } else {
+            tbShortage.setDelFlag("0");
         }
         List<TbShortage> list = tbShortageService.selectTbShortageList(tbShortage);
         ExcelUtil<TbShortage> util = new ExcelUtil<TbShortage>(TbShortage.class);
@@ -67,14 +71,26 @@ public class TbShortageController extends BaseController
     public AjaxResult add(@RequestBody TbShortage tbShortage)
     {
         tbShortage.setRegisterId(SecurityUtils.getUserId());
+        tbShortage.setRegisterName(SecurityUtils.getLoginUser().getUser().getNickName());
+        tbShortage.setCreateBy(getUsername());
         return toAjax(tbShortageService.insertTbShortage(tbShortage));
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:edit')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:edit') or @ss.hasPermi('textbook:shortage:add')")
     @Log(title = "缺书登记", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbShortage tbShortage)
     {
+        if (SecurityUtils.hasRole("teacher")) {
+            TbShortage existing = tbShortageService.selectTbShortageById(tbShortage.getLackId());
+            if (existing == null || !SecurityUtils.getUserId().equals(existing.getRegisterId())) {
+                return error("无权修改他人的缺书登记");
+            }
+            tbShortage.setRegisterId(SecurityUtils.getUserId());
+            tbShortage.setUpdateBy(getUsername());
+            return toAjax(tbShortageService.updateTbShortage(tbShortage));
+        }
+        tbShortage.setUpdateBy(getUsername());
         return toAjax(tbShortageService.updateTbShortage(tbShortage));
     }
 
@@ -90,9 +106,10 @@ public class TbShortageController extends BaseController
     @Log(title = "处理缺书", businessType = BusinessType.UPDATE)
     @PutMapping("/process/{shortageId}")
     public AjaxResult process(@PathVariable Long shortageId, @RequestParam String status,
-                              @RequestParam(required = false) Long supplierId)
+                              @RequestParam(required = false) Long supplierId,
+                              @RequestParam(required = false) Integer purchaseQty)
     {
-        return toAjax(tbShortageService.processShortage(shortageId, status, supplierId));
+        return toAjax(tbShortageService.processShortage(shortageId, status, supplierId, purchaseQty));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:shortage:query')")
@@ -114,11 +131,19 @@ public class TbShortageController extends BaseController
         return AjaxResult.success((String) result.get("msg"), result);
     }
 
-    @PreAuthorize("@ss.hasPermi('textbook:shortage:edit')")
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:edit') or @ss.hasPermi('textbook:shortage:add')")
     @Log(title = "取消缺书登记", businessType = BusinessType.UPDATE)
     @PutMapping("/cancel/{shortageId}")
     public AjaxResult cancel(@PathVariable Long shortageId)
     {
         return toAjax(tbShortageService.cancelShortage(shortageId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:process')")
+    @Log(title = "通知登记人领书", businessType = BusinessType.OTHER)
+    @PutMapping("/notifyRegister/{shortageId}")
+    public AjaxResult notifyRegister(@PathVariable Long shortageId)
+    {
+        return toAjax(tbShortageService.notifyRegister(shortageId));
     }
 }

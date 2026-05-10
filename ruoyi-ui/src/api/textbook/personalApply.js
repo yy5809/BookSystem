@@ -59,3 +59,10 @@ export function delPersonalApply(applyId) {
     method: 'delete'
   })
 }
+
+export function registerShortage(applyId) {
+  return request({
+    url: '/textbook/personalApply/registerShortage/' + applyId,
+    method: 'put'
+  })
+}

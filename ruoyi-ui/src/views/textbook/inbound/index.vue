@@ -21,17 +21,17 @@
     </el-form>
 
     <el-table v-loading="loading" :data="inboundList" border stripe>
-      <el-table-column type="index" label="序号" align="center" width="55" />
-      <el-table-column label="采购单号" align="center" prop="purchaseNo" width="200" />
-      <el-table-column label="采购数量(TOTAL)" align="center" prop="buyNum" width="120" />
-      <el-table-column label="状态" align="center" prop="status" width="100">
+      <el-table-column type="index" label="#" align="center" width="50" />
+      <el-table-column label="采购单号" align="center" prop="purchaseNo" width="180" show-overflow-tooltip />
+      <el-table-column label="采购数量(TOTAL)" align="center" prop="buyNum" width="110" />
+      <el-table-column label="状态" align="center" prop="status" width="90">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.tb_purchase_status" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createTime" width="160" />
-      <el-table-column label="到货时间" align="center" prop="receiveTime" width="160" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="160">
+      <el-table-column label="创建时间" align="center" prop="createTime" width="145" />
+      <el-table-column label="到货时间" align="center" prop="receiveTime" width="145" />
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)" v-hasPermi="['textbook:inbound:query']">详情</el-button>
           <el-button size="mini" type="text" icon="el-icon-box-plug" @click="handleInbound(scope.row)" v-if="scope.row.status === '4'" v-hasPermi="['textbook:inbound:add']">确认入库</el-button>
@@ -55,11 +55,11 @@
       <el-card class="detail-card">
         <template slot="header"><span>采购明细</span></template>
         <el-table :data="viewDetails" border stripe>
-          <el-table-column label="ISBN" prop="isbn" width="150" />
-          <el-table-column label="教材名称" prop="bookName" min-width="160" show-overflow-tooltip />
-          <el-table-column label="作者" prop="author" width="120" show-overflow-tooltip />
-          <el-table-column label="出版社" prop="publisher" width="150" show-overflow-tooltip />
-          <el-table-column label="数量" prop="quantity" width="80" align="center" />
+          <el-table-column label="ISBN" prop="isbn" width="130" />
+          <el-table-column label="教材名称" prop="bookName" min-width="140" show-overflow-tooltip />
+          <el-table-column label="作者" prop="author" width="90" show-overflow-tooltip />
+          <el-table-column label="出版社" prop="publisher" width="120" show-overflow-tooltip />
+          <el-table-column label="数量" prop="quantity" width="70" align="center" />
         </el-table>
       </el-card>
       <div slot="footer"><el-button @click="viewOpen = false">关 闭</el-button></div>
@@ -127,7 +127,9 @@ export default {
       }).then(() => {
         this.$modal.msgSuccess('已验收入库，库存已更新');
         this.getList();
-      }).catch(() => {});
+      }).catch(() => {
+        this.getList();
+      });
     }
   }
 };

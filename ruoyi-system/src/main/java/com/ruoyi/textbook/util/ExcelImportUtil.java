@@ -22,13 +22,16 @@ public class ExcelImportUtil {
 
     public static final int COL_ISBN = 0;
     public static final int COL_BOOK_NAME = 1;
-    public static final int COL_AUTHOR = 2;
-    public static final int COL_PUBLISHER = 3;
-    public static final int COL_COLLEGE = 4;
-    public static final int COL_MAJOR = 5;
-    public static final int COL_GRADE = 6;
-    public static final int COL_QUANTITY = 7;
-    public static final int COL_REMARK = 8;
+    public static final int COL_EDITION = 2;
+    public static final int COL_AUTHOR = 3;
+    public static final int COL_PUBLISHER = 4;
+    public static final int COL_PRICE = 5;
+    public static final int COL_TEXTBOOK_TYPE = 6;
+    public static final int COL_COLLEGE = 7;
+    public static final int COL_MAJOR = 8;
+    public static final int COL_GRADE = 9;
+    public static final int COL_QUANTITY = 10;
+    public static final int COL_REMARK = 11;
     private static final int HEADER_ROW = 0;
     private static final int DATA_START_ROW = 1;
 
@@ -49,13 +52,16 @@ public class ExcelImportUtil {
                     TbPurchaseImportDTO dto = new TbPurchaseImportDTO();
                     dto.setIsbn(getCellStringValue(row, COL_ISBN));
                     dto.setBookName(getCellStringValue(row, COL_BOOK_NAME));
-                    dto.setQuantity(parseQuantity(row, COL_QUANTITY));
+                    dto.setEdition(getCellStringValue(row, COL_EDITION));
+                    dto.setAuthor(getCellStringValue(row, COL_AUTHOR));
+                    dto.setPublisher(getCellStringValue(row, COL_PUBLISHER));
+                    dto.setPrice(parsePrice(row, COL_PRICE));
+                    dto.setTextbookType(getCellStringValue(row, COL_TEXTBOOK_TYPE));
                     dto.setCollege(getCellStringValue(row, COL_COLLEGE));
                     dto.setMajor(getCellStringValue(row, COL_MAJOR));
                     dto.setGrade(getCellStringValue(row, COL_GRADE));
+                    dto.setQuantity(parseQuantity(row, COL_QUANTITY));
                     dto.setRemark(getCellStringValue(row, COL_REMARK));
-                    dto.setAuthor(getCellStringValue(row, COL_AUTHOR));
-                    dto.setPublisher(getCellStringValue(row, COL_PUBLISHER));
 
                     if (dto.getIsbn() != null && !dto.getIsbn().trim().isEmpty()) {
                         result.add(dto);
@@ -79,7 +85,7 @@ public class ExcelImportUtil {
         CellStyle headerStyle = createHeaderStyle(workbook);
         Row headerRow = sheet.createRow(HEADER_ROW);
 
-        String[] headers = {"ISBN", "教材名称", "作者", "出版社", "申请学院", "申请专业", "适用年级", "采购数量", "备注"};
+        String[] headers = {"ISBN", "教材名称", "版次", "作者", "出版社", "定价", "教材类型", "申请学院", "适用专业", "适用年级", "采购数量", "备注"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
@@ -88,11 +94,14 @@ public class ExcelImportUtil {
 
         sheet.setColumnWidth(COL_ISBN, 18 * 256);
         sheet.setColumnWidth(COL_BOOK_NAME, 30 * 256);
+        sheet.setColumnWidth(COL_EDITION, 10 * 256);
         sheet.setColumnWidth(COL_AUTHOR, 12 * 256);
         sheet.setColumnWidth(COL_PUBLISHER, 20 * 256);
+        sheet.setColumnWidth(COL_PRICE, 10 * 256);
+        sheet.setColumnWidth(COL_TEXTBOOK_TYPE, 12 * 256);
         sheet.setColumnWidth(COL_COLLEGE, 15 * 256);
         sheet.setColumnWidth(COL_MAJOR, 15 * 256);
-        sheet.setColumnWidth(COL_GRADE, 20 * 256);
+        sheet.setColumnWidth(COL_GRADE, 15 * 256);
         sheet.setColumnWidth(COL_QUANTITY, 12 * 256);
         sheet.setColumnWidth(COL_REMARK, 25 * 256);
 
@@ -102,12 +111,15 @@ public class ExcelImportUtil {
                 "",
                 "1. 请严格按照模板格式填写数据，不要修改表头顺序",
                 "2. 列说明：",
-                "   - ISBN（必填）：教材的10位或13位ISBN编号",
+                "   - ISBN（必填）：教材的10位或13位ISBN编号，系统根据ISBN自动匹配教材信息",
                 "   - 教材名称（必填）：教材全称",
+                "   - 版次（选填）：教材版次，如\"第3版\"",
                 "   - 作者（选填）：教材作者，新教材建议填写以便完善信息",
                 "   - 出版社（选填）：教材出版社，新教材建议填写以便完善信息",
+                "   - 定价（选填）：教材单价，如 49.00",
+                "   - 教材类型（选填）：如\"马工程教材\"、\"自编教材\"等",
                 "   - 申请学院（必填）：从系统学院字典中选择",
-                "   - 申请专业（必填）：填写本学院对应的专业简称",
+                "   - 适用专业（必填）：填写本学院对应的专业简称",
                 "   - 适用年级（选填）：大一/大二/大三/大四/全校",
                 "   - 采购数量（必填）：正整数，范围1-9999",
                 "   - 备注（选填）：补充说明信息",
@@ -192,8 +204,18 @@ public class ExcelImportUtil {
         }
     }
 
+    private static java.math.BigDecimal parsePrice(Row row, int columnIndex) {
+        String value = getCellStringValue(row, columnIndex);
+        if (value == null || value.trim().isEmpty()) return null;
+        try {
+            return new java.math.BigDecimal(value);
+        } catch (NumberFormatException e) {
+            throw new ServiceException("定价格式错误: " + value);
+        }
+    }
+
     private static boolean isEmptyRow(Row row) {
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 12; i++) {
             Cell cell = row.getCell(i);
             if (cell != null && cell.getCellType() != CellType.BLANK) {
                 String value = getCellStringValue(row, i);

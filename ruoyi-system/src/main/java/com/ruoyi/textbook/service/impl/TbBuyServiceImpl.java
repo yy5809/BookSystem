@@ -18,6 +18,9 @@ import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.domain.TbOutbound;
 import com.ruoyi.textbook.domain.TbStockLog;
 import com.ruoyi.textbook.domain.TbSupplier;
+import com.ruoyi.textbook.domain.BookNotice;
+import com.ruoyi.textbook.domain.BookClaimForm;
+import com.ruoyi.textbook.domain.BookClaimFormDetail;
 import com.ruoyi.textbook.domain.dto.TbPurchaseImportDTO;
 import com.ruoyi.textbook.domain.dto.StockOperationResult;
 import com.ruoyi.textbook.enums.NoticeBizTypeEnum;
@@ -28,6 +31,9 @@ import com.ruoyi.textbook.mapper.TbPurchaseMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.mapper.TbStockLogMapper;
 import com.ruoyi.textbook.mapper.TbSupplierMapper;
+import com.ruoyi.textbook.mapper.BookNoticeMapper;
+import com.ruoyi.textbook.mapper.BookClaimFormMapper;
+import com.ruoyi.textbook.mapper.BookClaimFormDetailMapper;
 import com.ruoyi.textbook.service.ITbBuyService;
 import com.ruoyi.textbook.service.IStockOperationService;
 import com.ruoyi.textbook.service.ITbStockLogService;
@@ -88,6 +94,15 @@ public class TbBuyServiceImpl implements ITbBuyService {
 
     @Autowired
     private TbSupplierMapper tbSupplierMapper;
+
+    @Autowired
+    private BookNoticeMapper bookNoticeMapper;
+
+    @Autowired
+    private BookClaimFormMapper bookClaimFormMapper;
+
+    @Autowired
+    private BookClaimFormDetailMapper bookClaimFormDetailMapper;
 
     @Autowired
     private ITbStockLogService tbStockLogService;
@@ -213,7 +228,103 @@ public class TbBuyServiceImpl implements ITbBuyService {
     public int confirmArrived(Long buyId) {
         TbPurchase buy = purchaseStateService.transitionToArrived(buyId);
         buy.setReceiveTime(LocalDateTime.now());
-        return tbPurchaseMapper.updateTbPurchase(buy);
+        int result = tbPurchaseMapper.updateTbPurchase(buy);
+
+        List<TbShortage> relatedShortages = tbShortageMapper.selectTbShortageListByPurchaseId(buyId);
+        if (relatedShortages != null) {
+            for (TbShortage shortage : relatedShortages) {
+                if ("1".equals(shortage.getHandleStatus())) {
+                    shortage.setHandleStatus("2");
+                    shortage.setUpdateTime(DateUtils.getNowDate());
+                    tbShortageMapper.updateTbShortage(shortage);
+                }
+            }
+        }
+
+        try {
+            autoGenerateClaimNotices(buyId, buy.getPurchaseNo());
+        } catch (Exception e) {
+            log.warn("【入库完成】自动生成班级领书计划失败: {}", e.getMessage());
+        }
+
+        return result;
+    }
+
+    private void autoGenerateClaimNotices(Long buyId, String purchaseNo) {
+        List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
+        if (details == null || details.isEmpty()) return;
+
+        List<TbPurchaseDetail> classifiableDetails = new ArrayList<>();
+        for (TbPurchaseDetail d : details) {
+            if (StringUtils.isNotEmpty(d.getCollege()) && StringUtils.isNotEmpty(d.getGrade())) {
+                classifiableDetails.add(d);
+            }
+        }
+        if (classifiableDetails.isEmpty()) return;
+
+        java.util.Map<String, List<TbPurchaseDetail>> groupMap = new java.util.LinkedHashMap<>();
+        for (TbPurchaseDetail d : classifiableDetails) {
+            String key = (d.getCollege() != null ? d.getCollege() : "") + "|" + (d.getMajor() != null ? d.getMajor() : "") + "|" + (d.getGrade() != null ? d.getGrade() : "");
+            groupMap.computeIfAbsent(key, k -> new ArrayList<>()).add(d);
+        }
+
+        String semester = generateSemester();
+        String noticeNo = "TZ" + DateUtils.dateTimeNow("yyyyMMddHHmmss");
+        BookNotice notice = new BookNotice();
+        notice.setNoticeNo(noticeNo);
+        notice.setSemester(semester);
+        notice.setPickupLocation("库房");
+        notice.setStatus("0");
+        notice.setTotalClasses(groupMap.size());
+        notice.setIssuedClasses(0);
+        notice.setCreateBy(SecurityUtils.getLoginUser().getUser().getNickName());
+        notice.setCreateTime(DateUtils.getNowDate());
+        bookNoticeMapper.insertBookNotice(notice);
+
+        String formNoPrefix = "LS" + DateUtils.dateTimeNow("yyyyMMddHHmmss");
+        int formIndex = 0;
+        for (java.util.Map.Entry<String, List<TbPurchaseDetail>> entry : groupMap.entrySet()) {
+            TbPurchaseDetail first = entry.getValue().get(0);
+            BookClaimForm form = new BookClaimForm();
+            form.setNoticeId(notice.getNoticeId());
+            form.setFormNo(formNoPrefix + String.format("%03d", ++formIndex));
+            form.setClassName(first.getGrade() + (StringUtils.isNotEmpty(first.getMajor()) ? first.getMajor() : ""));
+            form.setStatus("0");
+            form.setPlannedQty(0);
+            form.setIssuedQty(0);
+            form.setCreateTime(DateUtils.getNowDate());
+            bookClaimFormMapper.insertBookClaimForm(form);
+
+            int plannedQty = 0;
+            for (TbPurchaseDetail d : entry.getValue()) {
+                BookClaimFormDetail detail = new BookClaimFormDetail();
+                detail.setFormId(form.getFormId());
+                detail.setTextbookId(d.getBookId());
+                detail.setIsbn(d.getIsbn());
+                detail.setBookName(d.getBookName());
+                detail.setAuthor(d.getAuthor());
+                detail.setPublisher(d.getPublisher());
+                detail.setPlannedQty(d.getQuantity());
+                detail.setIssuedQty(0);
+                detail.setPrice(d.getUnitPrice());
+                detail.setCreateTime(DateUtils.getNowDate());
+                bookClaimFormDetailMapper.insertBookClaimFormDetail(detail);
+                plannedQty += d.getQuantity() != null ? d.getQuantity() : 0;
+            }
+            form.setPlannedQty(plannedQty);
+            bookClaimFormMapper.updateBookClaimForm(form);
+        }
+
+        log.info("【入库完成】已自动生成班级领书计划, purchaseId={}, noticeNo={}, 班级数={}", buyId, noticeNo, groupMap.size());
+    }
+
+    private String generateSemester() {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int year = cal.get(java.util.Calendar.YEAR);
+        int month = cal.get(java.util.Calendar.MONTH) + 1;
+        if (month >= 9) return year + "-" + (year + 1) + "-1";
+        else if (month >= 2) return (year - 1) + "-" + year + "-2";
+        else return (year - 1) + "-" + year + "-1";
     }
 
     @Override
@@ -227,35 +338,23 @@ public class TbBuyServiceImpl implements ITbBuyService {
         }
 
         List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
-        String operatorName = SecurityUtils.getUsername();
+        SysUser currentUser = sysUserMapper.selectUserById(SecurityUtils.getUserId());
+        String operatorName = currentUser != null ? currentUser.getNickName() : SecurityUtils.getUsername();
         for (TbPurchaseDetail detail : details) {
             int qty = detail.getQuantity() != null ? detail.getQuantity() : 0;
-            TbInventory stock = tbInventoryMapper.selectTbInventoryByBookId(detail.getBookId());
-            int stockBefore = (stock != null) ? stock.getStockNum() : 0;
 
-            if (stock == null) {
-                stock = new TbInventory();
-                stock.setBookId(detail.getBookId());
-                stock.setStockNum(qty);
-                stock.setWarningNum(10);
-                stock.setCreateTime(DateUtils.getNowDate());
-                tbInventoryMapper.insertTbInventory(stock);
-            } else {
-                stock.setStockNum(stockBefore + qty);
-                tbInventoryMapper.updateTbInventory(stock);
+            StockOperationResult stockResult = stockOperationService.addStock(
+                    detail.getBookId(),
+                    qty,
+                    SecurityUtils.getUserId(),
+                    operatorName,
+                    "PURCHASE_INBOUND",
+                    buy.getPurchaseNo(),
+                    "采购验收入库，单号：" + buy.getPurchaseNo()
+            );
+            if (!stockResult.isSuccess()) {
+                throw new ServiceException("教材「" + detail.getBookName() + "」入库失败：" + stockResult.getErrorMessage());
             }
-
-            TbStockLog stockLog = new TbStockLog();
-            stockLog.setBookId(detail.getBookId());
-            stockLog.setIsbn(detail.getIsbn());
-            stockLog.setBizType("1");
-            stockLog.setRefBizId(buy.getPurchaseNo());
-            stockLog.setChangeNum(qty);
-            stockLog.setBeforeStock(stockBefore);
-            stockLog.setAfterStock(stockBefore + qty);
-            stockLog.setOperatorName(operatorName);
-            stockLog.setRemark("采购验收入库，单号：" + buy.getPurchaseNo());
-            tbStockLogMapper.insert(stockLog);
 
             try {
                 noticeService.sendInboundNotice(
@@ -265,8 +364,37 @@ public class TbBuyServiceImpl implements ITbBuyService {
             }
         }
 
-        purchaseStateService.transitionToInbound(buyId);
-        return tbPurchaseMapper.updateTbPurchase(buy);
+        TbPurchase inboundPurchase = purchaseStateService.transitionToInbound(buyId);
+        int result = tbPurchaseMapper.updateTbPurchase(inboundPurchase);
+
+        List<TbShortage> relatedShortages = tbShortageMapper.selectTbShortageListByPurchaseId(buyId);
+        if (relatedShortages != null) {
+            for (TbShortage shortage : relatedShortages) {
+                if ("1".equals(shortage.getHandleStatus()) || "2".equals(shortage.getHandleStatus())) {
+                    shortage.setHandleStatus("3");
+                    shortage.setHandleTime(new Date());
+                    shortage.setUpdateTime(DateUtils.getNowDate());
+                    shortage.setRemark("已通过采购单" + buy.getPurchaseNo() + "入库补齐");
+                    tbShortageMapper.updateTbShortage(shortage);
+
+                    if (shortage.getRegisterId() != null) {
+                        try {
+                            noticeService.sendNoticeToUser(
+                                    shortage.getRegisterId(),
+                                    "缺书到货通知",
+                                    "您登记的缺书《" + shortage.getBookName() + "》已全部到货入库，请前往领取。",
+                                    NoticeBizTypeEnum.LACK.getCode(),
+                                    shortage.getLackId());
+                            log.info("【入库完成】已通知缺书登记人领书, registerId={}, lackId={}", shortage.getRegisterId(), shortage.getLackId());
+                        } catch (Exception e) {
+                            log.warn("【入库完成】通知缺书登记人失败: {}", e.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -281,7 +409,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
                     detail.getBookId(),
                     detail.getQuantity(),
                     SecurityUtils.getUserId(),
-                    SecurityUtils.getUsername(),
+                    SecurityUtils.getLoginUser().getUser().getNickName(),
                     "PURCHASE_RECEIVE",
                     String.valueOf(buyId),
                     "采购单领书，单号：" + buy.getPurchaseNo()
@@ -302,9 +430,9 @@ public class TbBuyServiceImpl implements ITbBuyService {
             tbOutboundMapper.insertTbOutbound(out);
         }
 
-        purchaseStateService.transitionToReceived(buyId);
-        buy.setReceiveTime(LocalDateTime.now());
-        return tbPurchaseMapper.updateTbPurchase(buy);
+        TbPurchase receivedPurchase = purchaseStateService.transitionToReceived(buyId);
+        receivedPurchase.setReceiveTime(LocalDateTime.now());
+        return tbPurchaseMapper.updateTbPurchase(receivedPurchase);
     }
 
     @Override

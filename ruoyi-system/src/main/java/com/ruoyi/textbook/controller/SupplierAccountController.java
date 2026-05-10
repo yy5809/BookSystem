@@ -51,6 +51,9 @@ public class SupplierAccountController extends BaseController {
     public AjaxResult add(@RequestBody Map<String, Object> params) {
         String supplierCode = objToStr(params.get("supplierCode"));
         String supplierName = objToStr(params.get("supplierName"));
+        String contactPerson = objToStr(params.get("contactPerson"));
+        String contactPhone = objToStr(params.get("contactPhone"));
+        String address = objToStr(params.get("address"));
         String password = objToStr(params.get("password"));
         if (supplierCode == null || supplierCode.isEmpty()) {
             return error("供应商编码不能为空");
@@ -58,12 +61,21 @@ public class SupplierAccountController extends BaseController {
         if (supplierName == null || supplierName.isEmpty()) {
             return error("供应商名称不能为空");
         }
+        if (contactPerson == null || contactPerson.isEmpty()) {
+            return error("联系人不能为空");
+        }
+        if (contactPhone == null || contactPhone.isEmpty()) {
+            return error("联系电话不能为空");
+        }
+        if (address == null || address.isEmpty()) {
+            return error("地址不能为空");
+        }
         if (password == null || password.isEmpty()) {
             return error("密码不能为空");
         }
         TbSupplier supplier = buildSupplier(params);
         supplier.setCreateBy(getUsername());
-        return toAjax(supplierAccountService.insertSupplierAccount(supplier, password));
+        return toAjax(supplierAccountService.insertSupplierAccount(supplier, password, getUsername()));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:supplier:edit') and @ss.hasAnyRoles('admin,warehouse')")
@@ -77,7 +89,7 @@ public class SupplierAccountController extends BaseController {
         }
         supplier.setSupplierId(Long.valueOf(idObj.toString()));
         supplier.setUpdateBy(getUsername());
-        return toAjax(supplierAccountService.updateSupplierAccount(supplier));
+        return toAjax(supplierAccountService.updateSupplierAccount(supplier, getUsername()));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:supplier:remove') and @ss.hasAnyRoles('admin,warehouse')")

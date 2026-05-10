@@ -2,13 +2,13 @@
   <div class="app-container">
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="default" plain icon="el-icon-back" size="mini" @click="$router.push('/supplier/supplierPurchase')">返回</el-button>
+        <el-button type="default" plain icon="el-icon-back" size="mini" @click="$router.go(-1)">返回</el-button>
       </el-col>
     </el-row>
 
     <el-descriptions :column="2" border size="small">
       <el-descriptions-item label="采购单号">{{ purchaseInfo.purchaseNo }}</el-descriptions-item>
-      <el-descriptions-item label="申请部门">{{ purchaseInfo.deptName }}</el-descriptions-item>
+      <el-descriptions-item label="申请人">{{ purchaseInfo.userName }}</el-descriptions-item>
       <el-descriptions-item label="状态">
         <el-tag :type="statusType(purchaseInfo.purchaseStatus)" size="mini">{{ statusText(purchaseInfo.purchaseStatus) }}</el-tag>
       </el-descriptions-item>
@@ -22,9 +22,14 @@
         <span>采购明细</span>
       </template>
       <el-table :data="purchaseDetails" border stripe>
-        <el-table-column label="教材名称" align="center" prop="bookName" min-width="180" show-overflow-tooltip />
-        <el-table-column label="ISBN" align="center" prop="isbn" width="150" />
-        <el-table-column label="数量" align="center" prop="quantity" width="80" />
+        <el-table-column label="教材名称" align="center" prop="bookName" min-width="150" show-overflow-tooltip />
+        <el-table-column label="版次" align="center" prop="edition" width="65" />
+        <el-table-column label="作者" align="center" prop="author" width="85" show-overflow-tooltip />
+        <el-table-column label="出版社" align="center" prop="publisher" width="100" show-overflow-tooltip />
+        <el-table-column label="ISBN" align="center" prop="isbn" width="130" />
+        <el-table-column label="数量" align="center" prop="quantity" width="60" />
+        <el-table-column label="学院" align="center" prop="college" width="80" show-overflow-tooltip />
+        <el-table-column label="年级" align="center" prop="grade" width="55" />
       </el-table>
     </el-card>
 

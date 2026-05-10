@@ -3,6 +3,8 @@ package com.ruoyi.textbook.controller;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.textbook.annotation.MaxExportRows;
 import com.ruoyi.textbook.domain.TbInventory;
@@ -31,6 +33,7 @@ public class TbInventoryController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('textbook:inventory:export')")
     @MaxExportRows(value = 10000, message = "导出数据量超过限制")
+    @Log(title = "库存信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, TbInventory tbInventory) {
         List<TbInventory> list = tbInventoryService.selectTbInventoryList(tbInventory);

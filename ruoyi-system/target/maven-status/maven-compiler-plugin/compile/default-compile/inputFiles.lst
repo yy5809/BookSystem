@@ -16,16 +16,15 @@ D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\domain\
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\enums\InfoStatusEnum.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\domain\SysUserOnline.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\BookNotice.java
-D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\BookStockFlow.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\ISysOperLogService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\BookPersonalApplyMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\ITbBuyService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\controller\TbShortageController.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\TbSupplierMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\impl\TbPendingPurchaseServiceImpl.java
+D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\dto\TeacherImportDTO.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\mapper\SysRoleMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\enums\ShortageStatusEnum.java
-D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\controller\BookStockFlowController.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\controller\TbNoticeController.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\BookClaimFormDetailMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\mapper\SysUserMapper.java
@@ -44,6 +43,7 @@ D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\contr
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\BookClaimFormMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\ISysPostService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\TbPurchaseOrderMapper.java
+D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\impl\TeacherManageServiceImpl.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\TbInventoryCheck.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\TbPurchaseDetail.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\TbInventoryCheckMapper.java
@@ -88,8 +88,8 @@ D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\enums
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\ITbPendingService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\impl\TbOutboundServiceImpl.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\ITbOutboundService.java
+D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\impl\PurchaseStateService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\impl\SysMenuServiceImpl.java
-D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\IBookStockFlowService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\domain\SysConfig.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\TbOutbound.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\controller\TbSupplierController.java
@@ -103,13 +103,13 @@ D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\controller\BookNoticeController.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\ISysDeptService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\constants\TextbookConstants.java
+D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\dto\TbBookImportDTO.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\TbInboundMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\ISysMenuService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\TbPendingMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\ITbInventoryService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\ISysLogininforService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\domain\SysNotice.java
-D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\BookStockFlowMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\mapper\SysPostMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\TextbookNoticeDetail.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\ITbBookService.java
@@ -128,6 +128,7 @@ D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\impl\SysDeptServiceImpl.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\impl\SysUserServiceImpl.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\TbBookMapper.java
+D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\controller\TeacherManageController.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\ITbPurchaseOrderService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\impl\StockOperationServiceImpl.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\impl\TbBuyServiceImpl.java
@@ -138,6 +139,7 @@ D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\impl\SysDictTypeServiceImpl.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\impl\TbSupplierServiceImpl.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\ITbShortageService.java
+D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\util\BookImportUtil.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\TbInventory.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\impl\BookNoticeServiceImpl.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\TbPendingPurchase.java
@@ -162,8 +164,8 @@ D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\enums
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\IBookClaimFormService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\ISysDictDataService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\TbPurchaseMapper.java
-D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\impl\BookStockFlowServiceImpl.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\domain\BookClaimForm.java
+D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\service\ITeacherManageService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\mapper\TbOutboundMapper.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\system\service\ISysConfigService.java
 D:\USERPROG\JavaEE\RuoYi-Vue\ruoyi-system\src\main\java\com\ruoyi\textbook\controller\SupplierController.java

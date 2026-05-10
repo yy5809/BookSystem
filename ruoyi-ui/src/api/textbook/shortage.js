@@ -44,11 +44,11 @@ export function deleteShortage(id) {
 }
 
 // 处理缺书
-export function processShortage(id, status, supplierId) {
+export function processShortage(id, status, supplierId, purchaseQty) {
   return request({
     url: '/textbook/shortage/process/' + id,
     method: 'put',
-    params: { status: status, supplierId: supplierId }
+    params: { status: status, supplierId: supplierId, purchaseQty: purchaseQty }
   })
 }
 
@@ -56,6 +56,14 @@ export function processShortage(id, status, supplierId) {
 export function cancelShortage(id) {
   return request({
     url: '/textbook/shortage/cancel/' + id,
+    method: 'put'
+  })
+}
+
+// 通知登记人领书
+export function notifyRegister(id) {
+  return request({
+    url: '/textbook/shortage/notifyRegister/' + id,
     method: 'put'
   })
 }

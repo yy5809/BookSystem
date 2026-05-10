@@ -29,7 +29,7 @@
 
     <select id="selectBookClaimFormDetailListByFormId" parameterType="Long" resultMap="BookClaimFormDetailResult">
         <include refid="selectBookClaimFormDetailVo"/>
-        where form_id = #{formId}
+        where form_id = #{formId} and del_flag = '0'
         order by detail_id
     </select>
 
@@ -51,9 +51,9 @@
         where detail_id = #{detailId}
     </update>
 
-    <delete id="deleteBookClaimFormDetailByFormId" parameterType="Long">
-        delete from textbook_claim_form_detail where form_id = #{formId}
-    </delete>
+    <update id="deleteBookClaimFormDetailByFormId" parameterType="Long">
+        update textbook_claim_form_detail set del_flag = '1' where form_id = #{formId}
+    </update>
 
     <insert id="batchInsert" parameterType="java.util.List">
         insert into textbook_claim_form_detail (

@@ -46,6 +46,7 @@ public class BookNoticeController extends BaseController {
     @Log(title = "领书通知", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody BookNotice bookNotice) {
+        bookNotice.setCreateBy(getUsername());
         return toAjax(bookNoticeService.insertBookNotice(bookNotice));
     }
 
@@ -53,6 +54,7 @@ public class BookNoticeController extends BaseController {
     @Log(title = "保存并生成领书单", businessType = BusinessType.INSERT)
     @PostMapping("/saveAndGenerate")
     public AjaxResult saveAndGenerate(@RequestBody BookNotice bookNotice) {
+        bookNotice.setCreateBy(getUsername());
         try {
             return toAjax(bookNoticeService.saveAndGenerate(bookNotice));
         } catch (RuntimeException e) {
@@ -64,6 +66,7 @@ public class BookNoticeController extends BaseController {
     @Log(title = "领书通知", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody BookNotice bookNotice) {
+        bookNotice.setUpdateBy(getUsername());
         return toAjax(bookNoticeService.updateBookNotice(bookNotice));
     }
 

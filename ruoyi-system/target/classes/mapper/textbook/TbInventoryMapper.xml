@@ -57,9 +57,11 @@
     <update id="updateTbInventory" parameterType="com.ruoyi.textbook.domain.TbInventory">
         UPDATE textbook_stock
         <set>
+            <if test="stockNum != null">stock_num=#{stockNum},</if>
             <if test="storageAddr != null">storage_addr=#{storageAddr},</if>
             <if test="warningNum != null">warning_num=#{warningNum},</if>
             <if test="stockStatus != null">stock_status=#{stockStatus},</if>
+            update_time=NOW(),
         </set> WHERE stock_id=#{stockId} AND del_flag='0'
     </update>
 

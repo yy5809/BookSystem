@@ -60,7 +60,8 @@ public class BookPersonalApplyController extends BaseController {
     @PostMapping
     public AjaxResult add(@RequestBody BookPersonalApply bookPersonalApply) {
         bookPersonalApply.setTeacherId(SecurityUtils.getUserId());
-        bookPersonalApply.setTeacherName(SecurityUtils.getUsername());
+        bookPersonalApply.setTeacherName(SecurityUtils.getLoginUser().getUser().getNickName());
+        bookPersonalApply.setCreateBy(getUsername());
         return toAjax(bookPersonalApplyService.insertBookPersonalApply(bookPersonalApply));
     }
 
@@ -87,6 +88,13 @@ public class BookPersonalApplyController extends BaseController {
     @PutMapping("/issue/{applyId}")
     public AjaxResult issue(@PathVariable Long applyId) {
         return toAjax(bookPersonalApplyService.issueApply(applyId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:myApply:add')")
+    @Log(title = "Personal Apply Shortage Registration", businessType = BusinessType.INSERT)
+    @PutMapping("/registerShortage/{applyId}")
+    public AjaxResult registerShortage(@PathVariable Long applyId) {
+        return toAjax(bookPersonalApplyService.registerShortageFromApply(applyId));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:personalApply:remove')")

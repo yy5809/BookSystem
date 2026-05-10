@@ -1,8 +1,10 @@
 package com.ruoyi.textbook.controller;
 
+import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.entity.SysRole;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.service.ISysRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +26,7 @@ public class SupplierRoleController extends BaseController {
      * 创建供应商角色
      */
     @PreAuthorize("@ss.hasRole('admin')")
+    @Log(title = "供应商角色", businessType = BusinessType.INSERT)
     @PostMapping("/create")
     public AjaxResult createSupplierRole() {
         SysRole role = new SysRole();
@@ -32,7 +35,7 @@ public class SupplierRoleController extends BaseController {
         role.setRoleSort(3);
         role.setStatus("0");
         role.setDelFlag("0");
-        role.setCreateBy("admin");
+        role.setCreateBy(getUsername());
         
         // 检查角色是否已存在
         SysRole checkRole = new SysRole();

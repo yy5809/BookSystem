@@ -113,11 +113,11 @@
     </update>
 
     <delete id="deleteBookNoticeById" parameterType="Long">
-        update textbook_notice set del_flag = '2' where notice_id = #{noticeId}
+        update textbook_notice set del_flag = '1' where notice_id = #{noticeId}
     </delete>
 
     <delete id="deleteBookNoticeByIds" parameterType="String">
-        update textbook_notice set del_flag = '2' where notice_id in
+        update textbook_notice set del_flag = '1' where notice_id in
         <foreach item="noticeId" collection="array" open="(" separator="," close=")">
             #{noticeId}
         </foreach>

@@ -3,6 +3,7 @@ package com.ruoyi.textbook.controller;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.annotation.RateLimiter;
 import com.ruoyi.common.core.controller.BaseController;
+import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.utils.SecurityUtils;
@@ -44,6 +45,7 @@ public class TbInboundController extends BaseController
      * 导出入库信息列表
      */
     @PreAuthorize("@ss.hasPermi('textbook:inbound:export')")
+    @Log(title = "入库信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, TbInbound tbInbound)
     {
@@ -70,6 +72,7 @@ public class TbInboundController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody TbInbound tbInbound)
     {
+        tbInbound.setCreateBy(getUsername());
         return toAjax(tbInboundService.insertTbInbound(tbInbound));
     }
 
@@ -77,6 +80,7 @@ public class TbInboundController extends BaseController
      * 修改入库信息（已禁用，入库单一旦确认无法修改）
      */
     @PreAuthorize("@ss.hasPermi('textbook:inbound:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "入库信息", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbInbound tbInbound)
     {
@@ -103,8 +107,9 @@ public class TbInboundController extends BaseController
     @PostMapping("/process")
     public AjaxResult process(@RequestBody TbInbound tbInbound)
     {
+        tbInbound.setCreateBy(getUsername());
         Long operatorId = SecurityUtils.getUserId();
-        String operatorName = SecurityUtils.getUsername();
+        String operatorName = SecurityUtils.getLoginUser().getUser().getNickName();
         return toAjax(tbInboundService.processInbound(tbInbound, operatorId, operatorName));
     }
 }

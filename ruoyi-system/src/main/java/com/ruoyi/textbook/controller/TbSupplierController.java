@@ -50,6 +50,7 @@ public class TbSupplierController extends BaseController {
     @Log(title = "供应商", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbSupplier tbSupplier) {
+        tbSupplier.setCreateBy(getUsername());
         return toAjax(tbSupplierService.insertTbSupplier(tbSupplier));
     }
 
@@ -57,6 +58,7 @@ public class TbSupplierController extends BaseController {
     @Log(title = "供应商", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbSupplier tbSupplier) {
+        tbSupplier.setUpdateBy(getUsername());
         return toAjax(tbSupplierService.updateTbSupplier(tbSupplier));
     }
 

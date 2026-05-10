@@ -19,30 +19,38 @@ public class TbPurchaseImportDTO {
     @Size(max = 200, message = "教材名称长度不能超过200")
     private String bookName;
 
-    @Excel(name = "作者", sort = 2, width = 15)
+    @Excel(name = "版次", sort = 2, width = 10)
+    private String edition;
+
+    @Excel(name = "作者", sort = 3, width = 15)
     private String author;
 
-    @Excel(name = "出版社", sort = 3, width = 20)
+    @Excel(name = "出版社", sort = 4, width = 20)
     private String publisher;
 
-    @Excel(name = "申请学院", sort = 4, width = 15)
+    @Excel(name = "定价", sort = 5, width = 10)
+    private java.math.BigDecimal price;
+
+    @Excel(name = "教材类型", sort = 6, width = 15)
+    private String textbookType;
+
+    @Excel(name = "申请学院", sort = 7, width = 15)
     @NotBlank(message = "申请学院不能为空")
     private String college;
 
-    @Excel(name = "申请专业", sort = 5, width = 15)
-    @NotBlank(message = "申请专业不能为空")
+    @Excel(name = "适用专业", sort = 8, width = 15)
+    @NotBlank(message = "适用专业不能为空")
     private String major;
 
-    @Excel(name = "适用年级", sort = 6, width = 20)
+    @Excel(name = "适用年级", sort = 9, width = 20)
     private String grade;
 
-    @Excel(name = "采购数量", sort = 7, width = 12)
-    @NotBlank(message = "采购数量不能为空")
+    @Excel(name = "采购数量", sort = 10, width = 12)
     @Min(value = 1, message = "采购数量必须大于0")
     @Max(value = 9999, message = "采购数量不能超过9999")
     private Integer quantity;
 
-    @Excel(name = "备注", sort = 8, width = 30)
+    @Excel(name = "备注", sort = 11, width = 30)
     private String remark;
 
     private int rowIndex;
@@ -53,6 +61,8 @@ public class TbPurchaseImportDTO {
     public void setIsbn(String isbn) { this.isbn = isbn; }
     public String getBookName() { return bookName; }
     public void setBookName(String bookName) { this.bookName = bookName; }
+    public String getEdition() { return edition; }
+    public void setEdition(String edition) { this.edition = edition; }
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
     public String getCollege() { return college; }
@@ -67,6 +77,10 @@ public class TbPurchaseImportDTO {
     public void setAuthor(String author) { this.author = author; }
     public String getPublisher() { return publisher; }
     public void setPublisher(String publisher) { this.publisher = publisher; }
+    public java.math.BigDecimal getPrice() { return price; }
+    public void setPrice(java.math.BigDecimal price) { this.price = price; }
+    public String getTextbookType() { return textbookType; }
+    public void setTextbookType(String textbookType) { this.textbookType = textbookType; }
     public int getRowIndex() { return rowIndex; }
     public void setRowIndex(int rowIndex) { this.rowIndex = rowIndex; }
     public String getErrorMsg() { return errorMsg; }

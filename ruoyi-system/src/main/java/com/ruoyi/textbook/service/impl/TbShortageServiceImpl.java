@@ -11,9 +11,12 @@ import com.ruoyi.textbook.domain.TbBook;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbShortage;
+import com.ruoyi.textbook.domain.TbSupplier;
+import com.ruoyi.textbook.enums.NoticeBizTypeEnum;
 import com.ruoyi.textbook.mapper.TbBookMapper;
 import com.ruoyi.textbook.mapper.TbShortageMapper;
 import com.ruoyi.textbook.mapper.TbPurchaseMapper;
+import com.ruoyi.textbook.mapper.TbSupplierMapper;
 import com.ruoyi.textbook.service.ITbShortageService;
 import com.ruoyi.textbook.service.NoticeService;
 import com.ruoyi.system.mapper.SysUserMapper;
@@ -47,6 +50,8 @@ public class TbShortageServiceImpl implements ITbShortageService
     private TbBookMapper tbBookMapper;
     @Autowired
     private SysUserMapper sysUserMapper;
+    @Autowired
+    private TbSupplierMapper tbSupplierMapper;
     @Autowired
     private NoticeService noticeService;
 
@@ -228,7 +233,7 @@ public class TbShortageServiceImpl implements ITbShortageService
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int processShortage(Long shortageId, String status, Long supplierId)
+    public int processShortage(Long shortageId, String status, Long supplierId, Integer purchaseQty)
     {
         TbShortage shortage = tbShortageMapper.selectTbShortageById(shortageId);
         if (shortage == null) {
@@ -245,6 +250,7 @@ public class TbShortageServiceImpl implements ITbShortageService
         int rows = tbShortageMapper.updateTbShortage(shortage);
 
         if ("1".equals(status) && shortage.getBookId() != null) {
+            int qty = (purchaseQty != null && purchaseQty > 0) ? purchaseQty : shortage.getLackNum();
             Long currentUserId = SecurityUtils.getUserId();
             SysUser currentUser = sysUserMapper.selectUserById(currentUserId);
             String operatorName = currentUser != null ? currentUser.getNickName() : "系统";
@@ -263,7 +269,7 @@ public class TbShortageServiceImpl implements ITbShortageService
             purchase.setFundingSource("school");
             purchase.setSupplierId(supplierId);
             purchase.setBookId(shortage.getBookId());
-            purchase.setBuyNum(shortage.getLackNum());
+            purchase.setBuyNum(qty);
             tbPurchaseMapper.insertTbPurchase(purchase);
 
             TbPurchaseDetail detail = new TbPurchaseDetail();
@@ -271,11 +277,31 @@ public class TbShortageServiceImpl implements ITbShortageService
             detail.setBookId(shortage.getBookId());
             detail.setBookName(shortage.getBookName());
             detail.setIsbn(shortage.getIsbn());
-            detail.setQuantity(shortage.getLackNum());
+            detail.setQuantity(qty);
             tbPurchaseMapper.insertTbPurchaseDetail(detail);
 
             shortage.setPurchaseId(purchase.getBuyId());
             tbShortageMapper.updateTbShortage(shortage);
+
+            if (supplierId != null) {
+                TbSupplier supplier = tbSupplierMapper.selectBySupplierId(supplierId);
+                if (supplier != null && supplier.getUserId() != null) {
+                    try {
+                        noticeService.sendNoticeToUser(
+                                supplier.getUserId(),
+                                "新采购需求通知",
+                                "您有新的采购需求！\n采购单号：" + purchaseNo
+                                        + "\n教材：" + shortage.getBookName()
+                                        + "\n数量：" + qty + " 本"
+                                        + "\n\n请登录系统确认接单并发货。",
+                                NoticeBizTypeEnum.PURCHASE_CREATE.getCode(),
+                                purchase.getBuyId());
+                        log.info("【缺书转采购】已通知供应商 {}, 采购单号={}", supplier.getSupplierName(), purchaseNo);
+                    } catch (Exception e) {
+                        log.warn("【缺书转采购】通知供应商失败: {}", e.getMessage());
+                    }
+                }
+            }
 
             log.info("【缺书转采购】单条转采购完成, 缺书ID={}, 采购单号={}, 教材={}", shortageId, purchaseNo, shortage.getBookName());
         }
@@ -302,7 +328,7 @@ public class TbShortageServiceImpl implements ITbShortageService
                 log.warn("缺书记录不存在: id={}", id);
                 continue;
             }
-            if ("1".equals(s.getHandleStatus()) || "3".equals(s.getHandleStatus()) || "4".equals(s.getHandleStatus())) {
+            if ("1".equals(s.getHandleStatus()) || "2".equals(s.getHandleStatus()) || "3".equals(s.getHandleStatus()) || "4".equals(s.getHandleStatus())) {
                 skippedCount++;
                 log.debug("跳过已处理/已补齐/已取消的缺书记录: id={}, isbn={}, status={}", id, s.getIsbn(), s.getHandleStatus());
                 continue;
@@ -338,7 +364,7 @@ public class TbShortageServiceImpl implements ITbShortageService
         purchase.setUserName(operatorName);
         purchase.setUserType("2");
         purchase.setDeptName(currentUser != null && currentUser.getDept() != null ? currentUser.getDept().getDeptName() : "");
-        purchaseStateService.initAsApprovedWithPurchasing(purchase);
+        purchaseStateService.initAsApprovedWithWaitPurchase(purchase);
         purchase.setSubmitTime(LocalDateTime.now());
         purchase.setFundingSource("school");
         purchase.setBookId(allShortages.get(0).getBookId());
@@ -442,6 +468,37 @@ public class TbShortageServiceImpl implements ITbShortageService
         return result;
     }
 
+    @Override
+    public int notifyRegister(Long shortageId) {
+        TbShortage shortage = tbShortageMapper.selectTbShortageById(shortageId);
+        if (shortage == null) {
+            throw new ServiceException("缺书记录不存在");
+        }
+
+        if (!"3".equals(shortage.getHandleStatus())) {
+            throw new ServiceException("只有已入库的缺书才能通知登记人领书，当前状态：" + getStatusName(shortage.getHandleStatus()));
+        }
+
+        if (shortage.getRegisterId() == null) {
+            throw new ServiceException("该缺书记录没有登记人信息");
+        }
+
+        try {
+            noticeService.sendNoticeToUser(
+                    shortage.getRegisterId(),
+                    "缺书到货通知",
+                    "您登记的缺书《" + shortage.getBookName() + "》已到货入库，请前往库房领取。",
+                    NoticeBizTypeEnum.LACK.getCode(),
+                    shortageId);
+            log.info("【通知领书】已通知登记人领书, registerId={}, lackId={}, bookName={}", shortage.getRegisterId(), shortageId, shortage.getBookName());
+        } catch (Exception e) {
+            log.warn("【通知领书】发送通知失败: {}", e.getMessage());
+            throw new ServiceException("通知发送失败：" + e.getMessage());
+        }
+
+        return 1;
+    }
+
     private boolean isValidStatusTransition(String from, String to) {
         if (from == null || to == null || from.equals(to)) return false;
         switch (from) {
@@ -457,8 +514,8 @@ public class TbShortageServiceImpl implements ITbShortageService
         switch (status) {
             case "0": return "未处理";
             case "1": return "已纳入采购";
-            case "2": return "部分补齐";
-            case "3": return "已补齐";
+            case "2": return "已到货";
+            case "3": return "已入库";
             case "4": return "已取消";
             default: return status;
         }

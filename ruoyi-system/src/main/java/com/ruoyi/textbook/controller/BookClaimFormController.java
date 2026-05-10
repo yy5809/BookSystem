@@ -46,6 +46,7 @@ public class BookClaimFormController extends BaseController {
     @Log(title = "领书单", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody BookClaimForm bookClaimForm) {
+        bookClaimForm.setCreateBy(getUsername());
         return toAjax(bookClaimFormService.insertBookClaimForm(bookClaimForm));
     }
 
@@ -53,6 +54,7 @@ public class BookClaimFormController extends BaseController {
     @Log(title = "领书单", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody BookClaimForm bookClaimForm) {
+        bookClaimForm.setUpdateBy(getUsername());
         return toAjax(bookClaimFormService.updateBookClaimForm(bookClaimForm));
     }
 
@@ -69,7 +71,7 @@ public class BookClaimFormController extends BaseController {
         }
         try {
             Long operatorId = SecurityUtils.getUserId();
-            String operatorName = SecurityUtils.getUsername();
+            String operatorName = SecurityUtils.getLoginUser().getUser().getNickName();
             return toAjax(bookClaimFormService.confirmOutbound(
                     bookClaimForm.getFormId(),
                     operatorId,

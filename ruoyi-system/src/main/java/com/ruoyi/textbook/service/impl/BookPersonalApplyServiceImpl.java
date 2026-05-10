@@ -105,7 +105,7 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
             throw new ServiceException("该申请已审核，无法重复操作");
         }
 
-        bookPersonalApply.setAuditBy(SecurityUtils.getUsername());
+        bookPersonalApply.setAuditBy(SecurityUtils.getLoginUser().getUser().getNickName());
         bookPersonalApply.setAuditTime(new Date());
 
         if ("1".equals(bookPersonalApply.getStatus())) {
@@ -192,6 +192,68 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
     }
 
     @Override
+    public int registerShortageFromApply(Long applyId) {
+        BookPersonalApply apply = bookPersonalApplyMapper.selectBookPersonalApplyById(applyId);
+        if (apply == null) {
+            throw new ServiceException("申请记录不存在");
+        }
+
+        if (!"2".equals(apply.getStatus())) {
+            throw new ServiceException("只有已驳回的申请才能进行缺书登记，当前状态：" + apply.getStatus());
+        }
+
+        Long currentUserId = SecurityUtils.getUserId();
+        if (!currentUserId.equals(apply.getTeacherId())) {
+            throw new ServiceException("无权为他人创建缺书登记");
+        }
+
+        Integer shortageQty = apply.getApplyQty();
+        if (shortageQty == null || shortageQty <= 0) {
+            throw new ServiceException("申请数量无效");
+        }
+
+        TbShortage shortage = new TbShortage();
+        shortage.setBookId(apply.getTextbookId());
+        shortage.setBookName(apply.getBookName());
+        shortage.setIsbn(apply.getIsbn());
+        shortage.setLackNum(shortageQty);
+        shortage.setUrgency("0");
+        shortage.setRegisterId(apply.getTeacherId());
+        shortage.setRegisterName(apply.getTeacherName());
+        shortage.setHandleStatus("0");
+        shortage.setSource("1");
+        shortage.setSourceId(applyId);
+        shortage.setRemark("教师自助缺书登记，申请人：" + apply.getTeacherName());
+        shortage.setCreateTime(DateUtils.getNowDate());
+        shortage.setUpdateTime(DateUtils.getNowDate());
+        tbShortageMapper.insertTbShortage(shortage);
+
+        try {
+            noticeService.sendLackNotice(
+                    shortage.getBookId(),
+                    shortage.getBookName(),
+                    shortage.getIsbn(),
+                    shortage.getLackNum(),
+                    0,
+                    shortage.getLackId()
+            );
+        } catch (Exception e) {
+            log.warn("【教师自助缺书登记】发送缺书通知失败: {}", e.getMessage());
+        }
+
+        log.info("【教师自助缺书登记】教师一键缺书登记成功, applyId={}, teacherId={}, lackId={}, bookName={}",
+                applyId, apply.getTeacherId(), shortage.getLackId(), apply.getBookName());
+
+        BookPersonalApply updateApply = new BookPersonalApply();
+        updateApply.setApplyId(applyId);
+        updateApply.setStatus("5");
+        updateApply.setUpdateBy(SecurityUtils.getLoginUser().getUser().getNickName());
+        bookPersonalApplyMapper.updateBookPersonalApply(updateApply);
+
+        return 1;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public int issueApply(Long applyId) {
         BookPersonalApply existingApply = bookPersonalApplyMapper.selectBookPersonalApplyById(applyId);
@@ -208,7 +270,7 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
         }
 
         try {
-            stockOperationService.deductStock(existingApply.getTextbookId(), existingApply.getApplyQty(), "2", existingApply.getApplyNo(), SecurityUtils.getUsername());
+            stockOperationService.deductStock(existingApply.getTextbookId(), existingApply.getApplyQty(), "2", existingApply.getApplyNo(), SecurityUtils.getLoginUser().getUser().getNickName());
         } catch (ServiceException e) {
             if (e.getMessage().contains("库存不足") || e.getMessage().contains("并发冲突")) {
                 throw new ServiceException("出库失败：" + e.getMessage() + "。该教材库存可能在审核通过后被其他操作扣减，请驳回此申请并建议教师重新提交。");

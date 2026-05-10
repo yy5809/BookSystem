@@ -12,9 +12,9 @@ public interface ISupplierAccountService {
 
     boolean checkSupplierCodeUnique(TbSupplier supplier);
 
-    int insertSupplierAccount(TbSupplier supplier, String password);
+    int insertSupplierAccount(TbSupplier supplier, String password, String operName);
 
-    int updateSupplierAccount(TbSupplier supplier);
+    int updateSupplierAccount(TbSupplier supplier, String operName);
 
     int deleteSupplierAccountByIds(Long[] supplierIds);
 

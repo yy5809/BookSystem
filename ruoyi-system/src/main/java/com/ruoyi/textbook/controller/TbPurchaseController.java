@@ -10,6 +10,7 @@ import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.dto.AuditRequest;
 import com.ruoyi.textbook.service.ITbBuyService;
@@ -35,6 +36,13 @@ public class TbPurchaseController extends BaseController {
     @Log(title = "购书单批量提交", businessType = BusinessType.INSERT)
     @PostMapping("/batchSubmit")
     public AjaxResult batchSubmit(@RequestBody List<TbPurchase> buys) {
+        Long userId = SecurityUtils.getUserId();
+        String userName = SecurityUtils.getLoginUser().getUser().getNickName();
+        for (TbPurchase buy : buys) {
+            buy.setUserId(userId);
+            buy.setUserName(userName);
+            buy.setCreateBy(getUsername());
+        }
         return toAjax(tbBuyService.batchSubmit(buys));
     }
 
@@ -48,6 +56,9 @@ public class TbPurchaseController extends BaseController {
     @Log(title = "购书单", businessType = BusinessType.INSERT)
     @PostMapping("/submit")
     public AjaxResult submit(@Valid @RequestBody TbPurchase buy) {
+        buy.setUserId(SecurityUtils.getUserId());
+        buy.setUserName(SecurityUtils.getLoginUser().getUser().getNickName());
+        buy.setCreateBy(getUsername());
         return toAjax(tbBuyService.submit(buy));
     }
 

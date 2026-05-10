@@ -13,4 +13,9 @@ public interface IBookPersonalApplyService {
     public int auditApply(BookPersonalApply bookPersonalApply);
     public int issueApply(Long applyId);
     public int cancelApply(Long applyId, Long currentUserId);
+
+    /**
+     * 教师一键缺书登记（由已驳回的领书申请创建缺书记录）
+     */
+    public int registerShortageFromApply(Long applyId);
 }

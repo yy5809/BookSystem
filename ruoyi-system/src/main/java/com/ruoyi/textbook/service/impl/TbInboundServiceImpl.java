@@ -216,7 +216,7 @@ public class TbInboundServiceImpl implements ITbInboundService {
                         inbound.getBookId(),
                         inbound.getInNum(),
                         SecurityUtils.getUserId(),
-                        SecurityUtils.getUsername(),
+                        SecurityUtils.getLoginUser().getUser().getNickName(),
                         "INBOUND_DELETE",
                         String.valueOf(inbound.getInId()),
                         "批量删除入库单，回退库存，入库单号：" + inbound.getInboundNo()
@@ -441,8 +441,8 @@ public class TbInboundServiceImpl implements ITbInboundService {
         if (tbInbound.getPurchaseId() != null) {
             TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(tbInbound.getPurchaseId());
             if (purchase != null && ("4".equals(purchase.getStatus()) || "6".equals(purchase.getStatus()))) {
-                purchase.setStatus("5");
-                tbPurchaseMapper.updateTbPurchase(purchase);
+                TbPurchase inboundPurchase = purchaseStateService.transitionToInbound(tbInbound.getPurchaseId());
+                tbPurchaseMapper.updateTbPurchase(inboundPurchase);
                 log.info("【入库处理】采购单状态更新为'已入库', purchaseId={}", tbInbound.getPurchaseId());
             } else if (purchase != null) {
                 log.warn("【入库处理】采购单状态不是'已到货'或'已发货'，跳过状态更新, purchaseId={}, currentStatus={}", tbInbound.getPurchaseId(), purchase.getStatus());

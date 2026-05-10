@@ -37,28 +37,28 @@
     </el-row>
 
     <el-table v-loading="loading" :data="inventoryList" :row-class-name="tableRowClassName" border stripe>
-      <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
-      <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="180" />
-      <el-table-column label="作者" align="center" prop="author" width="90" show-overflow-tooltip />
-      <el-table-column label="出版社" align="center" prop="publisher" width="120" show-overflow-tooltip />
-      <el-table-column label="当前库存" align="center" prop="stockNum" width="90">
+      <el-table-column label="ISBN" align="center" prop="isbn" width="130" />
+      <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="140" />
+      <el-table-column label="作者" align="center" prop="author" width="80" show-overflow-tooltip />
+      <el-table-column label="出版社" align="center" prop="publisher" width="110" show-overflow-tooltip />
+      <el-table-column label="当前库存" align="center" prop="stockNum" width="80">
         <template slot-scope="scope">
           <span :style="{ color: getStockColor(scope.row), fontWeight: 'bold' }">{{ scope.row.stockNum || 0 }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="预警阈值" align="center" prop="warningNum" width="90" />
-      <el-table-column label="库存状态" align="center" width="90">
+      <el-table-column label="预警阈值" align="center" prop="warningNum" width="80" />
+      <el-table-column label="库存状态" align="center" width="80">
         <template slot-scope="scope">
           <el-tag :type="getStatusTagType(scope.row)" size="mini" effect="dark">{{ getStatusLabel(scope.row) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="累计入库" align="center" prop="totalPurchase" width="90">
+      <el-table-column label="累计入库" align="center" prop="totalPurchase" width="80">
         <template slot-scope="scope">{{ scope.row.totalPurchase || 0 }}</template>
       </el-table-column>
-      <el-table-column label="累计出库" align="center" prop="totalIssued" width="90">
+      <el-table-column label="累计出库" align="center" prop="totalIssued" width="80">
         <template slot-scope="scope">{{ scope.row.totalIssued || 0 }}</template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="120">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="115">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
           <el-button size="mini" type="text" icon="el-icon-document" @click="handleViewLog(scope.row)">流水</el-button>

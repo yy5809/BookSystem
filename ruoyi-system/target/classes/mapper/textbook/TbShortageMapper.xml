@@ -26,14 +26,15 @@
         FROM textbook_lack t
         LEFT JOIN textbook_info i ON t.book_id = i.book_id
         LEFT JOIN sys_user u ON t.register_id = u.user_id
-        WHERE t.del_flag = '0'
+        WHERE t.del_flag != '1'
     </sql>
 
     <select id="selectTbShortageById" parameterType="Long" resultMap="TbShortageResult">
-        <include refid="selectTbShortageVo"/> AND t.lack_id = #{lackId}
+        <include refid="selectTbShortageVo"/> AND t.del_flag != '1' AND t.lack_id = #{lackId}
     </select>
     <select id="selectTbShortageList" parameterType="com.ruoyi.textbook.domain.TbShortage" resultMap="TbShortageResult">
         <include refid="selectTbShortageVo"/>
+        <if test="delFlag != null and delFlag != ''">AND t.del_flag = #{delFlag}</if>
         <if test="bookName != null and bookName != ''">AND i.book_name LIKE CONCAT('%',#{bookName},'%')</if>
         <if test="isbn != null and isbn != ''">AND i.isbn = #{isbn}</if>
         <if test="handleStatus != null and handleStatus != ''">AND t.handle_status = #{handleStatus}</if>
@@ -67,10 +68,10 @@
     </update>
 
     <delete id="deleteTbShortageById" parameterType="Long">
-        UPDATE textbook_lack SET del_flag='1' WHERE lack_id=#{lackId}
+        UPDATE textbook_lack SET del_flag='2' WHERE lack_id=#{lackId}
     </delete>
     <delete id="deleteTbShortageByIds" parameterType="Long[]">
-        UPDATE textbook_lack SET del_flag='1' WHERE lack_id IN
+        UPDATE textbook_lack SET del_flag='2' WHERE lack_id IN
         <foreach item="lackId" collection="array" open="(" separator="," close=")">#{lackId}</foreach>
     </delete>
 

@@ -60,7 +60,7 @@ public class SupplierAccountServiceImpl implements ISupplierAccountService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertSupplierAccount(TbSupplier supplier, String password) {
+    public int insertSupplierAccount(TbSupplier supplier, String password, String operName) {
         SysUser existUser = userMapper.selectUserByUserName(supplier.getSupplierCode());
         if (existUser != null) {
             throw new ServiceException("供应商编码'" + supplier.getSupplierCode() + "'已存在，请更换编码");
@@ -71,6 +71,7 @@ public class SupplierAccountServiceImpl implements ISupplierAccountService {
         user.setNickName(supplier.getSupplierName());
         user.setPassword(SecurityUtils.encryptPassword(password));
         user.setStatus("0");
+        user.setCreateBy(operName);
         userMapper.insertUser(user);
 
         bindSupplierRole(user.getUserId());
@@ -82,7 +83,7 @@ public class SupplierAccountServiceImpl implements ISupplierAccountService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int updateSupplierAccount(TbSupplier supplier) {
+    public int updateSupplierAccount(TbSupplier supplier, String operName) {
         TbSupplier existing = supplierMapper.selectBySupplierId(supplier.getSupplierId());
         if (existing == null) {
             throw new ServiceException("供应商不存在");
@@ -98,6 +99,7 @@ public class SupplierAccountServiceImpl implements ISupplierAccountService {
         }
         user.setNickName(supplier.getSupplierName());
         user.setUserName(supplier.getSupplierCode());
+        user.setUpdateBy(operName);
         userMapper.updateUser(user);
 
         return supplierMapper.updateTbSupplier(supplier);

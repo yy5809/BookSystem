@@ -36,20 +36,20 @@
 
     <el-table v-loading="loading" :data="teacherList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="50" align="center" />
-      <el-table-column label="姓名" align="center" prop="nickName" show-overflow-tooltip />
-      <el-table-column label="职工号" align="center" prop="userName" show-overflow-tooltip />
-      <el-table-column label="所属部门" align="center" prop="dept.deptName" show-overflow-tooltip />
-      <el-table-column label="状态" align="center" width="80">
+      <el-table-column label="姓名" align="center" prop="nickName" min-width="80" show-overflow-tooltip />
+      <el-table-column label="职工号" align="center" prop="userName" min-width="100" show-overflow-tooltip />
+      <el-table-column label="所属部门" align="center" prop="dept.deptName" min-width="120" show-overflow-tooltip />
+      <el-table-column label="状态" align="center" width="75">
         <template slot-scope="scope">
           <el-switch v-model="scope.row.status" active-value="0" inactive-value="1" @change="handleStatusChange(scope.row)"></el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" align="center" width="160">
+      <el-table-column label="创建时间" align="center" width="145">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="180" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['textbook:teacher:edit']">修改</el-button>
           <el-button size="mini" type="text" icon="el-icon-key" @click="handleResetPwd(scope.row)" v-hasPermi="['textbook:teacher:resetPwd']">重置密码</el-button>
@@ -73,7 +73,7 @@
             <el-option v-for="dept in deptOptions" :key="dept.deptId" :label="dept.deptName" :value="dept.deptId" />
           </el-select>
         </el-form-item>
-        <el-form-item v-if="form.userId == undefined" label="密码" prop="password">
+        <el-form-item v-show="form.userId == undefined" label="密码" prop="password">
           <el-input v-model="form.password" placeholder="请输入密码" type="password" maxlength="20" show-password />
         </el-form-item>
       </el-form>

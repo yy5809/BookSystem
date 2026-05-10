@@ -25,6 +25,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.textbook.domain.dto.TeacherImportDTO;
 import com.ruoyi.textbook.service.ITeacherManageService;
+import com.ruoyi.common.utils.StringUtils;
 
 @RestController
 @RequestMapping("/textbook/teacher")
@@ -50,7 +51,18 @@ public class TeacherManageController extends BaseController {
     @PreAuthorize("@ss.hasPermi('textbook:teacher:add')")
     @Log(title = "教师管理", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody SysUser user) {
+    public AjaxResult add(@RequestBody Map<String, Object> params) {
+        String password = (String) params.get("password");
+        if (StringUtils.isEmpty(password)) {
+            return error("密码不能为空");
+        }
+        SysUser user = new SysUser();
+        user.setUserName((String) params.get("userName"));
+        user.setNickName((String) params.get("nickName"));
+        user.setPassword(password);
+        if (params.get("deptId") != null) {
+            user.setDeptId(Long.valueOf(params.get("deptId").toString()));
+        }
         if (!teacherManageService.checkUserNameUnique(user)) {
             return error("新增教师'" + user.getUserName() + "'失败，职工号已存在");
         }

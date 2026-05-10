@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="88px">
-      <el-form-item label="供应商名�? prop="supplierName">
+      <el-form-item label="供应商名称" prop="supplierName">
         <el-input v-model="queryParams.supplierName" placeholder="请输入供应商名称" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="供应商编�? prop="supplierCode">
+      <el-form-item label="供应商编码" prop="supplierCode">
         <el-input v-model="queryParams.supplierCode" placeholder="请输入供应商编码" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item>
@@ -24,21 +24,22 @@
     </el-row>
 
     <el-table v-loading="loading" :data="supplierList" border stripe>
-      <el-table-column label="供应商编�? align="center" prop="supplierCode" width="130" />
-      <el-table-column label="供应商名�? align="center" prop="supplierName" min-width="180" show-overflow-tooltip />
-      <el-table-column label="登录账号" align="center" prop="userName" width="130" show-overflow-tooltip />
-      <el-table-column label="联系�? align="center" prop="contactPerson" width="100" />
-      <el-table-column label="联系电话" align="center" prop="contactPhone" width="130" />
-      <el-table-column label="付款账期" align="center" prop="paymentTerms" width="100" />
-      <el-table-column label="状�? align="center" width="80">
+      <el-table-column label="供应商编码" align="center" prop="supplierCode" width="115" />
+      <el-table-column label="供应商名称" align="center" prop="supplierName" min-width="130" show-overflow-tooltip />
+      <el-table-column label="登录账号" align="center" prop="userName" width="100" show-overflow-tooltip />
+      <el-table-column label="联系人" align="center" prop="contactPerson" width="85" />
+      <el-table-column label="联系电话" align="center" prop="contactPhone" width="120" />
+      <el-table-column label="付款账期" align="center" prop="paymentTerms" width="90" />
+      <el-table-column label="状态" align="center" width="70">
         <template slot-scope="scope">
           <el-tag :type="scope.row.status === '0' ? 'success' : 'danger'" size="mini">{{ scope.row.status === '0' ? '正常' : '停用' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="180">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="255">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['textbook:supplier:edit']">修改</el-button>
           <el-button size="mini" type="text" icon="el-icon-key" @click="handleResetPwd(scope.row)" v-hasPermi="['textbook:supplier:edit']">重置密码</el-button>
+          <el-button size="mini" type="text" :style="scope.row.status === '0' ? 'color:#E6A23C' : 'color:#67C23A'" :icon="scope.row.status === '0' ? 'el-icon-video-pause' : 'el-icon-video-play'" @click="handleChangeStatus(scope.row)" v-hasPermi="['textbook:supplier:edit']">{{ scope.row.status === '0' ? '停用' : '启用' }}</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" style="color:#F56C6C" @click="handleDelete(scope.row)" v-hasPermi="['textbook:supplier:remove']">删除</el-button>
         </template>
       </el-table-column>
@@ -50,87 +51,87 @@
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="供应商编�? prop="supplierCode">
-              <el-input v-model="form.supplierCode" placeholder="请输入编�? :disabled="form.supplierId != null" />
+            <el-form-item label="供应商编码" prop="supplierCode">
+              <el-input v-model="form.supplierCode" placeholder="请输入编码" :disabled="form.supplierId != null" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="供应商名�? prop="supplierName">
-              <el-input v-model="form.supplierName" placeholder="请输入名�? />
+            <el-form-item label="供应商名称" prop="supplierName">
+              <el-input v-model="form.supplierName" placeholder="请输入名称" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="联系�? prop="contactPerson">
+            <el-form-item label="联系人" prop="contactPerson">
               <el-input v-model="form.contactPerson" placeholder="请输入联系人" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="联系电话">
-              <el-input v-model="form.contactPhone" placeholder="请输入联系电�? />
+            <el-form-item label="联系电话" prop="contactPhone">
+              <el-input v-model="form.contactPhone" placeholder="请输入联系电话" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="邮箱">
-              <el-input v-model="form.contactEmail" placeholder="请输入邮�? />
+              <el-input v-model="form.contactEmail" placeholder="请输入邮箱" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="地址">
+            <el-form-item label="地址" prop="address">
               <el-input v-model="form.address" placeholder="请输入地址" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="折扣�?%)">
+            <el-form-item label="折扣率(%)">
               <el-input-number v-model="form.discountRate" :min="0" :max="100" :precision="1" style="width:100%" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="付款账期">
-              <el-input v-model="form.paymentTerms" placeholder="如：月结30�? />
+              <el-input v-model="form.paymentTerms" placeholder="如：月结30天" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
-            <el-form-item label="开户银�?>
-              <el-input v-model="form.bankName" placeholder="请输入开户银�? />
+            <el-form-item label="开户银行">
+              <el-input v-model="form.bankName" placeholder="请输入开户银行" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="银行账号">
-              <el-input v-model="form.bankAccount" placeholder="请输入银行账�? />
+              <el-input v-model="form.bankAccount" placeholder="请输入银行账号" />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="税号">
-              <el-input v-model="form.taxNumber" placeholder="请输入税�? />
+              <el-input v-model="form.taxNumber" placeholder="请输入税号" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item v-if="form.supplierId == null" label="登录密码" prop="password">
-              <el-input v-model="form.password" placeholder="请输入登录密�? type="password" maxlength="20" show-password />
+              <el-input v-model="form.password" placeholder="请输入登录密码" type="password" maxlength="20" show-password />
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">�?�?/el-button>
-        <el-button @click="cancel">�?�?/el-button>
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listSupplierAccount, getSupplierAccount, addSupplierAccount, updateSupplierAccount, delSupplierAccount, resetSupplierPwd } from "@/api/textbook/supplier";
+import { listSupplierAccount, getSupplierAccount, addSupplierAccount, updateSupplierAccount, delSupplierAccount, resetSupplierPwd, changeSupplierStatus } from "@/api/textbook/supplier";
 
 export default {
   name: "SupplierManage",
@@ -155,10 +156,12 @@ export default {
         supplierCode: [{ required: true, message: "请输入供应商编码", trigger: "blur" }],
         supplierName: [{ required: true, message: "请输入供应商名称", trigger: "blur" }],
         contactPerson: [{ required: true, message: "请输入联系人", trigger: "blur" }],
+        contactPhone: [{ required: true, message: "请输入联系电话", trigger: "blur" }],
+        address: [{ required: true, message: "请输入地址", trigger: "blur" }],
         password: [
-          { required: true, message: "请输入登录密�?, trigger: "blur" },
-          { min: 5, max: 20, message: '密码长度必须介于 5 �?20 之间', trigger: 'blur' },
-          { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符�? > \" ' \\ |", trigger: "blur" }
+          { required: true, message: "请输入登录密码", trigger: "blur" },
+          { min: 5, max: 20, message: '密码长度必须介于 5 到 20 之间', trigger: 'blur' },
+          { pattern: /^[^<>"'|\\]+$/, message: "不能包含非法字符：< > \" ' \\ |", trigger: "blur" }
         ]
       }
     };
@@ -185,7 +188,7 @@ export default {
     },
     handleAdd() {
       this.reset();
-      this.title = "新增供应�?;
+      this.title = "新增供应商";
       this.open = true;
     },
     handleUpdate(row) {
@@ -193,7 +196,7 @@ export default {
       getSupplierAccount(row.supplierId).then(response => {
         this.form = response.data;
         this.form.userId = response.data.userId;
-        this.title = "修改供应�?;
+        this.title = "修改供应商";
         this.open = true;
       });
     },
@@ -203,10 +206,10 @@ export default {
         cancelButtonText: "取消",
         closeOnClickModal: false,
         inputPattern: /^.{5,20}$/,
-        inputErrorMessage: "密码长度必须介于 5 �?20 之间",
+        inputErrorMessage: "密码长度必须介于 5 到 20 之间",
         inputValidator: (value) => {
           if (/<|>|"|'|\||\\/.test(value)) {
-            return "不能包含非法字符�? > \" ' \\ |"
+            return "不能包含非法字符：< > \" ' \\ |"
           }
         }
       }).then(({ value }) => {
@@ -214,6 +217,16 @@ export default {
           this.$modal.msgSuccess("密码重置成功，新密码是：" + value)
         })
       }).catch(() => {});
+    },
+    handleChangeStatus(row) {
+      const text = row.status === '0' ? '停用' : '启用'
+      const newStatus = row.status === '0' ? '1' : '0'
+      this.$modal.confirm('确认要' + text + '供应商"' + row.supplierName + '"吗？').then(() => {
+        return changeSupplierStatus(row.userId, newStatus)
+      }).then(() => {
+        this.$modal.msgSuccess(text + "成功")
+        this.getList()
+      }).catch(() => {})
     },
     reset() {
       this.form = {
@@ -250,7 +263,7 @@ export default {
       });
     },
     handleDelete(row) {
-      this.$modal.confirm('是否确认删除供应�?' + row.supplierName + '"�?br/>将同时删除供应商的登录账�?).then(() => {
+      this.$modal.confirm('是否确认删除供应商"' + row.supplierName + '"？<br/>将同时删除供应商的登录账号？').then(() => {
         return delSupplierAccount(row.supplierId);
       }).then(() => {
         this.getList();

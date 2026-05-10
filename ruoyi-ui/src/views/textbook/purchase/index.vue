@@ -14,16 +14,16 @@
       </div>
 
       <el-table v-loading="loading" :data="purchaseList" border stripe>
-        <el-table-column label="采购单号" prop="purchaseNo" width="180" align="center"/>
-        <el-table-column label="申请人" prop="userName" width="100" align="center"/>
-        <el-table-column label="部门" prop="deptName" width="120" align="center"/>
-        <el-table-column label="状态" prop="auditStatus" width="100" align="center">
+        <el-table-column label="采购单号" prop="purchaseNo" width="170" align="center" show-overflow-tooltip />
+        <el-table-column label="申请人" prop="userName" width="90" align="center"/>
+        <el-table-column label="部门" prop="deptName" width="105" align="center" show-overflow-tooltip/>
+        <el-table-column label="状态" prop="auditStatus" width="80" align="center">
           <template slot-scope="scope">
             <el-tag :type="statusTagType(scope.row.auditStatus)">{{ statusText(scope.row.auditStatus) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="提交时间" prop="submitTime" width="160" align="center"/>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="380">
+        <el-table-column label="提交时间" prop="submitTime" width="145" align="center"/>
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="350">
           <template slot-scope="scope">
             <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
             <el-button size="mini" type="text" icon="el-icon-check" style="color:#67C23A" @click="handleAudit(scope.row)" v-if="scope.row.auditStatus === '0'" v-hasRole="['admin','warehouse']">通过</el-button>
@@ -125,13 +125,18 @@
               <el-table-column label="行号" prop="rowIndex" width="70" align="center">
                 <template slot-scope="scope"><el-tag size="mini">第{{ scope.row.rowIndex }}行</el-tag></template>
               </el-table-column>
-              <el-table-column label="ISBN" prop="isbn" width="140" align="center"/>
-              <el-table-column label="教材名称" prop="bookName" min-width="180" show-overflow-tooltip/>
-              <el-table-column label="数量" prop="quantity" width="80" align="center"/>
-              <el-table-column label="学院" prop="college" width="120" show-overflow-tooltip/>
-              <el-table-column label="专业" prop="major" width="120" show-overflow-tooltip/>
-              <el-table-column label="年级" prop="grade" width="120" show-overflow-tooltip/>
-              <el-table-column label="备注" prop="remark" min-width="120" show-overflow-tooltip/>
+              <el-table-column label="ISBN" prop="isbn" width="130" align="center"/>
+              <el-table-column label="教材名称" prop="bookName" min-width="140" show-overflow-tooltip/>
+              <el-table-column label="版次" prop="edition" width="70" align="center"/>
+              <el-table-column label="作者" prop="author" width="80" show-overflow-tooltip/>
+              <el-table-column label="出版社" prop="publisher" width="100" show-overflow-tooltip/>
+              <el-table-column label="定价" prop="price" width="70" align="center"/>
+              <el-table-column label="类型" prop="textbookType" width="70" align="center"/>
+              <el-table-column label="学院" prop="college" width="100" show-overflow-tooltip/>
+              <el-table-column label="专业" prop="major" width="100" show-overflow-tooltip/>
+              <el-table-column label="年级" prop="grade" width="70" align="center"/>
+              <el-table-column label="数量" prop="quantity" width="65" align="center"/>
+              <el-table-column label="备注" prop="remark" min-width="100" show-overflow-tooltip/>
             </el-table>
           </el-tab-pane>
           <el-tab-pane label="校验失败数据" name="fail" v-if="previewData.failCount > 0">
@@ -325,7 +330,7 @@ export default {
     },
 
     handleView(row) {
-      this.$router.push({ path: '/warehouse/purchase/detail', query: { id: row.buyId } })
+      this.$router.push({ path: '/textbook/purchase/detail', query: { id: row.buyId } })
     },
     handleAudit(row) {
       this.$modal.confirm('确认审核通过采购单 ' + row.purchaseNo + ' ？').then(() => {
@@ -382,7 +387,9 @@ export default {
       }).then(() => {
         this.$modal.msgSuccess('已验收入库，库存已更新')
         this.getList()
-      }).catch(() => {})
+      }).catch(() => {
+        this.getList()
+      })
     },
 
     statusText(status) {

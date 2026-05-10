@@ -85,6 +85,7 @@ public class TbBookController extends BaseController {
     @Log(title = "教材信息", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbBook tbBook) {
+        tbBook.setCreateBy(getUsername());
         return toAjax(tbBookService.insertTbBook(tbBook));
     }
 
@@ -92,6 +93,7 @@ public class TbBookController extends BaseController {
     @Log(title = "教材信息", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody TbBook tbBook) {
+        tbBook.setUpdateBy(getUsername());
         return toAjax(tbBookService.updateTbBook(tbBook));
     }
 
