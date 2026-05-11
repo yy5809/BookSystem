@@ -190,15 +190,11 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
 
         updateNoticeProgress(form.getNoticeId());
 
-        try {
-            String bookNames = details.stream()
-                    .map(BookClaimFormDetail::getBookName)
-                    .reduce((a, b) -> a + "、" + b)
-                    .orElse("");
-            noticeService.sendClaimFormOutboundNotice(formId, form.getClassName(), bookNames, totalIssuedQtyParam);
-        } catch (Exception e) {
-            log.warn("【班级领书出库】发送出库通知失败: {}", e.getMessage());
-        }
+        String bookNames = details.stream()
+                .map(BookClaimFormDetail::getBookName)
+                .reduce((a, b) -> a + "、" + b)
+                .orElse("");
+        noticeService.sendClaimFormOutboundNotice(formId, form.getClassName(), bookNames, totalIssuedQtyParam);
 
         log.info("【班级领书出库】完成! 领书单号={}, 班级={}, 实发数量={}, 状态={}",
                 form.getFormNo(), form.getClassName(), totalIssuedQtyParam, newStatus);

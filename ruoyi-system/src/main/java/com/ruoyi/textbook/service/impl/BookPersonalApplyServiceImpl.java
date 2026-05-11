@@ -175,18 +175,14 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
         shortage.setUpdateTime(DateUtils.getNowDate());
         tbShortageMapper.insertTbShortage(shortage);
 
-        try {
-            noticeService.sendLackNotice(
-                    shortage.getBookId(),
-                    shortage.getBookName(),
-                    shortage.getIsbn(),
-                    shortage.getLackNum(),
-                    0,
-                    shortage.getLackId()
-            );
-        } catch (Exception e) {
-            log.warn("【审核驳回】发送缺书通知失败: {}", e.getMessage());
-        }
+        noticeService.sendLackNotice(
+                shortage.getBookId(),
+                shortage.getBookName(),
+                shortage.getIsbn(),
+                shortage.getLackNum(),
+                0,
+                shortage.getLackId()
+        );
 
         return shortage.getLackId();
     }
@@ -228,18 +224,14 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
         shortage.setUpdateTime(DateUtils.getNowDate());
         tbShortageMapper.insertTbShortage(shortage);
 
-        try {
-            noticeService.sendLackNotice(
-                    shortage.getBookId(),
-                    shortage.getBookName(),
-                    shortage.getIsbn(),
-                    shortage.getLackNum(),
-                    0,
-                    shortage.getLackId()
-            );
-        } catch (Exception e) {
-            log.warn("【教师自助缺书登记】发送缺书通知失败: {}", e.getMessage());
-        }
+        noticeService.sendLackNotice(
+                shortage.getBookId(),
+                shortage.getBookName(),
+                shortage.getIsbn(),
+                shortage.getLackNum(),
+                0,
+                shortage.getLackId()
+        );
 
         log.info("【教师自助缺书登记】教师一键缺书登记成功, applyId={}, teacherId={}, lackId={}, bookName={}",
                 applyId, apply.getTeacherId(), shortage.getLackId(), apply.getBookName());

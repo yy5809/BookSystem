@@ -383,17 +383,13 @@ public class TbInboundServiceImpl implements ITbInboundService {
                     relatedPurchase.setRejectReason(null);
                     tbPurchaseMapper.updateTbPurchase(relatedPurchase);
                     log.info("【入库处理】已重新开放被驳回的领书单, purchaseId={}", shortage.getSourceId());
-                    try {
-                        noticeService.sendOrderApproveNotice(
-                                relatedPurchase.getUserId(),
-                                tbInbound.getBookName(),
-                                "1",
-                                "缺书已到货，您的领书单已重新开放，请等待审核",
-                                shortage.getSourceId()
-                        );
-                    } catch (Exception e) {
-                        log.warn("【入库处理】重新开放领书单通知发送失败: {}", e.getMessage());
-                    }
+                    noticeService.sendOrderApproveNotice(
+                            relatedPurchase.getUserId(),
+                            tbInbound.getBookName(),
+                            "1",
+                            "缺书已到货，您的领书单已重新开放，请等待审核",
+                            shortage.getSourceId()
+                    );
                 }
             }
 
@@ -405,36 +401,28 @@ public class TbInboundServiceImpl implements ITbInboundService {
                     relatedApply.setUpdateBy("system");
                     bookPersonalApplyMapper.updateBookPersonalApply(relatedApply);
                     log.info("【入库处理】已重新开放被驳回的个人领书申请, applyId={}", shortage.getSourceId());
-                    try {
-                        noticeService.sendNoticeToUser(
-                                relatedApply.getTeacherId(),
-                                "缺书到货-申请已重新开放",
-                                "您申请的《" + tbInbound.getBookName() + "》缺书已到货，领书申请已自动重新开放，请等待审核。",
-                                "4",
-                                shortage.getLackId()
-                        );
-                    } catch (Exception e) {
-                        log.warn("【入库处理】重新开放个人领书申请通知发送失败: {}", e.getMessage());
-                    }
+                    noticeService.sendNoticeToUser(
+                            relatedApply.getTeacherId(),
+                            "缺书到货-申请已重新开放",
+                            "您申请的《" + tbInbound.getBookName() + "》缺书已到货，领书申请已自动重新开放，请等待审核。",
+                            "4",
+                            shortage.getLackId()
+                    );
                 }
             }
 
             if (shortage.getRegisterId() != null) {
-                try {
-                    String arrivalMsg = remainingLack <= 0
-                            ? "您登记的缺书《" + tbInbound.getBookName() + "》已全部到货补齐"
-                            : "您登记的缺书《" + tbInbound.getBookName() + "》已部分到货，本次补齐" + allocateQty + "本，剩余缺" + remainingLack + "本";
-                    noticeService.sendNoticeToUser(
-                            shortage.getRegisterId(),
-                            "缺书到货通知",
-                            arrivalMsg,
-                            "4",
-                            shortage.getLackId()
-                    );
-                    log.info("【入库处理】已通知缺书登记人, registerId={}", shortage.getRegisterId());
-                } catch (Exception e) {
-                    log.warn("【入库处理】通知缺书登记人时异常: {}", e.getMessage());
-                }
+                String arrivalMsg = remainingLack <= 0
+                        ? "您登记的缺书《" + tbInbound.getBookName() + "》已全部到货补齐"
+                        : "您登记的缺书《" + tbInbound.getBookName() + "》已部分到货，本次补齐" + allocateQty + "本，剩余缺" + remainingLack + "本";
+                noticeService.sendNoticeToUser(
+                        shortage.getRegisterId(),
+                        "缺书到货通知",
+                        arrivalMsg,
+                        "4",
+                        shortage.getLackId()
+                );
+                log.info("【入库处理】已通知缺书登记人, registerId={}", shortage.getRegisterId());
             }
         }
 

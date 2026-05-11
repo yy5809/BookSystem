@@ -201,24 +201,20 @@ public class TbBuyServiceImpl implements ITbBuyService {
         int result = tbPurchaseMapper.updateTbPurchase(buy);
 
         if (result > 0 && supplier.getUserId() != null) {
-            try {
-                List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
-                String bookNames = details.stream()
-                        .map(TbPurchaseDetail::getBookName)
-                        .collect(Collectors.joining("、"));
-                noticeService.sendNoticeToUser(
-                        supplier.getUserId(),
-                        "新采购需求通知",
-                        "您有新的采购需求！\n采购单号：" + buy.getPurchaseNo()
-                                + "\n教材：" + bookNames
-                                + "\n数量：" + details.stream().mapToInt(d -> d.getQuantity() != null ? d.getQuantity() : 0).sum() + " 本"
-                                + "\n\n请登录系统确认接单并发货。",
-                        NoticeBizTypeEnum.PURCHASE_CREATE.getCode(),
-                        buyId);
-                log.info("【确认下单】已通知供应商 {}, userId={}, 采购单号={}", supplier.getSupplierName(), supplier.getUserId(), buy.getPurchaseNo());
-            } catch (Exception e) {
-                log.warn("【确认下单】通知发送失败: {}", e.getMessage());
-            }
+            List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
+            String bookNames = details.stream()
+                    .map(TbPurchaseDetail::getBookName)
+                    .collect(Collectors.joining("、"));
+            noticeService.sendNoticeToUser(
+                    supplier.getUserId(),
+                    "新采购需求通知",
+                    "您有新的采购需求！\n采购单号：" + buy.getPurchaseNo()
+                            + "\n教材：" + bookNames
+                            + "\n数量：" + details.stream().mapToInt(d -> d.getQuantity() != null ? d.getQuantity() : 0).sum() + " 本"
+                            + "\n\n请登录系统确认接单并发货。",
+                    NoticeBizTypeEnum.PURCHASE_CREATE.getCode(),
+                    buyId);
+            log.info("【确认下单】已通知供应商 {}, userId={}, 采购单号={}", supplier.getSupplierName(), supplier.getUserId(), buy.getPurchaseNo());
         }
         return result;
     }
@@ -264,7 +260,9 @@ public class TbBuyServiceImpl implements ITbBuyService {
 
         java.util.Map<String, List<TbPurchaseDetail>> groupMap = new java.util.LinkedHashMap<>();
         for (TbPurchaseDetail d : classifiableDetails) {
-            String key = (d.getCollege() != null ? d.getCollege() : "") + "|" + (d.getMajor() != null ? d.getMajor() : "") + "|" + (d.getGrade() != null ? d.getGrade() : "");
+            String key = (d.getCollege() != null ? d.getCollege() : "")
+                    + "|" + (d.getMajor() != null ? d.getMajor() : "")
+                    + "|" + (d.getGrade() != null ? d.getGrade() : "");
             groupMap.computeIfAbsent(key, k -> new ArrayList<>()).add(d);
         }
 
@@ -288,7 +286,9 @@ public class TbBuyServiceImpl implements ITbBuyService {
             BookClaimForm form = new BookClaimForm();
             form.setNoticeId(notice.getNoticeId());
             form.setFormNo(formNoPrefix + String.format("%03d", ++formIndex));
-            form.setClassName(first.getGrade() + (StringUtils.isNotEmpty(first.getMajor()) ? first.getMajor() : ""));
+            form.setGradeLevel(first.getGrade());
+            String gradeYearPrefix = toGradeYearPrefix(first.getGrade());
+            form.setClassName(gradeYearPrefix != null ? gradeYearPrefix + (StringUtils.isNotEmpty(first.getMajor()) ? first.getMajor() : "") : (first.getGrade() + (StringUtils.isNotEmpty(first.getMajor()) ? first.getMajor() : "")));
             form.setStatus("0");
             form.setPlannedQty(0);
             form.setIssuedQty(0);
@@ -316,6 +316,22 @@ public class TbBuyServiceImpl implements ITbBuyService {
         }
 
         log.info("【入库完成】已自动生成班级领书计划, purchaseId={}, noticeNo={}, 班级数={}", buyId, noticeNo, groupMap.size());
+    }
+
+    private static String toGradeYearPrefix(String gradeLevel) {
+        if (gradeLevel == null) return null;
+        if ("通用".equals(gradeLevel)) return "通用";
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        int year = cal.get(java.util.Calendar.YEAR);
+        int month = cal.get(java.util.Calendar.MONTH) + 1;
+        int freshmanYear = (month >= 9) ? year : year - 1;
+        switch (gradeLevel) {
+            case "大一": return (freshmanYear % 100) + "级";
+            case "大二": return ((freshmanYear - 1) % 100) + "级";
+            case "大三": return ((freshmanYear - 2) % 100) + "级";
+            case "大四": return ((freshmanYear - 3) % 100) + "级";
+            default: return gradeLevel;
+        }
     }
 
     private String generateSemester() {
@@ -356,12 +372,8 @@ public class TbBuyServiceImpl implements ITbBuyService {
                 throw new ServiceException("教材「" + detail.getBookName() + "」入库失败：" + stockResult.getErrorMessage());
             }
 
-            try {
-                noticeService.sendInboundNotice(
+            noticeService.sendInboundNotice(
                     detail.getBookId(), detail.getBookName(), buyId);
-            } catch (Exception e) {
-                log.warn("入库通知发送失败: {}", e.getMessage());
-            }
         }
 
         TbPurchase inboundPurchase = purchaseStateService.transitionToInbound(buyId);
@@ -378,17 +390,13 @@ public class TbBuyServiceImpl implements ITbBuyService {
                     tbShortageMapper.updateTbShortage(shortage);
 
                     if (shortage.getRegisterId() != null) {
-                        try {
-                            noticeService.sendNoticeToUser(
-                                    shortage.getRegisterId(),
-                                    "缺书到货通知",
-                                    "您登记的缺书《" + shortage.getBookName() + "》已全部到货入库，请前往领取。",
-                                    NoticeBizTypeEnum.LACK.getCode(),
-                                    shortage.getLackId());
-                            log.info("【入库完成】已通知缺书登记人领书, registerId={}, lackId={}", shortage.getRegisterId(), shortage.getLackId());
-                        } catch (Exception e) {
-                            log.warn("【入库完成】通知缺书登记人失败: {}", e.getMessage());
-                        }
+                        noticeService.sendNoticeToUser(
+                                shortage.getRegisterId(),
+                                "缺书到货通知",
+                                "您登记的缺书《" + shortage.getBookName() + "》已全部到货入库，请前往领取。",
+                                NoticeBizTypeEnum.LACK.getCode(),
+                                shortage.getLackId());
+                        log.info("【入库完成】已通知缺书登记人领书, registerId={}, lackId={}", shortage.getRegisterId(), shortage.getLackId());
                     }
                 }
             }

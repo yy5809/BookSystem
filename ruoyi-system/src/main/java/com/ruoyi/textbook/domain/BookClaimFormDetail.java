@@ -48,6 +48,8 @@ public class BookClaimFormDetail extends BaseEntity {
 
     private String className;
 
+    private String gradeLevel;
+
     public Long getDetailId() { return detailId; }
     public void setDetailId(Long detailId) { this.detailId = detailId; }
     public Long getFormId() { return formId; }
@@ -79,6 +81,9 @@ public class BookClaimFormDetail extends BaseEntity {
     public void setClassId(Long classId) { this.classId = classId; }
     public String getClassName() { return className; }
     public void setClassName(String className) { this.className = className; }
+
+    public String getGradeLevel() { return gradeLevel; }
+    public void setGradeLevel(String gradeLevel) { this.gradeLevel = gradeLevel; }
 
     @Override
     public String toString() {

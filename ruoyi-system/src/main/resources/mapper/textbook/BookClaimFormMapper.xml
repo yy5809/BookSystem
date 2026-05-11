@@ -10,6 +10,7 @@
         <result property="majorId"        column="major_id"        />
         <result property="classId"        column="class_id"        />
         <result property="className"      column="class_name"      />
+        <result property="gradeLevel"     column="grade_level"     />
         <result property="status"         column="status"          />
         <result property="plannedQty"     column="planned_qty"     />
         <result property="issuedQty"      column="issued_qty"      />
@@ -24,7 +25,7 @@
     </resultMap>
 
     <sql id="selectBookClaimFormVo">
-        select form_id, form_no, notice_id, college_id, major_id, class_id, class_name,
+        select form_id, form_no, notice_id, college_id, major_id, class_id, class_name, grade_level,
                status, planned_qty, issued_qty, receiver_name, issue_time,
                create_by, create_time, update_by, update_time, remark, del_flag
         from textbook_claim_form
@@ -61,6 +62,7 @@
             <if test="majorId != null">major_id,</if>
             <if test="classId != null">class_id,</if>
             <if test="className != null and className != ''">class_name,</if>
+            <if test="gradeLevel != null and gradeLevel != ''">grade_level,</if>
             <if test="status != null and status != ''">status,</if>
             <if test="plannedQty != null">planned_qty,</if>
             <if test="issuedQty != null">issued_qty,</if>
@@ -75,6 +77,7 @@
             <if test="majorId != null">#{majorId},</if>
             <if test="classId != null">#{classId},</if>
             <if test="className != null and className != ''">#{className},</if>
+            <if test="gradeLevel != null and gradeLevel != ''">#{gradeLevel},</if>
             <if test="status != null and status != ''">#{status},</if>
             <if test="plannedQty != null">#{plannedQty},</if>
             <if test="issuedQty != null">#{issuedQty},</if>
@@ -88,6 +91,7 @@
     <update id="updateBookClaimForm" parameterType="com.ruoyi.textbook.domain.BookClaimForm">
         update textbook_claim_form
         <set>
+            <if test="gradeLevel != null and gradeLevel != ''">grade_level = #{gradeLevel},</if>
             <if test="receiverName != null and receiverName != ''">receiver_name = #{receiverName},</if>
             <if test="issueTime != null">issue_time = #{issueTime},</if>
             <if test="issuedQty != null">issued_qty = #{issuedQty},</if>

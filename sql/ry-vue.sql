@@ -1306,33 +1306,6 @@ INSERT INTO `sys_user_role` VALUES (112, 8);
 INSERT INTO `sys_user_role` VALUES (113, 3);
 INSERT INTO `sys_user_role` VALUES (114, 8);
 
--- ----------------------------
--- Table structure for textbook_budget
--- ----------------------------
-DROP TABLE IF EXISTS `textbook_budget`;
-CREATE TABLE `textbook_budget`  (
-  `budget_id` bigint NOT NULL AUTO_INCREMENT COMMENT '预算ID',
-  `budget_year` char(4) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '预算年度',
-  `funding_source` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '经费来源（自费/科研经费/院系经费/项目经费）',
-  `total_budget` decimal(14, 2) NOT NULL COMMENT '预算总额',
-  `used_amount` decimal(14, 2) NULL DEFAULT 0.00 COMMENT '已使用金额',
-  `remaining_amount` decimal(14, 2) NULL DEFAULT 0.00 COMMENT '剩余金额',
-  `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '状态（0生效 1冻结 2失效）',
-  `manager_id` bigint NULL DEFAULT NULL COMMENT '负责人ID',
-  `manager_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '负责人姓名',
-  `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
-  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '删除标志',
-  `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  PRIMARY KEY (`budget_id`) USING BTREE,
-  UNIQUE INDEX `uk_year_source`(`budget_year`, `funding_source`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '年度预算管理表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of textbook_budget
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for textbook_buy
@@ -1600,37 +1573,6 @@ INSERT INTO `textbook_lack` VALUES (5, 7, 2, NULL, NULL, '0', 110, NULL, '2026-0
 INSERT INTO `textbook_lack` VALUES (6, 24, 1, NULL, NULL, '1', 113, NULL, '2026-05-09 19:52:55', '0', NULL, '测试', NULL, '1', NULL, '0', '', '2026-05-09 19:52:55', '', NULL);
 INSERT INTO `textbook_lack` VALUES (7, 8, 2, NULL, NULL, '0', 113, NULL, '2026-05-09 19:53:02', '0', NULL, '由教师领书申请驳回转入（教师自助登记），申请人：刘兆勋', NULL, '3', 3, '0', '', '2026-05-09 19:53:02', '', NULL);
 
--- ----------------------------
--- Table structure for textbook_location
--- ----------------------------
-DROP TABLE IF EXISTS `textbook_location`;
-CREATE TABLE `textbook_location`  (
-  `location_id` bigint NOT NULL AUTO_INCREMENT COMMENT '库位ID',
-  `location_code` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '库位编码',
-  `area_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '库区编码',
-  `area_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '库名称（A区教材区等）',
-  `shelf_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '货架编码',
-  `shelf_layer` int NULL DEFAULT NULL COMMENT '层号',
-  `grid_code` varchar(10) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '格位编码',
-  `location_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '库位名称',
-  `max_capacity` int NULL DEFAULT 100 COMMENT '最大容量（本）',
-  `current_qty` int NULL DEFAULT 0 COMMENT '当前存量',
-  `status` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '状态（0正常 1停用 2维修中）',
-  `remark` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
-  `del_flag` char(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '删除标志',
-  `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',
-  `create_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '创建时间',
-  `update_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '更新者',
-  `update_time` datetime(0) NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  PRIMARY KEY (`location_id`) USING BTREE,
-  UNIQUE INDEX `location_code`(`location_code`) USING BTREE,
-  INDEX `idx_area`(`area_code`) USING BTREE,
-  INDEX `idx_location_code`(`location_code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '库位管理表' ROW_FORMAT = DYNAMIC;
-
--- ----------------------------
--- Records of textbook_location
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for textbook_notice
@@ -1958,5 +1900,20 @@ CREATE TABLE `textbook_supplier`  (
 -- ----------------------------
 INSERT INTO `textbook_supplier` VALUES (1, 112, 'SUP001', '测试供应商', '测试联系人', '13800000000', '1784038332@qq.com', '苏州市吴中区长江路55号', 95.00, '月结30天', NULL, NULL, NULL, '0', NULL, '0', '', '2026-05-09 16:01:24', '', '2026-05-09 16:01:48');
 INSERT INTO `textbook_supplier` VALUES (2, 114, 'SUP002', '测试供应商2号', '张文斌', '12345678910', NULL, '苏州科技大学天平学院', 100.00, '月结30天', NULL, NULL, NULL, '0', NULL, '0', '', '2026-05-09 16:13:27', '', NULL);
+
+-- ----------------------------
+-- 年级年份映射字典（双字段设计：区分「适用年级」与「实际班级名称」）
+-- ----------------------------
+ALTER TABLE `textbook_claim_form` ADD COLUMN `grade_level` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '学业阶段（大一/大二/大三/大四）' AFTER `class_name`;
+
+ALTER TABLE `textbook_notice_detail` ADD COLUMN `grade_level` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '学业阶段（大一/大二/大三/大四）' AFTER `class_name`;
+
+INSERT INTO `sys_dict_type` VALUES (123, '年级年份映射', 'tb_grade_year_mapping', '0', 'admin', NOW(), '', NULL, '学业阶段→入学年份映射，每年更新');
+
+INSERT INTO `sys_dict_data` VALUES (200, 1, '大一', '25级', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (201, 2, '大二', '24级', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (202, 3, '大三', '23级', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (203, 4, '大四', '22级', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (204, 5, '通用', '通用', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;

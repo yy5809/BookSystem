@@ -158,19 +158,14 @@ public class TbShortageServiceImpl implements ITbShortageService
         }
         int rows = tbShortageMapper.insertTbShortage(tbShortage);
         if (rows > 0) {
-            try {
-                // MyBatis-Plus会自动设置自增主键值到实体对象中
-                noticeService.sendLackNotice(
-                        tbShortage.getBookId(),
-                        tbShortage.getBookName(),
-                        tbShortage.getIsbn(),
-                        tbShortage.getLackNum(),
-                        0,
-                        tbShortage.getLackId()
-                );
-            } catch (Exception e) {
-                log.warn("【缺书登记】发送缺书通知失败: {}", e.getMessage());
-            }
+            noticeService.sendLackNotice(
+                    tbShortage.getBookId(),
+                    tbShortage.getBookName(),
+                    tbShortage.getIsbn(),
+                    tbShortage.getLackNum(),
+                    0,
+                    tbShortage.getLackId()
+            );
         }
         return rows;
     }
@@ -286,20 +281,16 @@ public class TbShortageServiceImpl implements ITbShortageService
             if (supplierId != null) {
                 TbSupplier supplier = tbSupplierMapper.selectBySupplierId(supplierId);
                 if (supplier != null && supplier.getUserId() != null) {
-                    try {
-                        noticeService.sendNoticeToUser(
-                                supplier.getUserId(),
-                                "新采购需求通知",
-                                "您有新的采购需求！\n采购单号：" + purchaseNo
-                                        + "\n教材：" + shortage.getBookName()
-                                        + "\n数量：" + qty + " 本"
-                                        + "\n\n请登录系统确认接单并发货。",
-                                NoticeBizTypeEnum.PURCHASE_CREATE.getCode(),
-                                purchase.getBuyId());
-                        log.info("【缺书转采购】已通知供应商 {}, 采购单号={}", supplier.getSupplierName(), purchaseNo);
-                    } catch (Exception e) {
-                        log.warn("【缺书转采购】通知供应商失败: {}", e.getMessage());
-                    }
+                    noticeService.sendNoticeToUser(
+                            supplier.getUserId(),
+                            "新采购需求通知",
+                            "您有新的采购需求！\n采购单号：" + purchaseNo
+                                    + "\n教材：" + shortage.getBookName()
+                                    + "\n数量：" + qty + " 本"
+                                    + "\n\n请登录系统确认接单并发货。",
+                            NoticeBizTypeEnum.PURCHASE_CREATE.getCode(),
+                            purchase.getBuyId());
+                    log.info("【缺书转采购】已通知供应商 {}, 采购单号={}", supplier.getSupplierName(), purchaseNo);
                 }
             }
 
@@ -453,15 +444,11 @@ public class TbShortageServiceImpl implements ITbShortageService
         int result = tbShortageMapper.updateTbShortage(shortage);
 
         if (result > 0) {
-            try {
-                Long registerId = shortage.getRegisterId();
-                if (registerId != null) {
-                    noticeService.sendNoticeToUser(registerId, "缺书登记已取消", 
-                        "您的《" + shortage.getBookName() + "》缺书登记已被取消。", 
-                        "4", shortageId);
-                }
-            } catch (Exception e) {
-                log.warn("发送取消通知失败: {}", e.getMessage());
+            Long registerId = shortage.getRegisterId();
+            if (registerId != null) {
+                noticeService.sendNoticeToUser(registerId, "缺书登记已取消",
+                    "您的《" + shortage.getBookName() + "》缺书登记已被取消。",
+                    "4", shortageId);
             }
         }
 
@@ -484,7 +471,7 @@ public class TbShortageServiceImpl implements ITbShortageService
         }
 
         try {
-            noticeService.sendNoticeToUser(
+            noticeService.sendNoticeToUserOrThrow(
                     shortage.getRegisterId(),
                     "缺书到货通知",
                     "您登记的缺书《" + shortage.getBookName() + "》已到货入库，请前往库房领取。",

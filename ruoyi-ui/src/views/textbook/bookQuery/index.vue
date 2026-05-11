@@ -35,9 +35,9 @@
           <span :style="{ color: getStockColor(scope.row.stockNum), fontWeight: 'bold' }">{{ scope.row.stockNum || 0 }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="类型" align="center" prop="bookType" width="80">
+      <el-table-column label="类型" align="center" prop="textbookType" width="80">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.textbook_type" :value="scope.row.bookType" />
+          <dict-tag :options="dict.type.textbook_type" :value="scope.row.textbookType" />
         </template>
       </el-table-column>
     </el-table>
@@ -50,11 +50,11 @@
         <el-descriptions-item label="书名">{{ currentBook.bookName }}</el-descriptions-item>
         <el-descriptions-item label="作者">{{ currentBook.author }}</el-descriptions-item>
         <el-descriptions-item label="出版社">{{ currentBook.publisher }}</el-descriptions-item>
-        <el-descriptions-item label="出版时间">{{ currentBook.publishTime }}</el-descriptions-item>
+        <el-descriptions-item label="出版时间">{{ currentBook.publishDate }}</el-descriptions-item>
         <el-descriptions-item label="版次">{{ currentBook.edition }}</el-descriptions-item>
         <el-descriptions-item label="定价">¥{{ currentBook.price }}</el-descriptions-item>
         <el-descriptions-item label="类型">
-          <dict-tag :options="dict.type.textbook_type" :value="currentBook.bookType" />
+          <dict-tag :options="dict.type.textbook_type" :value="currentBook.textbookType" />
         </el-descriptions-item>
         <el-descriptions-item label="当前库存">
           <span :style="{ color: getStockColor(currentBook.stockNum), fontWeight: 'bold', fontSize: '16px' }">
@@ -64,7 +64,7 @@
           <el-tag type="danger" size="mini" style="margin-left: 8px;" v-if="(currentBook.stockNum || 0) === 0">缺货</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="适用课程" :span="2">{{ currentBook.courseName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="适用专业" :span="2">{{ currentBook.majorName || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="适用专业" :span="2">{{ currentBook.major || '-' }}</el-descriptions-item>
         <el-descriptions-item label="备注" :span="2">{{ currentBook.remark || '-' }}</el-descriptions-item>
       </el-descriptions>
       <div slot="footer" class="dialog-footer">

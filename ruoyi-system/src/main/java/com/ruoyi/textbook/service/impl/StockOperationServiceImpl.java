@@ -212,17 +212,13 @@ public class StockOperationServiceImpl implements IStockOperationService {
 
     @Override
     public void checkAndSendStockWarning(Long bookId, String bookName) {
-        try {
-            TbInventory inventory = inventoryMapper.selectTbInventoryByBookId(bookId);
-            if (inventory != null && inventory.getWarningNum() != null
-                    && inventory.getStockNum() <= inventory.getWarningNum()) {
-                noticeService.sendStockWarningNotice(
-                        bookId, bookName, inventory.getStockNum(), inventory.getWarningNum());
-                log.info("【库存预警】教材《{}》库存{}本低于预警阈值{}本，已发送通知",
-                        bookName, inventory.getStockNum(), inventory.getWarningNum());
-            }
-        } catch (Exception e) {
-            log.warn("【库存预警】检查库存预警失败：{}", e.getMessage());
+        TbInventory inventory = inventoryMapper.selectTbInventoryByBookId(bookId);
+        if (inventory != null && inventory.getWarningNum() != null
+                && inventory.getStockNum() <= inventory.getWarningNum()) {
+            noticeService.sendStockWarningNotice(
+                    bookId, bookName, inventory.getStockNum(), inventory.getWarningNum());
+            log.info("【库存预警】教材《{}》库存{}本低于预警阈值{}本，已发送通知",
+                    bookName, inventory.getStockNum(), inventory.getWarningNum());
         }
     }
 

@@ -30,7 +30,7 @@
                 <el-table v-if="scope.row._forms && scope.row._forms.length" :data="scope.row._forms" border stripe size="small" style="margin: 0;">
                   <el-table-column label="领书单号" prop="formNo" width="180" />
                   <el-table-column label="班级信息" min-width="140">
-                    <template slot-scope="s">{{ s.row.collegeName }} {{ s.row.majorName }} {{ s.row.grade }}{{ s.row.className }}</template>
+                    <template slot-scope="s">{{ s.row.collegeName }} {{ s.row.majorName }} {{ s.row.gradeLevel }}{{ s.row.className }}</template>
                   </el-table-column>
                   <el-table-column label="应发" prop="plannedQty" width="50" />
                   <el-table-column label="已发" prop="issuedQty" width="50" />
@@ -158,7 +158,7 @@
     <el-dialog :title="detailForm._editIndex !== undefined ? '编辑明细' : '添加明细'" :visible.sync="detailDialogVisible" width="550px" append-to-body>
       <el-form ref="detailFormRef" :model="detailForm" label-width="80px" size="small">
         <el-form-item label="年级">
-          <el-input v-model="detailForm.grade" placeholder="如：2024" />
+          <el-input v-model="detailForm.gradeLevel" placeholder="如：2024" />
         </el-form-item>
         <el-form-item label="班级">
           <el-input v-model="detailForm.className" placeholder="如：1班" />
@@ -281,7 +281,7 @@ export default {
       },
       queryParams: { pageNum: 1, pageSize: 10, semester: undefined, status: undefined, bizType: '8' },
       detailDialogVisible: false,
-      detailForm: { _editIndex: undefined, grade: '', className: '', textbookIds: [], plannedQty: 1 },
+      detailForm: { _editIndex: undefined, gradeLevel: '', className: '', textbookIds: [], plannedQty: 1 },
       bookOpts: [],
       bookLoading: false,
       formDetailVisible: false,
@@ -362,10 +362,10 @@ export default {
         this.bookOpts = res.rows || []
       }).finally(() => { this.bookLoading = false })
     },
-    openDetailDialog() { this.detailForm = { _editIndex: undefined, grade: '', className: '', textbookIds: [], plannedQty: 1 }; this.detailDialogVisible = true },
+    openDetailDialog() { this.detailForm = { _editIndex: undefined, gradeLevel: '', className: '', textbookIds: [], plannedQty: 1 }; this.detailDialogVisible = true },
     editDetail(idx) {
       const d = this.form.details[idx]
-      this.detailForm = { _editIndex: idx, grade: d.grade || '', className: d.className || '', textbookIds: d.textbookId ? [d.textbookId] : [], plannedQty: d.plannedQty || 1 }
+      this.detailForm = { _editIndex: idx, gradeLevel: d.gradeLevel || '', className: d.className || '', textbookIds: d.textbookId ? [d.textbookId] : [], plannedQty: d.plannedQty || 1 }
       this.detailDialogVisible = true
     },
     removeDetail(idx) { this.form.details.splice(idx, 1) },
@@ -382,7 +382,7 @@ export default {
         author: b.author,
         publisher: b.publisher,
         plannedQty: this.detailForm.plannedQty,
-        grade: this.detailForm.grade,
+        gradeLevel: this.detailForm.gradeLevel,
         className: this.detailForm.className
       }))
       const existing = this.form.details || []

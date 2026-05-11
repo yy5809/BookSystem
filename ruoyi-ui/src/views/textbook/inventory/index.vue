@@ -181,7 +181,7 @@ export default {
       this.handleQuery();
     },
     handleView(row) {
-      getInventoryInfo(row.stockId).then(res => {
+      getInventoryInfo(row.bookId).then(res => {
         this.detailData = res.data || res;
         this.detailOpen = true;
       }).catch(() => {

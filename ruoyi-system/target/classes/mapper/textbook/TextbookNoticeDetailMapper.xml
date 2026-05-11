@@ -13,6 +13,7 @@
         <result property="majorId" column="major_id"/>
         <result property="classId" column="class_id"/>
         <result property="className" column="class_name"/>
+        <result property="gradeLevel" column="grade_level"/>
         <result property="delFlag" column="del_flag"/>
         <result property="createBy" column="create_by"/>
         <result property="createTime" column="create_time"/>
@@ -28,11 +29,11 @@
 
     <insert id="batchInsert" parameterType="java.util.List" useGeneratedKeys="true" keyProperty="detailId">
         INSERT INTO textbook_notice_detail
-        (notice_id, textbook_id, isbn, book_name, planned_qty, college_id, major_id, class_id, class_name, del_flag, create_by, create_time)
+        (notice_id, textbook_id, isbn, book_name, planned_qty, college_id, major_id, class_id, class_name, grade_level, del_flag, create_by, create_time)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (#{item.noticeId}, #{item.textbookId}, #{item.isbn}, #{item.bookName}, #{item.plannedQty},
-             #{item.collegeId}, #{item.majorId}, #{item.classId}, #{item.className}, '0', #{item.createBy}, NOW())
+             #{item.collegeId}, #{item.majorId}, #{item.classId}, #{item.className}, #{item.gradeLevel}, '0', #{item.createBy}, NOW())
         </foreach>
     </insert>
 

@@ -66,6 +66,7 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
                     cfd.setMajorId(d.getMajorId());
                     cfd.setClassId(d.getClassId());
                     cfd.setClassName(d.getClassName());
+                    cfd.setGradeLevel(d.getGradeLevel());
                     claimFormDetails.add(cfd);
                 }
                 notice.setDetails(claimFormDetails);
@@ -128,6 +129,7 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
                 nd.setMajorId(detail.getMajorId());
                 nd.setClassId(detail.getClassId());
                 nd.setClassName(detail.getClassName());
+                nd.setGradeLevel(detail.getGradeLevel());
                 nd.setCreateBy(bookNotice.getCreateBy());
                 noticeDetails.add(nd);
             }
@@ -157,6 +159,7 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
                 nd.setMajorId(detail.getMajorId());
                 nd.setClassId(detail.getClassId());
                 nd.setClassName(detail.getClassName());
+                nd.setGradeLevel(detail.getGradeLevel());
                 nd.setCreateBy(bookNotice.getUpdateBy());
                 noticeDetails.add(nd);
             }
@@ -265,6 +268,7 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
                 form.setMajorId(firstDetail.getMajorId());
                 form.setClassId(firstDetail.getClassId());
                 form.setClassName(firstDetail.getClassName());
+                form.setGradeLevel(firstDetail.getGradeLevel());
                 form.setStatus("0");
                 form.setIssuedQty(0);
                 

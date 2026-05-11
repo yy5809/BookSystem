@@ -234,12 +234,8 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
             throw new ServiceException("所有明细处理失败，采购单未创建。请修正数据后重新导入");
         }
 
-        try {
-            noticeService.sendPurchaseCreateNotice(purchaseId, purchaseNo, detailSuccessCount);
-            log.info("{}采购单创建通知发送成功", logTag);
-        } catch (Exception e) {
-            log.warn("{}发送采购单创建通知失败: {}", logTag, e.getMessage(), e);
-        }
+        noticeService.sendPurchaseCreateNotice(purchaseId, purchaseNo, detailSuccessCount);
+        log.info("{}采购单创建通知发送成功", logTag);
 
         log.info("{}完成! 总记录数={}, 成功={}, 失败={}, 自动新增={}, 采购单号={}", logTag, totalRows, detailSuccessCount, failList.size(), autoCreatedCount.get(), purchaseNo);
         return buildResult(totalRows, detailSuccessCount, failList, purchaseNo, autoCreatedCount.get(), autoCreatedList);

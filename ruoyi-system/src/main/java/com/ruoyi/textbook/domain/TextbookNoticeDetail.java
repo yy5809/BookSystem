@@ -13,6 +13,7 @@ public class TextbookNoticeDetail extends BaseEntity {
     private Long majorId;
     private Long classId;
     private String className;
+    private String gradeLevel;
     private String delFlag;
 
     public Long getDetailId() { return detailId; }
@@ -35,6 +36,8 @@ public class TextbookNoticeDetail extends BaseEntity {
     public void setClassId(Long classId) { this.classId = classId; }
     public String getClassName() { return className; }
     public void setClassName(String className) { this.className = className; }
+    public String getGradeLevel() { return gradeLevel; }
+    public void setGradeLevel(String gradeLevel) { this.gradeLevel = gradeLevel; }
     public String getDelFlag() { return delFlag; }
     public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
 }

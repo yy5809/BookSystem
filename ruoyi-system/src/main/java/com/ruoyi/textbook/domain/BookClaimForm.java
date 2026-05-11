@@ -25,6 +25,9 @@ public class BookClaimForm extends BaseEntity {
     @Excel(name = "班级名称")
     private String className;
 
+    @Excel(name = "学业阶段")
+    private String gradeLevel;
+
     @Excel(name = "状态", readConverterExp = "0=待领取,1=部分出库,2=已出库")
     private String status;
 
@@ -62,6 +65,8 @@ public class BookClaimForm extends BaseEntity {
     public void setClassId(Long classId) { this.classId = classId; }
     public String getClassName() { return className; }
     public void setClassName(String className) { this.className = className; }
+    public String getGradeLevel() { return gradeLevel; }
+    public void setGradeLevel(String gradeLevel) { this.gradeLevel = gradeLevel; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
     public Integer getPlannedQty() { return plannedQty; }
