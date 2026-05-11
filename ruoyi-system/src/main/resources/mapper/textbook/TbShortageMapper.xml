@@ -18,11 +18,15 @@
         <result property="sourceId" column="source_id"/>
         <result property="remark" column="remark"/>
         <result property="delFlag" column="del_flag"/>
+        <result property="lackNo" column="lack_no"/>
+        <result property="closeReason" column="close_reason"/>
+        <result property="closeBy" column="close_by"/>
+        <result property="closeTime" column="close_time"/>
     </resultMap>
 
     <sql id="selectTbShortageVo">
-        SELECT t.lack_id, t.book_id, i.book_name, i.isbn, t.lack_num, t.urgency,
-               t.register_id, u.nick_name as register_name, t.handle_status, t.handle_time, t.register_time, t.purchase_id, t.source, t.source_id, t.remark, t.del_flag
+        SELECT t.lack_id, t.lack_no, t.book_id, i.book_name, i.isbn, t.lack_num, t.urgency,
+               t.register_id, u.nick_name as register_name, t.handle_status, t.handle_time, t.register_time, t.purchase_id, t.source, t.source_id, t.remark, t.del_flag, t.close_reason, t.close_by, t.close_time
         FROM textbook_lack t
         LEFT JOIN textbook_info i ON t.book_id = i.book_id
         LEFT JOIN sys_user u ON t.register_id = u.user_id
@@ -58,6 +62,9 @@
             <if test="source != null">source=#{source},</if>
             <if test="sourceId != null">source_id=#{sourceId},</if>
             <if test="remark != null">remark=#{remark},</if>
+            <if test="closeReason != null">close_reason=#{closeReason},</if>
+            <if test="closeBy != null">close_by=#{closeBy},</if>
+            <if test="closeTime != null">close_time=#{closeTime},</if>
             update_time=NOW(),
         </set> WHERE lack_id=#{lackId} AND del_flag='0'
     </update>

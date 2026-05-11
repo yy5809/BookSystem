@@ -21,4 +21,12 @@ public interface IBookClaimFormService {
                               Integer issuedQty, String receiverName);
 
     public List<BookClaimFormDetail> selectDetailsByFormId(Long formId);
+
+    public int withdrawForm(Long formId);
+
+    public int closeForm(Long formId, String closeReason);
+
+    public int reissue(Long formId, Long operatorId, String operatorName, Integer reissueQty);
+
+    public List<BookClaimForm> selectPendingReissueList();
 }

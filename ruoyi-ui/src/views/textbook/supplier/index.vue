@@ -89,7 +89,7 @@ export default {
       return m[status] || '未知'
     },
     viewPurchase(purchase) {
-      this.$router.push(`/supplier/supplierPurchase/${purchase.buyId}`)
+      this.$router.push(`/textbook/supplierPurchase/${purchase.buyId}`)
     }
   }
 }

@@ -109,3 +109,11 @@ export function confirmBookImport(fileHash) {
     data: { fileHash }
   })
 }
+
+export function listBookForTeacher(query) {
+  return request({
+    url: '/textbook/book/teacherList',
+    method: 'get',
+    params: query
+  })
+}

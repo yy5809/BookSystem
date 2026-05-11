@@ -49,6 +49,8 @@ public class BookClaimForm extends BaseEntity {
 
     private String delFlag;
 
+    private String cancelReason;
+
     private List<BookClaimFormDetail> details;
 
     public Long getFormId() { return formId; }
@@ -81,6 +83,8 @@ public class BookClaimForm extends BaseEntity {
     public void setRemark(String remark) { this.remark = remark; }
     public String getDelFlag() { return delFlag; }
     public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
+    public String getCancelReason() { return cancelReason; }
+    public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
     public List<BookClaimFormDetail> getDetails() { return details; }
     public void setDetails(List<BookClaimFormDetail> details) { this.details = details; }
 

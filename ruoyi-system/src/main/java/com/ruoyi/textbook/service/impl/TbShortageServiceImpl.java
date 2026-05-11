@@ -489,9 +489,9 @@ public class TbShortageServiceImpl implements ITbShortageService
     private boolean isValidStatusTransition(String from, String to) {
         if (from == null || to == null || from.equals(to)) return false;
         switch (from) {
-            case "0": return "1".equals(to) || "4".equals(to);
-            case "1": return "2".equals(to) || "3".equals(to) || "4".equals(to);
-            case "2": return "3".equals(to) || "4".equals(to);
+            case "0": return "1".equals(to) || "4".equals(to) || "5".equals(to);
+            case "1": return "2".equals(to) || "3".equals(to) || "4".equals(to) || "5".equals(to);
+            case "2": return "3".equals(to) || "4".equals(to) || "5".equals(to);
             default: return false;
         }
     }
@@ -504,6 +504,7 @@ public class TbShortageServiceImpl implements ITbShortageService
             case "2": return "已到货";
             case "3": return "已入库";
             case "4": return "已取消";
+            case "5": return "已关闭";
             default: return status;
         }
     }
@@ -523,5 +524,69 @@ public class TbShortageServiceImpl implements ITbShortageService
             .map(role -> role.getRoleKey())
             .collect(Collectors.toList());
         return roles.contains("warehouse");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int closeShortage(Long shortageId, String closeReason, String closeBy) {
+        TbShortage shortage = tbShortageMapper.selectTbShortageById(shortageId);
+        if (shortage == null) {
+            throw new ServiceException("缺书记录不存在");
+        }
+        if ("3".equals(shortage.getHandleStatus()) || "4".equals(shortage.getHandleStatus()) || "5".equals(shortage.getHandleStatus())) {
+            throw new ServiceException("当前状态不允许关闭");
+        }
+        shortage.setHandleStatus("5");
+        shortage.setCloseReason(closeReason);
+        shortage.setCloseBy(closeBy);
+        shortage.setCloseTime(DateUtils.getNowDate());
+        shortage.setUpdateTime(DateUtils.getNowDate());
+        int rows = tbShortageMapper.updateTbShortage(shortage);
+        if (rows > 0 && shortage.getRegisterId() != null) {
+            noticeService.sendNoticeToUser(shortage.getRegisterId(), "缺书登记已关闭",
+                    "您的《" + shortage.getBookName() + "》缺书登记已关闭，原因：" + closeReason, "4", shortageId);
+        }
+        return rows;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int mergeShortage(Long targetShortageId, Long[] sourceShortageIds) {
+        TbShortage target = tbShortageMapper.selectTbShortageById(targetShortageId);
+        if (target == null) {
+            throw new ServiceException("目标缺书记录不存在");
+        }
+        if (!"0".equals(target.getHandleStatus())) {
+            throw new ServiceException("目标缺书记录已处理，无法合并");
+        }
+
+        int mergeCount = 0;
+        for (Long sourceId : sourceShortageIds) {
+            if (sourceId.equals(targetShortageId)) continue;
+            TbShortage source = tbShortageMapper.selectTbShortageById(sourceId);
+            if (source == null) continue;
+            if (!"0".equals(source.getHandleStatus())) continue;
+
+            target.setLackNum(target.getLackNum() + source.getLackNum());
+            target.setRemark((target.getRemark() == null ? "" : target.getRemark() + "; ") + "已合并缺书单" + source.getLackNo());
+
+            source.setHandleStatus("4");
+            source.setUpdateTime(DateUtils.getNowDate());
+            tbShortageMapper.updateTbShortage(source);
+            mergeCount++;
+        }
+
+        if (mergeCount > 0) {
+            target.setUpdateTime(DateUtils.getNowDate());
+            tbShortageMapper.updateTbShortage(target);
+        }
+        return mergeCount;
+    }
+
+    @Override
+    public List<TbShortage> checkDuplicate(String isbn, Long excludeId) {
+        return tbShortageMapper.selectTbShortageListByIsbn(isbn).stream()
+                .filter(s -> "0".equals(s.getHandleStatus()) && !s.getLackId().equals(excludeId))
+                .collect(Collectors.toList());
     }
 }

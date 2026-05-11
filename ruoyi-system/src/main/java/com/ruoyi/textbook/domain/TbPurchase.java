@@ -83,6 +83,8 @@ public class TbPurchase extends BaseEntity {
     @Excel(name = "采购状态", readConverterExp = "0=待采购,1=采购中,2=已接单,3=已发货,4=已到货,5=已入库")
     private String purchaseStatus;
 
+    private String archived;
+
     public Long getBuyId() { return buyId; }
     public void setBuyId(Long buyId) { this.buyId = buyId; }
     public String getPurchaseNo() { return purchaseNo; }
@@ -136,6 +138,8 @@ public class TbPurchase extends BaseEntity {
 
     public String getPurchaseStatus() { return purchaseStatus; }
     public void setPurchaseStatus(String purchaseStatus) { this.purchaseStatus = purchaseStatus; }
+    public String getArchived() { return archived; }
+    public void setArchived(String archived) { this.archived = archived; }
 
     public boolean isPending() { return "0".equals(this.status); }
     public boolean isApproved() { return "1".equals(this.status); }

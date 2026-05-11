@@ -29,7 +29,7 @@
         <el-table-column label="ISBN" align="center" prop="isbn" width="130" />
         <el-table-column label="数量" align="center" prop="quantity" width="60" />
         <el-table-column label="学院" align="center" prop="college" width="80" show-overflow-tooltip />
-        <el-table-column label="年级" align="center" prop="grade" width="55" />
+        <el-table-column label="入学年份" align="center" prop="grade" width="80" />
       </el-table>
     </el-card>
 

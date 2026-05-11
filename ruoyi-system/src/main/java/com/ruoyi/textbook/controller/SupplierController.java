@@ -113,4 +113,39 @@ public class SupplierController extends BaseController {
         supplierService.markAllNoticesAsRead();
         return AjaxResult.success("全部标记已读成功");
     }
+
+    @PreAuthorize("@ss.hasRole('supplier')")
+    @PutMapping("/purchase/markDetail")
+    public AjaxResult markDetail(@RequestBody Map<String, Object> data) {
+        Long purchaseId = Long.valueOf(data.get("purchaseId").toString());
+        Long detailId = Long.valueOf(data.get("detailId").toString());
+        String feedback = (String) data.get("feedback");
+        String remark = (String) data.get("remark");
+        supplierService.markDetail(purchaseId, detailId, feedback, remark);
+        return AjaxResult.success("标记成功");
+    }
+
+    @PreAuthorize("@ss.hasRole('supplier')")
+    @PutMapping("/purchase/reject/{purchaseId}")
+    public AjaxResult rejectOrder(@PathVariable Long purchaseId, @RequestParam String reason) {
+        supplierService.rejectOrder(purchaseId, reason);
+        return AjaxResult.success("已退回采购单");
+    }
+
+    @PreAuthorize("@ss.hasRole('supplier')")
+    @PutMapping("/purchase/updateShip/{purchaseId}")
+    public AjaxResult updateShipment(@PathVariable Long purchaseId,
+                                     @RequestParam(required = false) String logisticsCompany,
+                                     @RequestParam(required = false) String logisticsNo) {
+        supplierService.updateShipment(purchaseId, logisticsCompany, logisticsNo);
+        return AjaxResult.success("物流信息已更新");
+    }
+
+    @PreAuthorize("@ss.hasRole('supplier')")
+    @GetMapping("/purchase/history")
+    public TableDataInfo listHistoryOrders(TbPurchase purchase) {
+        startPage();
+        List<TbPurchase> list = supplierService.listHistoryOrders(purchase);
+        return getDataTable(list);
+    }
 }

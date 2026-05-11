@@ -21,13 +21,14 @@
         <result property="updateBy"       column="update_by"       />
         <result property="updateTime"     column="update_time"     />
         <result property="delFlag"        column="del_flag"        />
+        <result property="cancelReason"  column="cancel_reason"   />
         <result property="remark"         column="remark"          />
     </resultMap>
 
     <sql id="selectBookClaimFormVo">
         select form_id, form_no, notice_id, college_id, major_id, class_id, class_name, grade_level,
                status, planned_qty, issued_qty, receiver_name, issue_time,
-               create_by, create_time, update_by, update_time, remark, del_flag
+               create_by, create_time, update_by, update_time, remark, del_flag, cancel_reason
         from textbook_claim_form
     </sql>
 
@@ -96,6 +97,7 @@
             <if test="issueTime != null">issue_time = #{issueTime},</if>
             <if test="issuedQty != null">issued_qty = #{issuedQty},</if>
             <if test="status != null and status != ''">status = #{status},</if>
+            <if test="cancelReason != null">cancel_reason = #{cancelReason},</if>
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
             update_time = sysdate(),
             <if test="remark != null">remark = #{remark},</if>

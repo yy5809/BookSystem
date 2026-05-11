@@ -37,4 +37,12 @@ public interface ISupplierService {
 
     // 根据用户ID获取供应商信息
     TbSupplier getSupplierByUserId(Long userId);
+
+    void markDetail(Long purchaseId, Long detailId, String feedback, String remark);
+
+    void rejectOrder(Long purchaseId, String reason);
+
+    void updateShipment(Long purchaseId, String logisticsCompany, String logisticsNo);
+
+    List<TbPurchase> listHistoryOrders(TbPurchase purchase);
 }

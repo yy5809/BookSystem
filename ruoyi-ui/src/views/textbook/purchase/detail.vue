@@ -35,7 +35,7 @@
           <el-table-column label="类型" prop="textbookType" width="65" align="center" />
           <el-table-column label="学院" prop="college" width="80" show-overflow-tooltip />
           <el-table-column label="专业" prop="major" width="80" show-overflow-tooltip />
-          <el-table-column label="年级" prop="grade" width="55" align="center" />
+          <el-table-column label="入学年份" prop="grade" width="80" align="center" />
           <el-table-column label="数量" prop="quantity" width="55" align="center" />
           <el-table-column label="单价" prop="unitPrice" width="70" align="center"><template slot-scope="scope">{{ scope.row.unitPrice || '-' }}</template></el-table-column>
           <el-table-column label="总价" prop="totalPrice" width="70" align="center"><template slot-scope="scope">{{ scope.row.totalPrice || '-' }}</template></el-table-column>

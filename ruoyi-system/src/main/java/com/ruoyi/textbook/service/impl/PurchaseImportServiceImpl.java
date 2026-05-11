@@ -392,7 +392,7 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         if (StringUtils.isNotEmpty(dto.getGrade())) {
             SysDictData gradeDict = validateDictValue("tb_grade", dto.getGrade());
             if (gradeDict == null) {
-                throw new ServiceException("适用年级[" + dto.getGrade() + "]不在系统字典中（可选：大一/大二/大三/大四/全校）");
+                throw new ServiceException("适用年级[" + dto.getGrade() + "]不在系统字典中（可选：22级/23级/24级/25级/全校）");
             }
         }
     }

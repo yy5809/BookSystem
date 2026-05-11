@@ -30,7 +30,7 @@
                 <el-table v-if="scope.row._forms && scope.row._forms.length" :data="scope.row._forms" border stripe size="small" style="margin: 0;">
                   <el-table-column label="领书单号" prop="formNo" width="180" />
                   <el-table-column label="班级信息" min-width="140">
-                    <template slot-scope="s">{{ s.row.collegeName }} {{ s.row.majorName }} {{ s.row.gradeLevel }}{{ s.row.className }}</template>
+                    <template slot-scope="s">{{ s.row.collegeName }} {{ s.row.majorName }} {{ formatGradeLevel(s.row.gradeLevel) }}{{ s.row.className }}</template>
                   </el-table-column>
                   <el-table-column label="应发" prop="plannedQty" width="50" />
                   <el-table-column label="已发" prop="issuedQty" width="50" />
@@ -157,8 +157,8 @@
     <!-- 添加/编辑明细 -->
     <el-dialog :title="detailForm._editIndex !== undefined ? '编辑明细' : '添加明细'" :visible.sync="detailDialogVisible" width="550px" append-to-body>
       <el-form ref="detailFormRef" :model="detailForm" label-width="80px" size="small">
-        <el-form-item label="年级">
-          <el-input v-model="detailForm.gradeLevel" placeholder="如：2024" />
+        <el-form-item label="入学年份（级）">
+          <el-input v-model="detailForm.gradeLevel" placeholder="如：22级" />
         </el-form-item>
         <el-form-item label="班级">
           <el-input v-model="detailForm.className" placeholder="如：1班" />
@@ -302,6 +302,19 @@ export default {
     this.getList()
   },
   methods: {
+    formatGradeLevel(val) {
+      if (!val || val === '通用') return ''
+      const match = val.match(/(\d{2})级/)
+      if (match) {
+        const year = parseInt(match[1])
+        const currentYear = new Date().getFullYear()
+        const enrollmentYear = year >= 50 ? 1900 + year : 2000 + year
+        const grade = currentYear - enrollmentYear + 1
+        const names = ['大一', '大二', '大三', '大四']
+        return val + '/' + (names[grade - 1] || ('大' + grade))
+      }
+      return val
+    },
     getList() {
       this.loading = true
       listNotice(this.queryParams).then(response => {

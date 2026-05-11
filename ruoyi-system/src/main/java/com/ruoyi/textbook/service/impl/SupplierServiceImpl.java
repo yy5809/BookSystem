@@ -188,7 +188,96 @@ public class SupplierServiceImpl implements ISupplierService {
         return tbSupplierMapper.selectByUserId(userId);
     }
 
-    // 获取当前供应商
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void markDetail(Long purchaseId, Long detailId, String feedback, String remark) {
+        TbSupplier supplier = getCurrentSupplier();
+        if (supplier == null) throw new ServiceException("供应商信息不存在");
+
+        TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
+        if (purchase == null || !supplier.getSupplierId().equals(purchase.getSupplierId())) {
+            throw new ServiceException("采购单不存在或无权操作");
+        }
+
+        List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(purchaseId);
+        TbPurchaseDetail target = null;
+        for (TbPurchaseDetail d : details) {
+            if (d.getDetailId().equals(detailId)) {
+                target = d;
+                break;
+            }
+        }
+        if (target == null) throw new ServiceException("采购明细不存在");
+
+        target.setSupplierFeedback(feedback);
+        target.setSupplierRemark(remark);
+        tbPurchaseMapper.updateTbPurchaseDetail(target);
+        log.info("【供应商标记明细】purchaseId={}, detailId={}, feedback={}", purchaseId, detailId, feedback);
+
+        boolean hasShortage = false;
+        for (TbPurchaseDetail d : details) {
+            if ("2".equals(d.getSupplierFeedback()) || "3".equals(d.getSupplierFeedback())) {
+                hasShortage = true;
+                break;
+            }
+        }
+        if (hasShortage) {
+            noticeService.sendNoticeToRole("warehouse", "采购单明细需要处理",
+                    "采购单" + purchase.getPurchaseNo() + "有明细被标记为缺货或信息有误，请及时处理。",
+                    "2", purchaseId);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void rejectOrder(Long purchaseId, String reason) {
+        TbSupplier supplier = getCurrentSupplier();
+        if (supplier == null) throw new ServiceException("供应商信息不存在");
+
+        TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
+        if (purchase == null || !supplier.getSupplierId().equals(purchase.getSupplierId())) {
+            throw new ServiceException("采购单不存在或无权操作");
+        }
+
+        purchase.setPurchaseStatus(PurchaseStatusEnum.WAIT_PURCHASE.getCode());
+        purchase.setRemark((purchase.getRemark() == null ? "" : purchase.getRemark() + "; ") + "供应商退回原因：" + reason);
+        tbPurchaseMapper.updateTbPurchase(purchase);
+
+        noticeService.sendNoticeToRole("warehouse", "供应商退回采购单",
+                "供应商" + supplier.getSupplierName() + "已退回采购单" + purchase.getPurchaseNo() + "，原因：" + reason,
+                "2", purchaseId);
+        log.info("【供应商退回采购单】purchaseId={}, reason={}", purchaseId, reason);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateShipment(Long purchaseId, String logisticsCompany, String logisticsNo) {
+        TbSupplier supplier = getCurrentSupplier();
+        if (supplier == null) throw new ServiceException("供应商信息不存在");
+
+        TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(purchaseId);
+        if (purchase == null || !supplier.getSupplierId().equals(purchase.getSupplierId())) {
+            throw new ServiceException("采购单不存在或无权操作");
+        }
+        String status = purchase.getPurchaseStatus();
+        if (!PurchaseStatusEnum.SHIPPED.getCode().equals(status) && !PurchaseStatusEnum.ARRIVED.getCode().equals(status)) {
+            throw new ServiceException("只有已发货状态的采购单才能修改物流信息");
+        }
+
+        purchase.setLogisticsCompany(logisticsCompany);
+        purchase.setLogisticsNo(logisticsNo);
+        tbPurchaseMapper.updateTbPurchase(purchase);
+        log.info("【供应商修改物流】purchaseId={}", purchaseId);
+    }
+
+    @Override
+    public List<TbPurchase> listHistoryOrders(TbPurchase purchase) {
+        TbSupplier supplier = getCurrentSupplier();
+        if (supplier == null) return new ArrayList<>();
+        purchase.setSupplierId(supplier.getSupplierId());
+        return tbPurchaseMapper.selectSupplierPurchases(purchase);
+    }
+
     private TbSupplier getCurrentSupplier() {
         Long userId = SecurityUtils.getUserId();
         return tbSupplierMapper.selectByUserId(userId);

@@ -93,4 +93,10 @@ public interface ITbShortageService
      * @return 结果
      */
     public int notifyRegister(Long shortageId);
+
+    public int closeShortage(Long shortageId, String closeReason, String closeBy);
+
+    public int mergeShortage(Long targetShortageId, Long[] sourceShortageIds);
+
+    public List<TbShortage> checkDuplicate(String isbn, Long excludeId);
 }

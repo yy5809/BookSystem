@@ -85,7 +85,7 @@ public class ExcelImportUtil {
         CellStyle headerStyle = createHeaderStyle(workbook);
         Row headerRow = sheet.createRow(HEADER_ROW);
 
-        String[] headers = {"ISBN", "教材名称", "版次", "作者", "出版社", "定价", "教材类型", "申请学院", "适用专业", "适用年级", "采购数量", "备注"};
+        String[] headers = {"ISBN", "教材名称", "版次", "作者", "出版社", "定价", "教材类型", "申请学院", "适用专业", "入学年份（级）", "采购数量", "备注"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
@@ -120,7 +120,7 @@ public class ExcelImportUtil {
                 "   - 教材类型（选填）：1=公共基础课 2=专业基础课 3=专业必修课 4=专业选修课 5=思想政治课",
                 "   - 申请学院（必填）：从系统学院字典中选择",
                 "   - 适用专业（必填）：填写本学院对应的专业简称",
-                "   - 适用年级（选填）：大一/大二/大三/大四/全校",
+                "   - 入学年份（级）（选填）：22级/23级/24级/25级/通用，填报学生入学年份对应的\"级\"",
                 "   - 采购数量（必填）：正整数，范围1-9999",
                 "   - 备注（选填）：补充说明信息",
                 "",

@@ -108,4 +108,8 @@ public interface TbPurchaseMapper
      * @return 待确认发货的采购单数
      */
     public int countPendingShipmentBySupplierId(Long supplierId);
+
+    public int updateTbPurchaseDetail(TbPurchaseDetail detail);
+
+    public int deleteTbPurchaseDetailByPurchaseId(Long purchaseId);
 }

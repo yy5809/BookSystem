@@ -1,6 +1,8 @@
 package com.ruoyi.textbook.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,5 +127,84 @@ public class BookClaimFormController extends BaseController {
             } catch (Exception ignored) {
             }
         }
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "撤回领书单", businessType = BusinessType.UPDATE)
+    @PutMapping("/withdraw/{formId}")
+    public AjaxResult withdrawForm(@PathVariable Long formId) {
+        try {
+            return toAjax(bookClaimFormService.withdrawForm(formId));
+        } catch (Exception e) {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "关闭领书单", businessType = BusinessType.UPDATE)
+    @PutMapping("/close")
+    public AjaxResult closeForm(@RequestParam Long formId, @RequestParam String closeReason) {
+        try {
+            return toAjax(bookClaimFormService.closeForm(formId, closeReason));
+        } catch (Exception e) {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:outbound') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "补发出库", businessType = BusinessType.UPDATE)
+    @PutMapping("/reissue")
+    public AjaxResult reissue(@RequestParam Long formId, @RequestParam(required = false) Integer reissueQty) {
+        try {
+            Long operatorId = SecurityUtils.getUserId();
+            String operatorName = SecurityUtils.getLoginUser().getUser().getNickName();
+            return toAjax(bookClaimFormService.reissue(formId, operatorId, operatorName, reissueQty));
+        } catch (Exception e) {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:list')")
+    @GetMapping("/pendingReissue")
+    public AjaxResult pendingReissueList() {
+        return AjaxResult.success(bookClaimFormService.selectPendingReissueList());
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:outbound') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "部分出库", businessType = BusinessType.UPDATE)
+    @PostMapping("/partialIssue")
+    public AjaxResult partialIssue(@RequestParam Long formId,
+                                   @RequestParam Integer issuedQty,
+                                   @RequestParam(required = false) String receiverName) {
+        try {
+            Long operatorId = SecurityUtils.getUserId();
+            String operatorName = SecurityUtils.getLoginUser().getUser().getNickName();
+            return toAjax(bookClaimFormService.confirmOutbound(formId, operatorId, operatorName, issuedQty, receiverName));
+        } catch (Exception e) {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:outbound') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "退库操作", businessType = BusinessType.UPDATE)
+    @PostMapping("/return")
+    public AjaxResult returnToStock(@RequestBody Map<String, Object> data) {
+        return AjaxResult.error("退库功能需在Service层完善后开放");
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:claimForm:query')")
+    @GetMapping("/checkDuplicate")
+    public AjaxResult checkDuplicate(@RequestParam Long noticeId, @RequestParam String className) {
+        BookClaimForm query = new BookClaimForm();
+        query.setNoticeId(noticeId);
+        query.setClassName(className);
+        List<BookClaimForm> forms = bookClaimFormService.selectBookClaimFormList(query);
+        boolean exists = forms != null && !forms.isEmpty();
+        Map<String, Object> result = new HashMap<>();
+        result.put("duplicate", exists);
+        if (exists) {
+            result.put("existingForms", forms);
+        }
+        return AjaxResult.success(result);
     }
 }

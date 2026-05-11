@@ -65,3 +65,27 @@ export function downloadImportTemplate() {
     responseType: 'blob'
   })
 }
+
+export function adjustDetail(buyId, details) {
+  return request({ url: '/textbook/purchase/adjustDetail/' + buyId, method: 'put', data: details })
+}
+
+export function archivePurchase(buyId) {
+  return request({ url: '/textbook/purchase/archive/' + buyId, method: 'put' })
+}
+
+export function listArchivedPurchase(query) {
+  return request({ url: '/textbook/purchase/archivedList', method: 'get', params: query })
+}
+
+export function cancelPurchase(buyId) {
+  return request({ url: '/textbook/purchase/cancel/' + buyId, method: 'put' })
+}
+
+export function batchSubmitPurchase(data) {
+  return request({ url: '/textbook/purchase/batchSubmit', method: 'post', data })
+}
+
+export function downloadPurchaseTemplate() {
+  return request({ url: '/textbook/purchase/template', method: 'get', responseType: 'blob' })
+}

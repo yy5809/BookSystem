@@ -34,3 +34,18 @@ export function exportInventory(query) {
     responseType: 'blob'
   })
 }
+
+export function getStockFlowList(query) {
+  return request({
+    url: '/textbook/inventory/flowList',
+    method: 'get',
+    params: query
+  })
+}
+
+export function getStockByBookId(bookId) {
+  return request({
+    url: '/textbook/inventory/byBook/' + bookId,
+    method: 'get'
+  })
+}

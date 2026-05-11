@@ -74,6 +74,10 @@ public class TbPurchaseDetail extends BaseEntity
     @Excel(name = "适用年级")
     private String grade;
 
+    private String supplierFeedback;
+
+    private String supplierRemark;
+
     // remark inherited from BaseEntity
 
     public void setDetailId(Long detailId)
@@ -186,6 +190,10 @@ public class TbPurchaseDetail extends BaseEntity
     public String getMajor() { return major; }
     public void setGrade(String grade) { this.grade = grade; }
     public String getGrade() { return grade; }
+    public void setSupplierFeedback(String supplierFeedback) { this.supplierFeedback = supplierFeedback; }
+    public String getSupplierFeedback() { return supplierFeedback; }
+    public void setSupplierRemark(String supplierRemark) { this.supplierRemark = supplierRemark; }
+    public String getSupplierRemark() { return supplierRemark; }
 
     @Override
     public String toString() {

@@ -30,4 +30,10 @@ public interface ITbBuyService {
      * @return 导入结果（成功数量、失败信息等）
      */
     Map<String, Object> importFromExcel(MultipartFile file);
+
+    int adjustDetail(Long buyId, List<TbPurchaseDetail> details);
+
+    int archivePurchase(Long buyId);
+
+    List<TbPurchase> listArchived(TbPurchase query);
 }

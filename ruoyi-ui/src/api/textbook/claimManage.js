@@ -67,3 +67,51 @@ export function cancelPersonalApply(applyId) {
 export function delPersonalApply(applyId) {
   return request({ url: '/textbook/personalApply/' + applyId, method: 'delete' })
 }
+
+export function addNotice(data) {
+  return request({ url: '/textbook/notice', method: 'post', data })
+}
+
+export function publishNotice(noticeId) {
+  return request({ url: '/textbook/notice/publish/' + noticeId, method: 'put' })
+}
+
+export function cancelNotice(noticeId, cancelReason) {
+  return request({ url: '/textbook/notice/cancel/' + noticeId, method: 'put', params: { cancelReason } })
+}
+
+export function extendPickupTime(noticeId, newEndTime) {
+  return request({ url: '/textbook/notice/extend/' + noticeId, method: 'put', params: { newEndTime } })
+}
+
+export function withdrawClaimForm(formId) {
+  return request({ url: '/textbook/claimForm/withdraw/' + formId, method: 'put' })
+}
+
+export function closeClaimForm(formId, closeReason) {
+  return request({ url: '/textbook/claimForm/close', method: 'put', params: { formId, closeReason } })
+}
+
+export function reissueClaimForm(formId, reissueQty) {
+  return request({ url: '/textbook/claimForm/reissue', method: 'put', params: { formId, reissueQty } })
+}
+
+export function pendingReissueList() {
+  return request({ url: '/textbook/claimForm/pendingReissue', method: 'get' })
+}
+
+export function partialIssue(data) {
+  return request({ url: '/textbook/claimForm/partialIssue', method: 'post', data })
+}
+
+export function checkDuplicate(formId, className) {
+  return request({ url: '/textbook/claimForm/checkDuplicate', method: 'get', params: { formId, className } })
+}
+
+export function returnToStock(data) {
+  return request({ url: '/textbook/claimForm/return', method: 'post', data })
+}
+
+export function listBook(query) {
+  return request({ url: '/textbook/book/list', method: 'get', params: query })
+}

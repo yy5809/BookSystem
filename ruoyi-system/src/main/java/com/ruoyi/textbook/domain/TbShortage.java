@@ -29,7 +29,7 @@ public class TbShortage extends BaseEntity {
     @Excel(name = "登记人姓名")
     private String registerName;
 
-    @Excel(name = "处理状态", readConverterExp = "0=未处理,1=已纳入采购,2=已到货,3=已完成")
+    @Excel(name = "处理状态", readConverterExp = "0=未处理,1=已纳入采购,2=已到货,3=已完成,4=已取消,5=已关闭")
     private String handleStatus;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -52,6 +52,15 @@ public class TbShortage extends BaseEntity {
     private String remark;
 
     private String delFlag;
+
+    private String lackNo;
+
+    private String closeReason;
+
+    private String closeBy;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date closeTime;
 
     public Long getLackId() { return lackId; }
     public void setLackId(Long lackId) { this.lackId = lackId; }
@@ -85,6 +94,15 @@ public class TbShortage extends BaseEntity {
     public void setRemark(String remark) { this.remark = remark; }
     public String getDelFlag() { return delFlag; }
     public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
+
+    public String getLackNo() { return lackNo; }
+    public void setLackNo(String lackNo) { this.lackNo = lackNo; }
+    public String getCloseReason() { return closeReason; }
+    public void setCloseReason(String closeReason) { this.closeReason = closeReason; }
+    public String getCloseBy() { return closeBy; }
+    public void setCloseBy(String closeBy) { this.closeBy = closeBy; }
+    public Date getCloseTime() { return closeTime; }
+    public void setCloseTime(Date closeTime) { this.closeTime = closeTime; }
 
     @Override
     public String toString() {

@@ -258,4 +258,24 @@ public class TbBookController extends BaseController {
         if (dto.getTextbookType() == null || dto.getTextbookType().trim().isEmpty()) return "教材类型不能为空";
         return null;
     }
+
+    @PreAuthorize("@ss.hasPermi('textbook:book:list')")
+    @GetMapping("/teacherList")
+    public TableDataInfo teacherList(TbBook tbBook) {
+        startPage();
+        List<TbBook> list = tbBookService.selectTbBookList(tbBook);
+        List<Map<String, Object>> maskedList = list.stream().map(book -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("bookId", book.getBookId());
+            map.put("isbn", book.getIsbn());
+            map.put("bookName", book.getBookName());
+            map.put("author", book.getAuthor());
+            map.put("publisher", book.getPublisher());
+            map.put("edition", book.getEdition());
+            map.put("price", book.getPrice());
+            map.put("bookType", book.getTextbookType());
+            return map;
+        }).collect(Collectors.toList());
+        return getDataTable(maskedList);
+    }
 }

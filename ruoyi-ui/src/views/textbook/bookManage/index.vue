@@ -153,8 +153,8 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="适用年级" prop="grade">
-              <el-select v-model="form.grade" placeholder="请选择适用年级" clearable style="width: 100%">
+            <el-form-item label="入学年份（级）" prop="grade">
+              <el-select v-model="form.grade" placeholder="请选择入学年份（级）" clearable style="width: 100%">
                 <el-option v-for="dict in dict.type.tb_grade" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
@@ -253,8 +253,8 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="适用年级" prop="grade">
-              <el-select v-model="completeForm.grade" placeholder="请选择适用年级" clearable style="width: 100%">
+            <el-form-item label="入学年份（级）" prop="grade">
+              <el-select v-model="completeForm.grade" placeholder="请选择入学年份（级）" clearable style="width: 100%">
                 <el-option v-for="dict in dict.type.tb_grade" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
@@ -308,7 +308,7 @@
       </div>
 
       <div v-if="importStep === 2 && previewData" style="max-height: 55vh; overflow-y: auto;">
-        <el-alert :title="'文件：' + (previewData.fileName || '未知') + '，共 ' + previewData.totalRows + ' 行数据'"
+        <el-alert :title="'文件名：' + (previewData.fileName || '未知') + '，共 ' + previewData.totalRows + ' 行数据'"
                   :type="previewData.failCount > 0 ? 'warning' : 'success'"
                   :closable="false" show-icon style="margin-bottom: 15px;">
           <template slot="default">
@@ -434,7 +434,7 @@ export default {
       rules: {
         isbn: [
           { required: true, message: "ISBN不能为空", trigger: "blur" },
-          { pattern: /^(\d{10}|\d{13})$/, message: "ISBN必须为10位或13位数字", trigger: "blur" }
+          { pattern: /^(\d{10}|\d{13})$/, message: "ISBN必须是10位或13位数字", trigger: "blur" }
         ],
         bookName: [{ required: true, message: "教材名称不能为空", trigger: "blur" }],
         author: [{ required: true, message: "作者不能为空", trigger: "blur" }],
@@ -615,7 +615,7 @@ export default {
           this.previewActiveTab = this.previewData.failCount > 0 ? 'fail' : 'success';
           this.importStep = 2;
           if (this.previewData.successCount === 0) this.$modal.msgWarning('所有数据校验均未通过，请修正后重新上传');
-          else if (this.previewData.failCount > 0) this.$modal.msgWarning('校验完成，' + this.previewData.successCount + '条通过，' + this.previewData.failCount + '条失败');
+          else if (this.previewData.failCount > 0) this.$modal.msgWarning('校验完成：' + this.previewData.successCount + '条通过，' + this.previewData.failCount + '条失败');
           else this.$modal.msgSuccess('校验全部通过，共' + this.previewData.successCount + '条数据');
         } else { this.$modal.msgError(res.msg || '预览校验失败'); }
       } catch (err) { console.error(err); this.$modal.msgError('预览校验异常，请重试'); }

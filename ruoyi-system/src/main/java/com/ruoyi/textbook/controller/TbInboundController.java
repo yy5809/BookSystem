@@ -112,4 +112,24 @@ public class TbInboundController extends BaseController
         String operatorName = SecurityUtils.getLoginUser().getUser().getNickName();
         return toAjax(tbInboundService.processInbound(tbInbound, operatorId, operatorName));
     }
+
+    @PreAuthorize("@ss.hasPermi('textbook:inbound:list') and @ss.hasAnyRoles('admin,warehouse')")
+    @GetMapping("/pendingList")
+    public AjaxResult pendingList()
+    {
+        TbInbound query = new TbInbound();
+        List<TbInbound> list = tbInboundService.selectTbInboundList(query);
+        return AjaxResult.success(list);
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:inbound:process') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "部分入库确认", businessType = BusinessType.UPDATE)
+    @PostMapping("/partialConfirm")
+    public AjaxResult partialConfirm(@RequestBody TbInbound tbInbound)
+    {
+        tbInbound.setCreateBy(getUsername());
+        Long operatorId = SecurityUtils.getUserId();
+        String operatorName = SecurityUtils.getLoginUser().getUser().getNickName();
+        return toAjax(tbInboundService.processInbound(tbInbound, operatorId, operatorName));
+    }
 }

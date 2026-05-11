@@ -67,3 +67,35 @@ export function notifyRegister(id) {
     method: 'put'
   })
 }
+
+export function closeShortage(id, closeReason) {
+  return request({
+    url: '/textbook/shortage/close/' + id,
+    method: 'put',
+    params: { closeReason }
+  })
+}
+
+export function mergeShortage(targetShortageId, sourceShortageIds) {
+  return request({
+    url: '/textbook/shortage/merge',
+    method: 'post',
+    params: { targetShortageId, sourceShortageIds: sourceShortageIds.join(',') }
+  })
+}
+
+export function checkDuplicateShortage(isbn, excludeId) {
+  return request({
+    url: '/textbook/shortage/checkDuplicate',
+    method: 'get',
+    params: { isbn, excludeId }
+  })
+}
+
+export function convertToPurchase(shortageIds) {
+  return request({
+    url: '/textbook/shortage/convertToPurchase',
+    method: 'post',
+    data: shortageIds
+  })
+}

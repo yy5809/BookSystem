@@ -317,4 +317,59 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
         // 生成领书单
         return generateClaimFormsByClass(notice);
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int cancelNotice(Long noticeId, String cancelReason, String cancelBy) {
+        BookNotice notice = this.selectBookNoticeById(noticeId);
+        if (notice == null) {
+            throw new ServiceException("领书通知不存在");
+        }
+        if ("4".equals(notice.getStatus())) {
+            throw new ServiceException("该通知已作废");
+        }
+        if ("0".equals(notice.getStatus())) {
+            throw new ServiceException("草稿状态的通知无需作废，可直接删除");
+        }
+
+        List<BookClaimForm> forms = bookClaimFormMapper.selectBookClaimFormsByNoticeId(noticeId);
+        if (forms != null && !forms.isEmpty()) {
+            for (BookClaimForm form : forms) {
+                if ("2".equals(form.getStatus()) || "1".equals(form.getStatus())) {
+                    throw new ServiceException("存在已出库或部分出库的班级，无法作废通知");
+                }
+            }
+            for (BookClaimForm form : forms) {
+                form.setStatus("5");
+                form.setCancelReason(cancelReason);
+                bookClaimFormMapper.updateBookClaimForm(form);
+            }
+        }
+
+        notice.setStatus("4");
+        notice.setCancelReason(cancelReason);
+        notice.setCancelBy(cancelBy);
+        notice.setCancelTime(new Date());
+        notice.setUpdateTime(DateUtils.getNowDate());
+        int rows = bookNoticeMapper.updateBookNotice(notice);
+
+        log.info("【领书通知作废】通知编号={}, 作废原因={}", notice.getNoticeNo(), cancelReason);
+        return rows;
+    }
+
+    @Override
+    public int extendPickupTime(Long noticeId, Date newEndTime) {
+        BookNotice notice = bookNoticeMapper.selectBookNoticeById(noticeId);
+        if (notice == null) {
+            throw new ServiceException("领书通知不存在");
+        }
+        if (newEndTime.before(notice.getPickupStart())) {
+            throw new ServiceException("领取结束时间不能早于开始时间");
+        }
+        notice.setPickupEnd(newEndTime);
+        notice.setUpdateTime(DateUtils.getNowDate());
+        notice.setRemark((notice.getRemark() == null ? "" : notice.getRemark() + "; ")
+                + "领取时间已延长至" + DateUtils.parseDateToStr("yyyy-MM-dd HH:mm:ss", newEndTime));
+        return bookNoticeMapper.updateBookNotice(notice);
+    }
 }

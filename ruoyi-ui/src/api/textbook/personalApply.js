@@ -66,3 +66,24 @@ export function registerShortage(applyId) {
     method: 'put'
   })
 }
+
+export function closeApply(applyId) {
+  return request({
+    url: '/textbook/personalApply/close/' + applyId,
+    method: 'put'
+  })
+}
+
+export function pendingAuditCount() {
+  return request({
+    url: '/textbook/personalApply/pendingAudit',
+    method: 'get'
+  })
+}
+
+export function pendingPickupCount() {
+  return request({
+    url: '/textbook/personalApply/pendingPickup',
+    method: 'get'
+  })
+}

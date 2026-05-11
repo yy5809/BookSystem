@@ -31,7 +31,7 @@ public class TbBookImportDTO {
     @Excel(name = "适用专业", sort = 8, width = 15)
     private String major;
 
-    @Excel(name = "适用年级", sort = 9, width = 10)
+    @Excel(name = "入学年份（级）", sort = 9, width = 10)
     private String grade;
 
     private int rowIndex;

@@ -8,7 +8,8 @@ public enum ShortageStatusEnum {
     IN_PURCHASE("1", "已纳入采购", Arrays.asList("2", "3", "4")),
     PARTIAL("2", "部分补齐", Arrays.asList("3", "4")),
     COMPLETED("3", "已补齐", Arrays.asList()),
-    CANCELLED("4", "已取消", Arrays.asList());
+    CANCELLED("4", "已取消", Arrays.asList()),
+    CLOSED("5", "已关闭", Arrays.asList());
 
     private final String code;
     private final String desc;

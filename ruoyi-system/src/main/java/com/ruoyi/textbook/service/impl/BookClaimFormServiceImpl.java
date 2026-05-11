@@ -218,4 +218,110 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
         return bookClaimFormDetailMapper.selectBookClaimFormDetailListByFormId(formId);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int withdrawForm(Long formId) {
+        BookClaimForm form = bookClaimFormMapper.selectBookClaimFormById(formId);
+        if (form == null) {
+            throw new ServiceException("领书单不存在");
+        }
+        if (!"0".equals(form.getStatus())) {
+            throw new ServiceException("只有待领取状态的领书单才能撤回");
+        }
+        form.setStatus("3");
+        form.setUpdateTime(DateUtils.getNowDate());
+        log.info("【领书单撤回】领书单号={}, 班级={}", form.getFormNo(), form.getClassName());
+        return bookClaimFormMapper.updateBookClaimForm(form);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int closeForm(Long formId, String closeReason) {
+        BookClaimForm form = bookClaimFormMapper.selectBookClaimFormById(formId);
+        if (form == null) {
+            throw new ServiceException("领书单不存在");
+        }
+        if ("2".equals(form.getStatus())) {
+            throw new ServiceException("已出库的领书单不能关闭");
+        }
+        if ("5".equals(form.getStatus())) {
+            throw new ServiceException("已作废的领书单不能关闭");
+        }
+        form.setStatus("4");
+        form.setCancelReason(closeReason);
+        form.setUpdateTime(DateUtils.getNowDate());
+        log.info("【领书单关闭】领书单号={}, 班级={}, 原因={}", form.getFormNo(), form.getClassName(), closeReason);
+        int rows = bookClaimFormMapper.updateBookClaimForm(form);
+        updateNoticeProgress(form.getNoticeId());
+        return rows;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int reissue(Long formId, Long operatorId, String operatorName, Integer reissueQty) {
+        BookClaimForm form = bookClaimFormMapper.selectBookClaimFormById(formId);
+        if (form == null) {
+            throw new ServiceException("领书单不存在");
+        }
+        if (!"1".equals(form.getStatus())) {
+            throw new ServiceException("只有部分出库状态的领书单才能补发");
+        }
+
+        List<BookClaimFormDetail> details = bookClaimFormDetailMapper.selectBookClaimFormDetailListByFormId(formId);
+        if (details == null || details.isEmpty()) {
+            throw new ServiceException("领书单没有明细信息");
+        }
+
+        int maxReissue = 0;
+        for (BookClaimFormDetail detail : details) {
+            maxReissue += (detail.getPlannedQty() - detail.getIssuedQty());
+        }
+        if (maxReissue <= 0) {
+            throw new ServiceException("该领书单无需补发");
+        }
+
+        int actualQty = (reissueQty != null && reissueQty > 0) ? reissueQty : maxReissue;
+        actualQty = Math.min(actualQty, maxReissue);
+
+        int remaining = actualQty;
+        for (BookClaimFormDetail detail : details) {
+            int needQty = detail.getPlannedQty() - detail.getIssuedQty();
+            if (needQty <= 0 || remaining <= 0) continue;
+
+            int issueQty = Math.min(needQty, remaining);
+            StockOperationResult result = stockOperationService.deductStock(
+                    detail.getTextbookId(), issueQty, operatorId, operatorName,
+                    "CLAIM_FORM_REISSUE", String.valueOf(formId),
+                    "补发出库，领书单号：" + form.getFormNo() + "，班级：" + form.getClassName());
+            if (!result.isSuccess()) {
+                throw new ServiceException("教材《" + detail.getBookName() + "》" + result.getErrorMessage());
+            }
+
+            detail.setIssuedQty(detail.getIssuedQty() + issueQty);
+            bookClaimFormDetailMapper.updateBookClaimFormDetail(detail);
+            remaining -= issueQty;
+        }
+
+        int newTotalIssued = form.getIssuedQty() + (actualQty - remaining);
+        form.setIssuedQty(newTotalIssued);
+        form.setIssueTime(new Date());
+        if (newTotalIssued >= form.getPlannedQty()) {
+            form.setStatus("2");
+        }
+        form.setUpdateBy(operatorName);
+        form.setUpdateTime(DateUtils.getNowDate());
+        bookClaimFormMapper.updateBookClaimForm(form);
+
+        updateNoticeProgress(form.getNoticeId());
+        log.info("【补发出库】领书单号={}, 补发数量={}, 累计已发={}", form.getFormNo(), (actualQty - remaining), newTotalIssued);
+        return 1;
+    }
+
+    @Override
+    public List<BookClaimForm> selectPendingReissueList() {
+        return bookClaimFormMapper.selectBookClaimFormList(new BookClaimForm() {{
+            setStatus("1");
+        }});
+    }
+
 }

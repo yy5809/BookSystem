@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Date;
 
+import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.textbook.domain.BookClaimForm;
 import com.ruoyi.textbook.domain.BookNotice;
 import com.ruoyi.textbook.service.IBookNoticeService;
@@ -178,5 +180,48 @@ public class BookNoticeController extends BaseController {
             classes.add(cls);
         }
         return AjaxResult.success(classes);
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "作废领书通知", businessType = BusinessType.UPDATE)
+    @PutMapping("/cancel/{noticeId}")
+    public AjaxResult cancelNotice(@PathVariable Long noticeId, @RequestParam String cancelReason) {
+        try {
+            String cancelBy = getUsername();
+            bookNoticeService.cancelNotice(noticeId, cancelReason, cancelBy);
+            return AjaxResult.success("作废成功");
+        } catch (RuntimeException e) {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "延长领取时间", businessType = BusinessType.UPDATE)
+    @PutMapping("/extend/{noticeId}")
+    public AjaxResult extendPickupTime(@PathVariable Long noticeId, @RequestParam String newEndTime) {
+        try {
+            Date endTime = DateUtils.parseDate(newEndTime);
+            return toAjax(bookNoticeService.extendPickupTime(noticeId, endTime));
+        } catch (RuntimeException e) {
+            return AjaxResult.error(e.getMessage());
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:query')")
+    @GetMapping("/bindingData/{semester}")
+    public AjaxResult bindingData(@PathVariable String semester) {
+        BookNotice query = new BookNotice();
+        query.setSemester(semester);
+        query.setStatus("0");
+        List<BookNotice> list = bookNoticeService.selectBookNoticeList(query);
+        return AjaxResult.success(list != null && !list.isEmpty() ? list.get(0) : null);
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:noticeManage:list')")
+    @GetMapping("/archivedList")
+    public TableDataInfo archivedList(BookNotice bookNotice) {
+        startPage();
+        List<BookNotice> list = bookNoticeService.selectBookNoticeList(bookNotice);
+        return getDataTable(list);
     }
 }

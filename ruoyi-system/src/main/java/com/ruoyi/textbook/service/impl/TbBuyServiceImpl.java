@@ -113,6 +113,9 @@ public class TbBuyServiceImpl implements ITbBuyService {
     @Autowired
     private PurchaseStateService purchaseStateService;
 
+    @Autowired
+    private com.ruoyi.common.core.redis.RedisCache redisCache;
+
     @Override
     public TbPurchase getById(Long buyId) {
         TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(buyId);
@@ -318,20 +321,9 @@ public class TbBuyServiceImpl implements ITbBuyService {
         log.info("【入库完成】已自动生成班级领书计划, purchaseId={}, noticeNo={}, 班级数={}", buyId, noticeNo, groupMap.size());
     }
 
-    private static String toGradeYearPrefix(String gradeLevel) {
+    private String toGradeYearPrefix(String gradeLevel) {
         if (gradeLevel == null) return null;
-        if ("通用".equals(gradeLevel)) return "通用";
-        java.util.Calendar cal = java.util.Calendar.getInstance();
-        int year = cal.get(java.util.Calendar.YEAR);
-        int month = cal.get(java.util.Calendar.MONTH) + 1;
-        int freshmanYear = (month >= 9) ? year : year - 1;
-        switch (gradeLevel) {
-            case "大一": return (freshmanYear % 100) + "级";
-            case "大二": return ((freshmanYear - 1) % 100) + "级";
-            case "大三": return ((freshmanYear - 2) % 100) + "级";
-            case "大四": return ((freshmanYear - 3) % 100) + "级";
-            default: return gradeLevel;
-        }
+        return com.ruoyi.textbook.util.GradeConverter.normalizeGradeLevel(gradeLevel, getCurrentAcademicYear());
     }
 
     private String generateSemester() {
@@ -341,6 +333,17 @@ public class TbBuyServiceImpl implements ITbBuyService {
         if (month >= 9) return year + "-" + (year + 1) + "-1";
         else if (month >= 2) return (year - 1) + "-" + year + "-2";
         else return (year - 1) + "-" + year + "-1";
+    }
+
+    private int getCurrentAcademicYear() {
+        try {
+            String configValue = redisCache.getCacheObject("sys_config:textbook.current_academic_year");
+            if (configValue != null && !configValue.isEmpty()) {
+                return Integer.parseInt(configValue);
+            }
+        } catch (Exception ignored) {}
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        return cal.get(java.util.Calendar.YEAR);
     }
 
     @Override
@@ -767,5 +770,40 @@ public class TbBuyServiceImpl implements ITbBuyService {
             }
         }
         return "1";
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int adjustDetail(Long buyId, List<TbPurchaseDetail> details) {
+        TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(buyId);
+        if (purchase == null) throw new ServiceException("采购单不存在");
+        String ps = purchase.getPurchaseStatus();
+        if (PurchaseStatusEnum.ARRIVED.getCode().equals(ps) || PurchaseStatusEnum.INBOUND.getCode().equals(ps)) {
+            throw new ServiceException("已到货或已入库的采购单不允许调整明细");
+        }
+        tbPurchaseMapper.deleteTbPurchaseDetailByPurchaseId(buyId);
+        if (details != null) {
+            for (TbPurchaseDetail d : details) {
+                d.setPurchaseId(buyId);
+                tbPurchaseMapper.insertTbPurchaseDetail(d);
+            }
+        }
+        log.info("【采购单调整明细】buyId={}, 明细数={}", buyId, details != null ? details.size() : 0);
+        return 1;
+    }
+
+    @Override
+    public int archivePurchase(Long buyId) {
+        TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(buyId);
+        if (purchase == null) throw new ServiceException("采购单不存在");
+        purchase.setArchived("1");
+        return tbPurchaseMapper.updateTbPurchase(purchase);
+    }
+
+    @Override
+    public List<TbPurchase> listArchived(TbPurchase query) {
+        if (query == null) query = new TbPurchase();
+        query.setArchived("1");
+        return tbPurchaseMapper.selectTbPurchaseList(query);
     }
 }

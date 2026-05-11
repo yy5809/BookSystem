@@ -5,7 +5,8 @@ public enum PersonalApplyStatusEnum {
     APPROVED("1", "已通过"),
     REJECTED("2", "已驳回"),
     ISSUED("3", "已出库"),
-    CANCELLED("4", "已取消");
+    CLOSED("4", "已关闭"),
+    SHORTAGE_REGISTERED("5", "已转缺书");
 
     private final String code;
     private final String desc;

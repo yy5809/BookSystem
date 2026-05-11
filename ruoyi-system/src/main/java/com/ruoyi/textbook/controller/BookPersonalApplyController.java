@@ -113,4 +113,33 @@ public class BookPersonalApplyController extends BaseController {
         }
         return toAjax(bookPersonalApplyService.deleteBookPersonalApplyByIds(applyIds));
     }
+
+    @PreAuthorize("@ss.hasPermi('textbook:personalApply:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "关闭个人领书申请", businessType = BusinessType.UPDATE)
+    @PutMapping("/close/{applyId}")
+    public AjaxResult close(@PathVariable Long applyId) {
+        BookPersonalApply apply = bookPersonalApplyService.selectBookPersonalApplyById(applyId);
+        if (apply == null) return error("申请记录不存在");
+        apply.setStatus("4");
+        apply.setUpdateBy(getUsername());
+        return toAjax(bookPersonalApplyService.updateBookPersonalApply(apply));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:personalApply:list') and @ss.hasAnyRoles('admin,warehouse')")
+    @GetMapping("/pendingAudit")
+    public AjaxResult pendingAudit() {
+        BookPersonalApply query = new BookPersonalApply();
+        query.setStatus("0");
+        List<BookPersonalApply> list = bookPersonalApplyService.selectBookPersonalApplyList(query);
+        return AjaxResult.success(list != null ? list.size() : 0);
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:personalApply:list') and @ss.hasAnyRoles('admin,warehouse')")
+    @GetMapping("/pendingPickup")
+    public AjaxResult pendingPickup() {
+        BookPersonalApply query = new BookPersonalApply();
+        query.setStatus("1");
+        List<BookPersonalApply> list = bookPersonalApplyService.selectBookPersonalApplyList(query);
+        return AjaxResult.success(list != null ? list.size() : 0);
+    }
 }

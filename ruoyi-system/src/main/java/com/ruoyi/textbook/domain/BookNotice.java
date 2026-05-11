@@ -29,7 +29,7 @@ public class BookNotice extends BaseEntity {
     @Excel(name = "领取地点")
     private String pickupLocation;
 
-    @Excel(name = "状态", readConverterExp = "0=草稿,1=已发布,2=领取中,3=已完成")
+    @Excel(name = "状态", readConverterExp = "0=草稿,1=已发布,2=领取中,3=已完成,4=已作废")
     private String status;
 
     @Excel(name = "班级总数")
@@ -42,6 +42,13 @@ public class BookNotice extends BaseEntity {
     private String remark;
 
     private String delFlag;
+
+    private String cancelReason;
+
+    private String cancelBy;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date cancelTime;
 
     private List<BookClaimFormDetail> details;
 
@@ -67,6 +74,13 @@ public class BookNotice extends BaseEntity {
     public void setRemark(String remark) { this.remark = remark; }
     public String getDelFlag() { return delFlag; }
     public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
+
+    public String getCancelReason() { return cancelReason; }
+    public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
+    public String getCancelBy() { return cancelBy; }
+    public void setCancelBy(String cancelBy) { this.cancelBy = cancelBy; }
+    public Date getCancelTime() { return cancelTime; }
+    public void setCancelTime(Date cancelTime) { this.cancelTime = cancelTime; }
 
     public List<BookClaimFormDetail> getDetails() { return details; }
     public void setDetails(List<BookClaimFormDetail> details) { this.details = details; }

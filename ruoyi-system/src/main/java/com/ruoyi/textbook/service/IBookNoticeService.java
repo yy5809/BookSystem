@@ -1,5 +1,6 @@
 package com.ruoyi.textbook.service;
 
+import java.util.Date;
 import java.util.List;
 import com.ruoyi.textbook.domain.BookNotice;
 import com.ruoyi.textbook.domain.BookClaimForm;
@@ -21,4 +22,8 @@ public interface IBookNoticeService {
     public int saveAndGenerate(BookNotice bookNotice);
 
     public List<BookClaimForm> generateClaimForms(Long noticeId);
+
+    public int cancelNotice(Long noticeId, String cancelReason, String cancelBy);
+
+    public int extendPickupTime(Long noticeId, Date newEndTime);
 }

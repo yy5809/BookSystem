@@ -1,6 +1,7 @@
 package com.ruoyi.textbook.controller;
 
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +12,9 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.textbook.domain.TbPurchase;
+import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.dto.AuditRequest;
 import com.ruoyi.textbook.service.ITbBuyService;
 
@@ -112,5 +115,42 @@ public class TbPurchaseController extends BaseController {
     @DeleteMapping("/remove/{id}")
     public AjaxResult remove(@PathVariable("id") Long buyId) {
         return toAjax(tbBuyService.deleteWithCheck(buyId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "调整采购单明细", businessType = BusinessType.UPDATE)
+    @PutMapping("/adjustDetail/{id}")
+    public AjaxResult adjustDetail(@PathVariable("id") Long buyId, @RequestBody List<TbPurchaseDetail> details) {
+        return toAjax(tbBuyService.adjustDetail(buyId, details));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:edit') and @ss.hasAnyRoles('admin,warehouse')")
+    @Log(title = "归档采购单", businessType = BusinessType.UPDATE)
+    @PutMapping("/archive/{id}")
+    public AjaxResult archive(@PathVariable("id") Long buyId) {
+        return toAjax(tbBuyService.archivePurchase(buyId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:list')")
+    @GetMapping("/archivedList")
+    public TableDataInfo archivedList(TbPurchase query) {
+        startPage();
+        return getDataTable(tbBuyService.listArchived(query));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:query')")
+    @GetMapping("/detailList/{id}")
+    public AjaxResult getDetailList(@PathVariable("id") Long buyId) {
+        return AjaxResult.success(tbBuyService.selectDetailsByPurchaseId(buyId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:import')")
+    @GetMapping("/template")
+    public void downloadTemplate(HttpServletResponse response) {
+        try {
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            FileUtils.setAttachmentResponseHeader(response, "采购单导入模板.xlsx");
+        } catch (Exception ignored) {
+        }
     }
 }

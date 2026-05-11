@@ -63,3 +63,19 @@ export function markNoticeAsRead(noticeId) {
 export function markAllNoticesAsRead() {
   return request({ url: '/textbook/supplier/notice/read/all', method: 'put' })
 }
+
+export function markDetail(data) {
+  return request({ url: '/textbook/supplier/purchase/markDetail', method: 'put', data })
+}
+
+export function rejectOrder(purchaseId, reason) {
+  return request({ url: `/textbook/supplier/purchase/reject/${purchaseId}`, method: 'put', params: { reason } })
+}
+
+export function updateShipment(purchaseId, logisticsCompany, logisticsNo) {
+  return request({ url: `/textbook/supplier/purchase/updateShip/${purchaseId}`, method: 'put', params: { logisticsCompany, logisticsNo } })
+}
+
+export function listHistoryOrders(query) {
+  return request({ url: '/textbook/supplier/purchase/history', method: 'get', params: query })
+}

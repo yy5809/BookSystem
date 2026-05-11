@@ -8,7 +8,9 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.textbook.annotation.MaxExportRows;
 import com.ruoyi.textbook.domain.TbInventory;
+import com.ruoyi.textbook.domain.TbStockLog;
 import com.ruoyi.textbook.service.ITbInventoryService;
+import com.ruoyi.textbook.service.ITbStockLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,9 @@ public class TbInventoryController extends BaseController
 {
     @Autowired
     private ITbInventoryService tbInventoryService;
+
+    @Autowired
+    private ITbStockLogService tbStockLogService;
 
     @PreAuthorize("@ss.hasPermi('textbook:inventory:list')")
     @GetMapping("/list")
@@ -59,5 +64,13 @@ public class TbInventoryController extends BaseController
     @GetMapping("/byBook/{bookId}")
     public AjaxResult getByBookId(@PathVariable Long bookId) {
         return AjaxResult.success(tbInventoryService.selectTbInventoryByBookId(bookId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:stockFlow:list')")
+    @GetMapping("/flowList")
+    public TableDataInfo flowList(TbStockLog tbStockLog) {
+        startPage();
+        List<TbStockLog> list = tbStockLogService.selectList(tbStockLog);
+        return getDataTable(list);
     }
 }

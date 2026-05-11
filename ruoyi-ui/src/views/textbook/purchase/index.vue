@@ -134,7 +134,7 @@
               <el-table-column label="类型" prop="textbookType" width="70" align="center"/>
               <el-table-column label="学院" prop="college" width="100" show-overflow-tooltip/>
               <el-table-column label="专业" prop="major" width="100" show-overflow-tooltip/>
-              <el-table-column label="年级" prop="grade" width="70" align="center"/>
+              <el-table-column label="入学年份" prop="grade" width="90" align="center"/>
               <el-table-column label="数量" prop="quantity" width="65" align="center"/>
               <el-table-column label="备注" prop="remark" min-width="100" show-overflow-tooltip/>
             </el-table>

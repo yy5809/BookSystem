@@ -18,12 +18,15 @@
         <result property="updateTime"  column="update_time"  />
         <result property="remark"      column="remark"       />
         <result property="delFlag"     column="del_flag"     />
+        <result property="cancelReason" column="cancel_reason" />
+        <result property="cancelBy"    column="cancel_by"    />
+        <result property="cancelTime"  column="cancel_time"  />
     </resultMap>
 
     <sql id="selectBookNoticeVo">
         select notice_id, notice_no, semester, pickup_start, pickup_end, pickup_location,
                status, total_classes, issued_classes, create_by, create_time, update_by, update_time,
-               remark, del_flag
+               remark, del_flag, cancel_reason, cancel_by, cancel_time
         from textbook_notice
     </sql>
 
@@ -88,6 +91,9 @@
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
             update_time = sysdate(),
             <if test="remark != null">remark = #{remark},</if>
+            <if test="cancelReason != null">cancel_reason = #{cancelReason},</if>
+            <if test="cancelBy != null">cancel_by = #{cancelBy},</if>
+            <if test="cancelTime != null">cancel_time = #{cancelTime},</if>
         </set>
         where notice_id = #{noticeId} and del_flag = '0'
     </update>

@@ -146,4 +146,32 @@ public class TbShortageController extends BaseController
     {
         return toAjax(tbShortageService.notifyRegister(shortageId));
     }
+
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:process')")
+    @Log(title = "关闭缺书单", businessType = BusinessType.UPDATE)
+    @PutMapping("/close/{shortageId}")
+    public AjaxResult closeShortage(@PathVariable Long shortageId, @RequestParam String closeReason)
+    {
+        String closeBy = getUsername();
+        return toAjax(tbShortageService.closeShortage(shortageId, closeReason, closeBy));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:process')")
+    @Log(title = "合并缺书单", businessType = BusinessType.UPDATE)
+    @PostMapping("/merge")
+    public AjaxResult mergeShortage(@RequestParam Long targetShortageId,
+                                     @RequestParam Long[] sourceShortageIds)
+    {
+        int count = tbShortageService.mergeShortage(targetShortageId, sourceShortageIds);
+        return AjaxResult.success("成功合并" + count + "条缺书记录");
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:shortage:query')")
+    @GetMapping("/checkDuplicate")
+    public AjaxResult checkDuplicate(@RequestParam String isbn,
+                                      @RequestParam(required = false) Long excludeId)
+    {
+        List<TbShortage> duplicates = tbShortageService.checkDuplicate(isbn, excludeId);
+        return AjaxResult.success(duplicates);
+    }
 }
