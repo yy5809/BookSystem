@@ -4,8 +4,8 @@
       <el-form-item label="采购单号" prop="purchaseNo">
         <el-input v-model="queryParams.purchaseNo" placeholder="请输入采购单号" clearable @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+      <el-form-item label="采购状态" prop="purchaseStatus">
+        <el-select v-model="queryParams.purchaseStatus" placeholder="请选择状态" clearable>
           <el-option label="已到货" value="4" />
           <el-option label="已入库" value="5" />
         </el-select>
@@ -24,9 +24,9 @@
       <el-table-column type="index" label="#" align="center" width="50" />
       <el-table-column label="采购单号" align="center" prop="purchaseNo" width="180" show-overflow-tooltip />
       <el-table-column label="采购数量(TOTAL)" align="center" prop="buyNum" width="110" />
-      <el-table-column label="状态" align="center" prop="status" width="90">
+      <el-table-column label="采购状态" align="center" width="90">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.tb_purchase_status" :value="scope.row.status" />
+          <dict-tag :options="dict.type.tb_purchase_status" :value="scope.row.purchaseStatus" />
         </template>
       </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createTime" width="145" />
@@ -34,7 +34,7 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)" v-hasPermi="['textbook:inbound:query']">详情</el-button>
-          <el-button size="mini" type="text" icon="el-icon-box-plug" @click="handleInbound(scope.row)" v-if="scope.row.status === '4'" v-hasPermi="['textbook:inbound:add']">确认入库</el-button>
+          <el-button size="mini" type="text" icon="el-icon-box-plug" @click="handleInbound(scope.row)" v-if="scope.row.purchaseStatus === '4'" v-hasPermi="['textbook:inbound:add']">确认入库</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -49,7 +49,7 @@
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12"><el-form-item label="经费来源"><el-input :value="viewData.fundingSource" disabled /></el-form-item></el-col>
-          <el-col :span="12"><el-form-item label="状态"><dict-tag :options="dict.type.tb_purchase_status" :value="viewData.status" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="采购状态"><dict-tag :options="dict.type.tb_purchase_status" :value="viewData.purchaseStatus" /></el-form-item></el-col>
         </el-row>
       </el-form>
       <el-card class="detail-card">
@@ -60,6 +60,14 @@
           <el-table-column label="作者" prop="author" width="90" show-overflow-tooltip />
           <el-table-column label="出版社" prop="publisher" width="120" show-overflow-tooltip />
           <el-table-column label="数量" prop="quantity" width="70" align="center" />
+          <el-table-column label="供应商反馈" width="110" align="center">
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.supplierFeedback === '1'" type="success" size="mini">可供货</el-tag>
+              <el-tag v-else-if="scope.row.supplierFeedback === '2'" type="danger" size="mini">⚠ 缺货-已跳过</el-tag>
+              <el-tag v-else-if="scope.row.supplierFeedback === '3'" type="warning" size="mini">⚠ 有误-已跳过</el-tag>
+              <span v-else style="color:#c0c4cc">未反馈</span>
+            </template>
+          </el-table-column>
         </el-table>
       </el-card>
       <div slot="footer"><el-button @click="viewOpen = false">关 闭</el-button></div>
@@ -87,7 +95,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         purchaseNo: null,
-        status: null
+        purchaseStatus: null
       }
     };
   },
@@ -98,7 +106,11 @@ export default {
     getList() {
       this.loading = true;
       const params = this.addDateRange(this.queryParams, this.dateRange);
-      params.statusIn = ['4', '5'];
+      if (this.queryParams.purchaseStatus) {
+        params.statusIn = [this.queryParams.purchaseStatus];
+      } else {
+        params.statusIn = ['4', '5'];
+      }
       listPurchase(params).then(response => {
         this.inboundList = response.rows;
         this.total = response.total;

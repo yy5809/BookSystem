@@ -80,7 +80,7 @@ public class TbPurchase extends BaseEntity {
     private String logisticsCompany;
     private String invoiceNo;
 
-    @Excel(name = "采购状态", readConverterExp = "0=待采购,1=采购中,2=已接单,3=已发货,4=已到货,5=已入库")
+    @Excel(name = "采购状态", readConverterExp = "0=待采购,1=已下单,2=已接单,3=已发货,4=已到货,5=已入库")
     private String purchaseStatus;
 
     private String archived;

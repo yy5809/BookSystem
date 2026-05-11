@@ -210,11 +210,7 @@ public class BookNoticeController extends BaseController {
     @PreAuthorize("@ss.hasPermi('textbook:noticeManage:query')")
     @GetMapping("/bindingData/{semester}")
     public AjaxResult bindingData(@PathVariable String semester) {
-        BookNotice query = new BookNotice();
-        query.setSemester(semester);
-        query.setStatus("0");
-        List<BookNotice> list = bookNoticeService.selectBookNoticeList(query);
-        return AjaxResult.success(list != null && !list.isEmpty() ? list.get(0) : null);
+        return AjaxResult.success(bookNoticeService.getBindingData(semester));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:noticeManage:list')")

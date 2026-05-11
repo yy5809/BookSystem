@@ -18,22 +18,10 @@ import com.ruoyi.textbook.domain.TbShortage;
 import com.ruoyi.textbook.domain.TbOutbound;
 import com.ruoyi.textbook.domain.TbStockLog;
 import com.ruoyi.textbook.domain.TbSupplier;
-import com.ruoyi.textbook.domain.BookNotice;
-import com.ruoyi.textbook.domain.BookClaimForm;
-import com.ruoyi.textbook.domain.BookClaimFormDetail;
 import com.ruoyi.textbook.domain.dto.TbPurchaseImportDTO;
 import com.ruoyi.textbook.domain.dto.StockOperationResult;
 import com.ruoyi.textbook.enums.NoticeBizTypeEnum;
-import com.ruoyi.textbook.mapper.TbBookMapper;
-import com.ruoyi.textbook.mapper.TbInventoryMapper;
-import com.ruoyi.textbook.mapper.TbOutboundMapper;
-import com.ruoyi.textbook.mapper.TbPurchaseMapper;
-import com.ruoyi.textbook.mapper.TbShortageMapper;
-import com.ruoyi.textbook.mapper.TbStockLogMapper;
-import com.ruoyi.textbook.mapper.TbSupplierMapper;
-import com.ruoyi.textbook.mapper.BookNoticeMapper;
-import com.ruoyi.textbook.mapper.BookClaimFormMapper;
-import com.ruoyi.textbook.mapper.BookClaimFormDetailMapper;
+import com.ruoyi.textbook.mapper.*;
 import com.ruoyi.textbook.service.ITbBuyService;
 import com.ruoyi.textbook.service.IStockOperationService;
 import com.ruoyi.textbook.service.ITbStockLogService;
@@ -96,13 +84,10 @@ public class TbBuyServiceImpl implements ITbBuyService {
     private TbSupplierMapper tbSupplierMapper;
 
     @Autowired
-    private BookNoticeMapper bookNoticeMapper;
+    private com.ruoyi.textbook.mapper.BookPersonalApplyMapper bookPersonalApplyMapper;
 
     @Autowired
-    private BookClaimFormMapper bookClaimFormMapper;
-
-    @Autowired
-    private BookClaimFormDetailMapper bookClaimFormDetailMapper;
+    private com.ruoyi.textbook.mapper.TextbookClassBindingMapper textbookClassBindingMapper;
 
     @Autowired
     private ITbStockLogService tbStockLogService;
@@ -240,85 +225,7 @@ public class TbBuyServiceImpl implements ITbBuyService {
             }
         }
 
-        try {
-            autoGenerateClaimNotices(buyId, buy.getPurchaseNo());
-        } catch (Exception e) {
-            log.warn("【入库完成】自动生成班级领书计划失败: {}", e.getMessage());
-        }
-
         return result;
-    }
-
-    private void autoGenerateClaimNotices(Long buyId, String purchaseNo) {
-        List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
-        if (details == null || details.isEmpty()) return;
-
-        List<TbPurchaseDetail> classifiableDetails = new ArrayList<>();
-        for (TbPurchaseDetail d : details) {
-            if (StringUtils.isNotEmpty(d.getCollege()) && StringUtils.isNotEmpty(d.getGrade())) {
-                classifiableDetails.add(d);
-            }
-        }
-        if (classifiableDetails.isEmpty()) return;
-
-        java.util.Map<String, List<TbPurchaseDetail>> groupMap = new java.util.LinkedHashMap<>();
-        for (TbPurchaseDetail d : classifiableDetails) {
-            String key = (d.getCollege() != null ? d.getCollege() : "")
-                    + "|" + (d.getMajor() != null ? d.getMajor() : "")
-                    + "|" + (d.getGrade() != null ? d.getGrade() : "");
-            groupMap.computeIfAbsent(key, k -> new ArrayList<>()).add(d);
-        }
-
-        String semester = generateSemester();
-        String noticeNo = "TZ" + DateUtils.dateTimeNow("yyyyMMddHHmmss");
-        BookNotice notice = new BookNotice();
-        notice.setNoticeNo(noticeNo);
-        notice.setSemester(semester);
-        notice.setPickupLocation("库房");
-        notice.setStatus("0");
-        notice.setTotalClasses(groupMap.size());
-        notice.setIssuedClasses(0);
-        notice.setCreateBy(SecurityUtils.getLoginUser().getUser().getNickName());
-        notice.setCreateTime(DateUtils.getNowDate());
-        bookNoticeMapper.insertBookNotice(notice);
-
-        String formNoPrefix = "LS" + DateUtils.dateTimeNow("yyyyMMddHHmmss");
-        int formIndex = 0;
-        for (java.util.Map.Entry<String, List<TbPurchaseDetail>> entry : groupMap.entrySet()) {
-            TbPurchaseDetail first = entry.getValue().get(0);
-            BookClaimForm form = new BookClaimForm();
-            form.setNoticeId(notice.getNoticeId());
-            form.setFormNo(formNoPrefix + String.format("%03d", ++formIndex));
-            form.setGradeLevel(first.getGrade());
-            String gradeYearPrefix = toGradeYearPrefix(first.getGrade());
-            form.setClassName(gradeYearPrefix != null ? gradeYearPrefix + (StringUtils.isNotEmpty(first.getMajor()) ? first.getMajor() : "") : (first.getGrade() + (StringUtils.isNotEmpty(first.getMajor()) ? first.getMajor() : "")));
-            form.setStatus("0");
-            form.setPlannedQty(0);
-            form.setIssuedQty(0);
-            form.setCreateTime(DateUtils.getNowDate());
-            bookClaimFormMapper.insertBookClaimForm(form);
-
-            int plannedQty = 0;
-            for (TbPurchaseDetail d : entry.getValue()) {
-                BookClaimFormDetail detail = new BookClaimFormDetail();
-                detail.setFormId(form.getFormId());
-                detail.setTextbookId(d.getBookId());
-                detail.setIsbn(d.getIsbn());
-                detail.setBookName(d.getBookName());
-                detail.setAuthor(d.getAuthor());
-                detail.setPublisher(d.getPublisher());
-                detail.setPlannedQty(d.getQuantity());
-                detail.setIssuedQty(0);
-                detail.setPrice(d.getUnitPrice());
-                detail.setCreateTime(DateUtils.getNowDate());
-                bookClaimFormDetailMapper.insertBookClaimFormDetail(detail);
-                plannedQty += d.getQuantity() != null ? d.getQuantity() : 0;
-            }
-            form.setPlannedQty(plannedQty);
-            bookClaimFormMapper.updateBookClaimForm(form);
-        }
-
-        log.info("【入库完成】已自动生成班级领书计划, purchaseId={}, noticeNo={}, 班级数={}", buyId, noticeNo, groupMap.size());
     }
 
     private String toGradeYearPrefix(String gradeLevel) {
@@ -359,8 +266,15 @@ public class TbBuyServiceImpl implements ITbBuyService {
         List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId);
         SysUser currentUser = sysUserMapper.selectUserById(SecurityUtils.getUserId());
         String operatorName = currentUser != null ? currentUser.getNickName() : SecurityUtils.getUsername();
+        int inboundCount = 0, skipCount = 0;
         for (TbPurchaseDetail detail : details) {
             int qty = detail.getQuantity() != null ? detail.getQuantity() : 0;
+
+            if ("2".equals(detail.getSupplierFeedback()) || "3".equals(detail.getSupplierFeedback())) {
+                skipCount++;
+                log.info("【入库】跳过明细 detailId={}, 书名={}, 供应商反馈={}", detail.getDetailId(), detail.getBookName(), detail.getSupplierFeedback());
+                continue;
+            }
 
             StockOperationResult stockResult = stockOperationService.addStock(
                     detail.getBookId(),
@@ -375,8 +289,35 @@ public class TbBuyServiceImpl implements ITbBuyService {
                 throw new ServiceException("教材「" + detail.getBookName() + "」入库失败：" + stockResult.getErrorMessage());
             }
 
+            if (StringUtils.isNotEmpty(detail.getCollege()) && StringUtils.isNotEmpty(detail.getMajor())) {
+                com.ruoyi.textbook.domain.TextbookClassBinding binding =
+                        new com.ruoyi.textbook.domain.TextbookClassBinding();
+                binding.setSemester(generateSemester());
+                binding.setCollege(detail.getCollege());
+                binding.setMajor(detail.getMajor());
+                binding.setClassName(detail.getGrade() != null ? detail.getGrade() + detail.getMajor() : detail.getMajor());
+                binding.setBookId(detail.getBookId());
+                binding.setIsbn(detail.getIsbn());
+                binding.setBookName(detail.getBookName());
+                binding.setPlannedQty(qty);
+                binding.setSource("1");
+                binding.setPendingId(buyId);
+                binding.setCreateBy(operatorName);
+                textbookClassBindingMapper.upsertBinding(binding);
+            }
+
             noticeService.sendInboundNotice(
                     detail.getBookId(), detail.getBookName(), buyId);
+            inboundCount++;
+        }
+
+        if (skipCount > 0) {
+            log.info("【入库完成】共{}条明细，实际入库{}条，跳过{}条（供应商标记缺货/信息有误）",
+                    details.size(), inboundCount, skipCount);
+        }
+
+        if (inboundCount == 0) {
+            throw new ServiceException("所有教材明细均被供应商标记为缺货或信息有误，无法入库，请联系供应商核实");
         }
 
         TbPurchase inboundPurchase = purchaseStateService.transitionToInbound(buyId);
@@ -392,7 +333,35 @@ public class TbBuyServiceImpl implements ITbBuyService {
                     shortage.setRemark("已通过采购单" + buy.getPurchaseNo() + "入库补齐");
                     tbShortageMapper.updateTbShortage(shortage);
 
-                    if (shortage.getRegisterId() != null) {
+                    boolean personalApplyRestored = false;
+                    if ("3".equals(shortage.getSource()) && shortage.getSourceId() != null) {
+                        com.ruoyi.textbook.domain.BookPersonalApply personalApply =
+                                bookPersonalApplyMapper.selectBookPersonalApplyById(shortage.getSourceId());
+                        if (personalApply != null && "2".equals(personalApply.getStatus())) {
+                            com.ruoyi.textbook.domain.BookPersonalApply updateApply =
+                                    new com.ruoyi.textbook.domain.BookPersonalApply();
+                            updateApply.setApplyId(personalApply.getApplyId());
+                            updateApply.setStatus("1");
+                            updateApply.setAuditOpinion("缺书已补货入库，恢复为可出库状态");
+                            updateApply.setUpdateBy(operatorName);
+                            updateApply.setUpdateTime(DateUtils.getNowDate());
+                            bookPersonalApplyMapper.updateBookPersonalApply(updateApply);
+                            personalApplyRestored = true;
+
+                            if (personalApply.getTeacherId() != null) {
+                                String teacherName = personalApply.getTeacherName() != null ? personalApply.getTeacherName() : "教师";
+                                noticeService.sendNoticeToUser(
+                                        personalApply.getTeacherId(),
+                                        "缺书补货到库通知",
+                                        teacherName + "，您申请的《" + personalApply.getBookName()  + "》已补货入库，管理员将尽快为您办理出库。",
+                                        NoticeBizTypeEnum.LACK.getCode(),
+                                        personalApply.getApplyId());
+                                log.info("【入库完成】已通知教师领书, teacherId={}, applyId={}", personalApply.getTeacherId(), personalApply.getApplyId());
+                            }
+                        }
+                    }
+
+                    if (!personalApplyRestored && shortage.getRegisterId() != null) {
                         noticeService.sendNoticeToUser(
                                 shortage.getRegisterId(),
                                 "缺书到货通知",

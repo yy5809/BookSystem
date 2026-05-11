@@ -22,19 +22,39 @@
         <span>采购明细</span>
       </template>
       <el-table :data="purchaseDetails" border stripe>
-        <el-table-column label="教材名称" align="center" prop="bookName" min-width="150" show-overflow-tooltip />
+        <el-table-column label="教材名称" align="center" prop="bookName" min-width="140" show-overflow-tooltip />
         <el-table-column label="版次" align="center" prop="edition" width="65" />
         <el-table-column label="作者" align="center" prop="author" width="85" show-overflow-tooltip />
         <el-table-column label="出版社" align="center" prop="publisher" width="100" show-overflow-tooltip />
         <el-table-column label="ISBN" align="center" prop="isbn" width="130" />
         <el-table-column label="数量" align="center" prop="quantity" width="60" />
         <el-table-column label="学院" align="center" prop="college" width="80" show-overflow-tooltip />
-        <el-table-column label="入学年份" align="center" prop="grade" width="80" />
+        <el-table-column label="适用年级" align="center" prop="grade" width="80" />
+        <el-table-column label="我的反馈" align="center" width="120">
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.supplierFeedback === '1'" type="success" size="mini">可供货</el-tag>
+            <el-tag v-else-if="scope.row.supplierFeedback === '2'" type="danger" size="mini">缺货</el-tag>
+            <el-tag v-else-if="scope.row.supplierFeedback === '3'" type="warning" size="mini">信息有误</el-tag>
+            <span v-else style="color:#c0c4cc">未反馈</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" width="200" v-if="purchaseInfo.purchaseStatus === '1'">
+          <template slot-scope="scope">
+            <el-button size="mini" type="success" @click="markFeedback(scope.row, '1')" :disabled="scope.row.supplierFeedback === '1'">可供货</el-button>
+            <el-button size="mini" type="danger" @click="markFeedback(scope.row, '2')" :disabled="scope.row.supplierFeedback === '2'">缺货</el-button>
+            <el-button size="mini" type="warning" @click="markFeedback(scope.row, '3')" :disabled="scope.row.supplierFeedback === '3'">有误</el-button>
+          </template>
+        </el-table-column>
       </el-table>
     </el-card>
 
+    <el-alert v-if="purchaseInfo.purchaseStatus === '1' && unmarkedCount > 0"
+      title="请逐项核准采购明细" type="warning" :closable="false" show-icon style="margin: 12px 0;">
+      还有 {{ unmarkedCount }} 条明细未核准，请逐条标记为"可供货"/"缺货"/"信息有误"后再确认接单
+    </el-alert>
+
     <div style="text-align: right; margin-top: 15px;" v-if="purchaseInfo.purchaseStatus === '1' || purchaseInfo.purchaseStatus === '2'">
-      <el-button type="success" icon="el-icon-check" size="mini" @click="handleAccept" v-if="purchaseInfo.purchaseStatus === '1'">确认接单</el-button>
+      <el-button type="success" icon="el-icon-check" size="mini" @click="handleAccept" v-if="purchaseInfo.purchaseStatus === '1'" :disabled="unmarkedCount > 0">确认接单</el-button>
       <el-button type="primary" icon="el-icon-truck" size="mini" @click="handleShipment" v-if="purchaseInfo.purchaseStatus === '2'">确认发货</el-button>
     </div>
 
@@ -62,7 +82,7 @@
 </template>
 
 <script>
-import { getSupplierPurchaseDetail, acceptOrder, confirmShipment } from '@/api/textbook/supplier'
+import { getSupplierPurchaseDetail, acceptOrder, confirmShipment, markDetail } from '@/api/textbook/supplier'
 
 export default {
   name: "SupplierPurchaseDetail",
@@ -87,6 +107,11 @@ export default {
   created() {
     this.loadDetail()
   },
+  computed: {
+    unmarkedCount() {
+      return this.purchaseDetails.filter(d => !d.supplierFeedback || d.supplierFeedback === '0').length
+    }
+  },
   methods: {
     loadDetail() {
       getSupplierPurchaseDetail(this.$route.params.id).then(response => {
@@ -99,15 +124,26 @@ export default {
       return m[status] || 'info'
     },
     statusText(status) {
-      const m = { '0': '待采购', '1': '采购中', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }
+      const m = { '0': '待采购', '1': '已下单', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }
       return m[status] || '未知'
     },
     handleAccept() {
-      this.$modal.confirm('确认接单该采购单？').then(() => {
+      if (this.unmarkedCount > 0) {
+        this.$modal.msgWarning('请先逐项核准所有明细后再确认接单')
+        return
+      }
+      this.$modal.confirm('确认接单该采购单？核准后无法修改明细反馈。').then(() => {
         return acceptOrder(this.purchaseInfo.buyId)
       }).then(() => {
         this.$modal.msgSuccess('已接单')
         this.loadDetail()
+      }).catch(() => {})
+    },
+    markFeedback(row, feedback) {
+      const data = { purchaseId: this.purchaseInfo.buyId, detailId: row.detailId, feedback: feedback, remark: '' }
+      markDetail(data).then(() => {
+        row.supplierFeedback = feedback
+        this.$modal.msgSuccess(feedback === '1' ? '已标记为可供货' : feedback === '2' ? '已标记为缺货' : '已标记为信息有误')
       }).catch(() => {})
     },
     handleShipment() {

@@ -46,6 +46,9 @@ public class TbBookController extends BaseController {
     @Autowired
     private com.ruoyi.common.core.redis.RedisCache redisCache;
 
+    @Autowired
+    private com.ruoyi.system.mapper.SysDictDataMapper dictDataMapper;
+
     /**
      * 查询教材基础信息列表
      */
@@ -256,6 +259,22 @@ public class TbBookController extends BaseController {
         if (dto.getAuthor() == null || dto.getAuthor().trim().isEmpty()) return "作者不能为空";
         if (dto.getPublisher() == null || dto.getPublisher().trim().isEmpty()) return "出版社不能为空";
         if (dto.getTextbookType() == null || dto.getTextbookType().trim().isEmpty()) return "教材类型不能为空";
+        String converted = convertTextbookType(dto.getTextbookType());
+        if (converted == null) return "教材类型无法识别，可选：公共基础课/专业基础课/专业必修课/专业选修课/思想政治课";
+        dto.setTextbookType(converted);
+        return null;
+    }
+
+    private String convertTextbookType(String raw) {
+        if (raw == null || raw.isEmpty()) return null;
+        String trimmed = raw.trim();
+        if (trimmed.matches("^\\d+$")) return trimmed;
+        com.ruoyi.common.core.domain.entity.SysDictData query = new com.ruoyi.common.core.domain.entity.SysDictData();
+        query.setDictType("textbook_type");
+        query.setDictLabel(trimmed);
+        query.setStatus("0");
+        java.util.List<com.ruoyi.common.core.domain.entity.SysDictData> list = dictDataMapper.selectDictDataList(query);
+        if (list != null && !list.isEmpty()) return list.get(0).getDictValue();
         return null;
     }
 

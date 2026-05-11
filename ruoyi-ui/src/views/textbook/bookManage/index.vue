@@ -153,8 +153,8 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="入学年份（级）" prop="grade">
-              <el-select v-model="form.grade" placeholder="请选择入学年份（级）" clearable style="width: 100%">
+            <el-form-item label="适用年级" prop="grade">
+              <el-select v-model="form.grade" placeholder="请选择适用年级" clearable style="width: 100%">
                 <el-option v-for="dict in dict.type.tb_grade" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>
@@ -253,8 +253,8 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="入学年份（级）" prop="grade">
-              <el-select v-model="completeForm.grade" placeholder="请选择入学年份（级）" clearable style="width: 100%">
+            <el-form-item label="适用年级" prop="grade">
+              <el-select v-model="completeForm.grade" placeholder="请选择适用年级" clearable style="width: 100%">
                 <el-option v-for="dict in dict.type.tb_grade" :key="dict.value" :label="dict.label" :value="dict.value" />
               </el-select>
             </el-form-item>

@@ -26,4 +26,10 @@ public interface IBookNoticeService {
     public int cancelNotice(Long noticeId, String cancelReason, String cancelBy);
 
     public int extendPickupTime(Long noticeId, Date newEndTime);
+
+    /**
+     * 根据学期从绑定表查询班级教材数据（用于领书通知发布时自动带出）
+     * @return [{college, major, classList: [{className, books: [{bookId,isbn,bookName,plannedQty}]}]}]
+     */
+    public java.util.List<java.util.Map<String, Object>> getBindingData(String semester);
 }

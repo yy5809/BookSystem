@@ -134,13 +134,30 @@ public class SupplierServiceImpl implements ISupplierService {
             throw new ServiceException("采购单不存在或无权操作");
         }
 
+        List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(purchaseId);
+        StringBuilder feedbackSummary = new StringBuilder();
+        int shortageCount = 0, errorCount = 0;
+        if (details != null) {
+            for (TbPurchaseDetail d : details) {
+                if ("2".equals(d.getSupplierFeedback())) {
+                    shortageCount++;
+                    if (feedbackSummary.length() > 0) feedbackSummary.append("；");
+                    feedbackSummary.append("《").append(d.getBookName()).append("》缺货");
+                } else if ("3".equals(d.getSupplierFeedback())) {
+                    errorCount++;
+                    if (feedbackSummary.length() > 0) feedbackSummary.append("；");
+                    feedbackSummary.append("《").append(d.getBookName()).append("》信息有误");
+                }
+            }
+        }
+
         TbPurchase shippedPurchase = purchaseStateService.transitionToShipped(purchaseId);
         shippedPurchase.setLogisticsCompany(logisticsCompany);
         shippedPurchase.setLogisticsNo(logisticsNo);
         tbPurchaseMapper.updateTbPurchase(shippedPurchase);
         
-        // 发送通知给库管员
-        noticeService.sendShipmentNotice(purchaseId, purchase.getPurchaseNo(), logisticsCompany, logisticsNo);
+        String feedbackInfo = feedbackSummary.length() > 0 ? ("\n供应商核准反馈：" + feedbackSummary) : "";
+        noticeService.sendShipmentNotice(purchaseId, purchase.getPurchaseNo(), logisticsCompany, logisticsNo, feedbackInfo);
     }
 
     @Override

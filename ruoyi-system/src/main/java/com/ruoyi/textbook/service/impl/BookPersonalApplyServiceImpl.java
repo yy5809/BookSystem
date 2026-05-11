@@ -162,11 +162,8 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
         shortage.setIsbn(apply.getIsbn());
         shortage.setLackNum(auditData.getShortageQty() != null ? auditData.getShortageQty() : apply.getApplyQty());
         shortage.setUrgency(auditData.getShortageUrgency() != null ? auditData.getShortageUrgency() : "0");
-        shortage.setRegisterId(SecurityUtils.getUserId());
-        SysUser currentUser = sysUserMapper.selectUserById(SecurityUtils.getUserId());
-        if (currentUser != null) {
-            shortage.setRegisterName(currentUser.getNickName());
-        }
+        shortage.setRegisterId(apply.getTeacherId());
+        shortage.setRegisterName(apply.getTeacherName());
         shortage.setHandleStatus("0");
         shortage.setSource("3");
         shortage.setSourceId(apply.getApplyId());

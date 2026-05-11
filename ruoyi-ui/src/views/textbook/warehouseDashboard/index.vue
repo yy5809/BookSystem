@@ -45,7 +45,7 @@
           <div class="card-info">
             <div class="card-title">待到货采购</div>
             <div class="card-number">{{ stats.pendingPurchaseCount }}</div>
-            <div class="card-desc">采购中/已发货</div>
+            <div class="card-desc">已下单/已发货</div>
           </div>
         </div>
       </el-col>

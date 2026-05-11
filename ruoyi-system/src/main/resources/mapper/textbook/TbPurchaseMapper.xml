@@ -34,7 +34,8 @@
                t.reject_reason, t.audit_opinion, t.receive_time,
                t.submit_time, t.create_time,
                t.del_flag, t.funding_source, t.file_hash,
-               t.supplier_id, t.purchase_status, t.archived
+               t.supplier_id, t.purchase_status, t.archived,
+               t.logistics_no, t.logistics_company, t.invoice_no
         FROM textbook_buy t WHERE t.del_flag = '0'
     </sql>
 
@@ -49,7 +50,7 @@
         <if test="userType != null and userType != ''">AND t.user_type = #{userType}</if>
         <if test="status != null and status != ''">AND t.audit_status = #{status}</if>
         <if test="params.statusIn != null and params.statusIn.size > 0">
-            AND t.audit_status IN
+            AND t.purchase_status IN
             <foreach item="s" collection="params.statusIn" open="(" separator="," close=")">#{s}</foreach>
         </if>
         <!-- 数据权限过滤 -->

@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@SuppressWarnings("unchecked")
 public class BookNoticeServiceImpl implements IBookNoticeService {
 
     private static final Logger log = LoggerFactory.getLogger(BookNoticeServiceImpl.class);
@@ -48,6 +49,9 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
 
     @Autowired
     private TextbookNoticeDetailMapper textbookNoticeDetailMapper;
+
+    @Autowired
+    private com.ruoyi.textbook.mapper.TextbookClassBindingMapper textbookClassBindingMapper;
 
     @Override
     public BookNotice selectBookNoticeById(Long noticeId) {
@@ -371,5 +375,51 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
         notice.setRemark((notice.getRemark() == null ? "" : notice.getRemark() + "; ")
                 + "领取时间已延长至" + DateUtils.parseDateToStr("yyyy-MM-dd HH:mm:ss", newEndTime));
         return bookNoticeMapper.updateBookNotice(notice);
+    }
+
+    @Override
+    public java.util.List<java.util.Map<String, Object>> getBindingData(String semester) {
+        java.util.List<com.ruoyi.textbook.domain.TextbookClassBinding> bindings =
+                textbookClassBindingMapper.selectBySemester(semester);
+        if (bindings == null || bindings.isEmpty()) return java.util.Collections.emptyList();
+
+        java.util.Map<String, java.util.Map<String, Object>> collegeMajorMap = new java.util.LinkedHashMap<>();
+        for (com.ruoyi.textbook.domain.TextbookClassBinding b : bindings) {
+            String key = b.getCollege() + "|" + b.getMajor();
+            collegeMajorMap.computeIfAbsent(key, k -> {
+                java.util.Map<String, Object> cm = new java.util.LinkedHashMap<>();
+                cm.put("college", b.getCollege());
+                cm.put("major", b.getMajor());
+                cm.put("classMap", new java.util.LinkedHashMap<String, java.util.List<java.util.Map<String, Object>>>());
+                return cm;
+            });
+
+            java.util.Map<String, java.util.List<java.util.Map<String, Object>>> classMap =
+                    (java.util.Map<String, java.util.List<java.util.Map<String, Object>>>) collegeMajorMap.get(key).get("classMap");
+
+            classMap.computeIfAbsent(b.getClassName(), cn -> new java.util.ArrayList<>());
+            java.util.Map<String, Object> book = new java.util.LinkedHashMap<>();
+            book.put("bookId", b.getBookId());
+            book.put("isbn", b.getIsbn());
+            book.put("bookName", b.getBookName());
+            book.put("plannedQty", b.getPlannedQty());
+            classMap.get(b.getClassName()).add(book);
+        }
+
+        java.util.List<java.util.Map<String, Object>> result = new java.util.ArrayList<>();
+        for (java.util.Map<String, Object> cm : collegeMajorMap.values()) {
+            java.util.Map<String, java.util.List<java.util.Map<String, Object>>> classMap =
+                    (java.util.Map<String, java.util.List<java.util.Map<String, Object>>>) cm.remove("classMap");
+            java.util.List<java.util.Map<String, Object>> classList = new java.util.ArrayList<>();
+            for (java.util.Map.Entry<String, java.util.List<java.util.Map<String, Object>>> e : classMap.entrySet()) {
+                java.util.Map<String, Object> cls = new java.util.LinkedHashMap<>();
+                cls.put("className", e.getKey());
+                cls.put("books", e.getValue());
+                classList.add(cls);
+            }
+            cm.put("classList", classList);
+            result.add(cm);
+        }
+        return result;
     }
 }

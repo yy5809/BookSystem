@@ -371,6 +371,10 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
             throw new ServiceException("采购数量必须在1-9999之间");
         }
 
+        if (StringUtils.isNotEmpty(dto.getTextbookType())) {
+            dto.setTextbookType(convertTextbookType(dto.getTextbookType()));
+        }
+
         if (StringUtils.isEmpty(dto.getCollege())) {
             throw new ServiceException("申请学院不能为空");
         }
@@ -392,7 +396,7 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         if (StringUtils.isNotEmpty(dto.getGrade())) {
             SysDictData gradeDict = validateDictValue("tb_grade", dto.getGrade());
             if (gradeDict == null) {
-                throw new ServiceException("适用年级[" + dto.getGrade() + "]不在系统字典中（可选：22级/23级/24级/25级/全校）");
+                throw new ServiceException("适用年级[" + dto.getGrade() + "]不在系统字典中（可选：大一/大二/大三/大四/通用）");
             }
         }
     }
@@ -405,6 +409,15 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         query.setStatus("0");
         List<SysDictData> dictList = dictDataMapper.selectDictDataList(query);
         return (dictList != null && !dictList.isEmpty()) ? dictList.get(0) : null;
+    }
+
+    private String convertTextbookType(String raw) {
+        if (raw == null || raw.isEmpty()) return raw;
+        String trimmed = raw.trim();
+        if (trimmed.matches("^\\d+$")) return trimmed;
+        SysDictData dict = validateDictValue("textbook_type", trimmed);
+        if (dict != null) return dict.getDictValue();
+        throw new ServiceException("教材类型[" + raw + "]无法识别，可选：公共基础课/专业基础课/专业必修课/专业选修课/思想政治课，也支持填数字 1~5");
     }
 
     private boolean isValidRow(TbPurchaseImportDTO dto) {

@@ -17,9 +17,9 @@
         <el-table-column label="采购单号" prop="purchaseNo" width="170" align="center" show-overflow-tooltip />
         <el-table-column label="申请人" prop="userName" width="90" align="center"/>
         <el-table-column label="部门" prop="deptName" width="105" align="center" show-overflow-tooltip/>
-        <el-table-column label="状态" prop="auditStatus" width="80" align="center">
+        <el-table-column label="采购状态" width="80" align="center">
           <template slot-scope="scope">
-            <el-tag :type="statusTagType(scope.row.auditStatus)">{{ statusText(scope.row.auditStatus) }}</el-tag>
+            <el-tag :type="pStatusTag(scope.row.purchaseStatus)">{{ pStatusText(scope.row.purchaseStatus) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column label="提交时间" prop="submitTime" width="145" align="center"/>
@@ -131,10 +131,14 @@
               <el-table-column label="作者" prop="author" width="80" show-overflow-tooltip/>
               <el-table-column label="出版社" prop="publisher" width="100" show-overflow-tooltip/>
               <el-table-column label="定价" prop="price" width="70" align="center"/>
-              <el-table-column label="类型" prop="textbookType" width="70" align="center"/>
+              <el-table-column label="教材类型" width="85" align="center">
+                <template slot-scope="scope">
+                  <dict-tag :options="dict.type.textbook_type" :value="scope.row.textbookType" />
+                </template>
+              </el-table-column>
               <el-table-column label="学院" prop="college" width="100" show-overflow-tooltip/>
               <el-table-column label="专业" prop="major" width="100" show-overflow-tooltip/>
-              <el-table-column label="入学年份" prop="grade" width="90" align="center"/>
+              <el-table-column label="适用年级" prop="grade" width="90" align="center"/>
               <el-table-column label="数量" prop="quantity" width="65" align="center"/>
               <el-table-column label="备注" prop="remark" min-width="100" show-overflow-tooltip/>
             </el-table>
@@ -290,6 +294,7 @@ import { listSupplierOptions } from '@/api/textbook/supplier'
 
 export default {
   name: 'TbBuy',
+  dicts: ['textbook_type'],
   data() {
     return {
       loading: false,
@@ -368,7 +373,7 @@ export default {
       const s = this.supplierOptions.find(item => item.supplierId === this.dispatchSupplierId)
       const supplierName = s ? s.supplierName : '未知'
       confirmOrder(this.dispatchData.buyId, this.dispatchSupplierId).then(() => {
-        this.$modal.msgSuccess('已通知供应商【' + supplierName + '】，采购单进入采购中状态')
+        this.$modal.msgSuccess('已通知供应商【' + supplierName + '】，采购单进入已下单状态')
         this.dispatchOpen = false
         this.getList()
       }).catch(() => {})
@@ -392,9 +397,11 @@ export default {
       })
     },
 
-    statusText(status) {
-      const map = { '0': '待审核', '1': '已通过', '2': '已驳回', '3': '已领书', '4': '已到货', '5': '已入库', '6': '已发货' }
-      return map[status] || '未知'
+    pStatusText(status) {
+      return { '0': '待采购', '1': '已下单', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }[status] || '未知'
+    },
+    pStatusTag(status) {
+      return { '0': 'info', '1': 'warning', '2': '', '3': '', '4': 'info', '5': 'success' }[status] || 'info'
     },
     statusTagType(status) {
       const map = { '0': 'warning', '1': 'success', '2': 'danger', '3': '', '4': 'info', '5': 'success', '6': '' }

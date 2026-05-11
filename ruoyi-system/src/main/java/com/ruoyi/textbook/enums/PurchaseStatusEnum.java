@@ -5,7 +5,7 @@ import java.util.List;
 
 public enum PurchaseStatusEnum {
     WAIT_PURCHASE("0", "待采购", Arrays.asList("1")),
-    PURCHASING("1", "采购中", Arrays.asList("2", "3")),
+    PURCHASING("1", "已下单", Arrays.asList("2", "3")),
     ACCEPTED("2", "已接单", Arrays.asList("3")),
     SHIPPED("3", "已发货", Arrays.asList("4")),
     ARRIVED("4", "已到货", Arrays.asList("5")),

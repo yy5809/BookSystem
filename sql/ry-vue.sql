@@ -11,7 +11,7 @@
  Target Server Version : 80022
  File Encoding         : 65001
 
- Date: 11/05/2026 18:23:30
+ Date: 11/05/2026 19:57:08
 */
 
 SET NAMES utf8mb4;
@@ -100,7 +100,7 @@ CREATE TABLE `sys_config`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`config_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 103 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '参数配置表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 104 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '参数配置表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_config
@@ -116,6 +116,7 @@ INSERT INTO `sys_config` VALUES (8, '用户管理-账号密码更新周期', 'sy
 INSERT INTO `sys_config` VALUES (100, '默认库存预警数量', 'textbook.stock.warning', '10', 'Y', 'admin', '2026-04-08 14:46:04', '', NULL, NULL);
 INSERT INTO `sys_config` VALUES (101, 'Stock Warning Threshold', 'textbook.stock.warning', '10', 'Y', 'admin', '2026-04-16 19:35:33', '', NULL, NULL);
 INSERT INTO `sys_config` VALUES (102, '当前学年', 'textbook.current_academic_year', '2026', 'Y', 'admin', '2026-05-11 18:23:16', '', NULL, '用于计算年级，每年9月更新。如2026表示2026-2027学年');
+INSERT INTO `sys_config` VALUES (103, '当前学年', 'textbook.current_academic_year', '2026', 'Y', 'admin', '2026-05-11 19:56:53', '', NULL, '用于计算年级，每年9月更新。如2026表示2026-2027学年');
 
 -- ----------------------------
 -- Table structure for sys_dept
@@ -181,7 +182,7 @@ CREATE TABLE `sys_dict_data`  (
   `update_time` datetime(0) NULL DEFAULT NULL COMMENT '更新时间',
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`dict_code`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 321 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '字典数据表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 338 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '字典数据表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_dict_data
@@ -324,6 +325,23 @@ INSERT INTO `sys_dict_data` VALUES (317, 3, '部分补齐', '2', 'tb_shortage_st
 INSERT INTO `sys_dict_data` VALUES (318, 4, '已补齐', '3', 'tb_shortage_status', 'success', 'N', 'N', '0', 'admin', '2026-05-11 18:23:16', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (319, 5, '已取消', '4', 'tb_shortage_status', 'info', 'N', 'N', '0', 'admin', '2026-05-11 18:23:16', '', NULL, NULL);
 INSERT INTO `sys_dict_data` VALUES (320, 6, '已关闭', '5', 'tb_shortage_status', 'info', 'N', 'N', '0', 'admin', '2026-05-11 18:23:16', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (321, 4, '已撤回', '3', 'tb_claim_form_status', 'info', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (322, 5, '已关闭', '4', 'tb_claim_form_status', 'info', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (323, 6, '已作废', '5', 'tb_claim_form_status', 'info', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (324, 5, '已作废', '4', 'tb_notice_status', 'danger', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (325, 4, 'return_inbound', '4', 'tb_stock_flow_type', 'warning', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (326, 6, '已转缺书', '5', 'tb_personal_apply_status', 'warning', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (327, 1, '未处理', '0', 'tb_shortage_status', 'info', 'N', 'Y', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (328, 2, '已纳入采购', '1', 'tb_shortage_status', 'primary', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (329, 3, '部分补齐', '2', 'tb_shortage_status', 'warning', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (330, 4, '已补齐', '3', 'tb_shortage_status', 'success', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (331, 5, '已取消', '4', 'tb_shortage_status', 'info', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (332, 6, '已关闭', '5', 'tb_shortage_status', 'info', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (333, 1, '22级', '22级', 'tb_enrollment_year', 'info', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (334, 2, '23级', '23级', 'tb_enrollment_year', 'primary', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (335, 3, '24级', '24级', 'tb_enrollment_year', 'warning', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (336, 4, '25级', '25级', 'tb_enrollment_year', 'success', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
+INSERT INTO `sys_dict_data` VALUES (337, 5, '通用', '通用', 'tb_enrollment_year', 'info', 'N', 'N', '0', 'admin', '2026-05-11 19:56:53', '', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for sys_dict_type
@@ -341,7 +359,7 @@ CREATE TABLE `sys_dict_type`  (
   `remark` varchar(500) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`dict_id`) USING BTREE,
   UNIQUE INDEX `dict_type`(`dict_type`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 125 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '字典类型表' ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 127 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '字典类型表' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of sys_dict_type
@@ -374,6 +392,7 @@ INSERT INTO `sys_dict_type` VALUES (121, '教材信息来源', 'textbook_info_so
 INSERT INTO `sys_dict_type` VALUES (122, '入学年份（级）', 'tb_grade', '0', 'admin', '2026-04-28 19:26:49', '', NULL, '教材-适用年级');
 INSERT INTO `sys_dict_type` VALUES (123, '年级年份映射', 'tb_grade_year_mapping', '0', 'admin', '2026-05-11 18:23:16', '', NULL, '学业阶段→入学年份映射，每年更新');
 INSERT INTO `sys_dict_type` VALUES (124, '缺书处理状态', 'tb_shortage_status', '0', 'admin', '2026-05-11 18:23:16', '', NULL, '缺书登记处理状态');
+INSERT INTO `sys_dict_type` VALUES (126, '入学年份（级）', 'tb_enrollment_year', '0', 'admin', '2026-05-11 19:56:53', '', NULL, '学生入学年份对应的级：22级/23级/24级/25级/通用');
 
 -- ----------------------------
 -- Table structure for sys_job
@@ -1927,5 +1946,81 @@ CREATE TABLE `textbook_supplier`  (
 -- ----------------------------
 INSERT INTO `textbook_supplier` VALUES (1, 112, 'SUP001', '测试供应商', '测试联系人', '13800000000', '1784038332@qq.com', '苏州市吴中区长江路55号', 95.00, '月结30天', NULL, NULL, NULL, '0', NULL, '0', '', '2026-05-09 16:01:24', '', '2026-05-09 16:01:48');
 INSERT INTO `textbook_supplier` VALUES (2, 114, 'SUP002', '测试供应商2号', '张文斌', '12345678910', NULL, '苏州科技大学天平学院', 100.00, '月结30天', NULL, NULL, NULL, '0', NULL, '0', '', '2026-05-09 16:13:27', '', NULL);
+
+-- ----------------------------
+-- 年级年份映射字典
+-- ----------------------------
+INSERT IGNORE INTO `sys_dict_type` VALUES (123, '年级年份映射', 'tb_grade_year_mapping', '0', 'admin', NOW(), '', NULL, '学业阶段→入学年份映射，每年更新');
+INSERT IGNORE INTO `sys_dict_data` VALUES (200, 1, '大一', '25级', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT IGNORE INTO `sys_dict_data` VALUES (201, 2, '大二', '24级', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT IGNORE INTO `sys_dict_data` VALUES (202, 3, '大三', '23级', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT IGNORE INTO `sys_dict_data` VALUES (203, 4, '大四', '22级', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+INSERT IGNORE INTO `sys_dict_data` VALUES (204, 5, '通用', '通用', 'tb_grade_year_mapping', '', '', 'N', '0', 'admin', NOW(), '', NULL, NULL);
+
+-- ----------------------------
+-- 二次开发—补全字典数据
+-- ----------------------------
+INSERT IGNORE INTO `sys_dict_data` (`dict_sort`,`dict_label`,`dict_value`,`dict_type`,`css_class`,`list_class`,`is_default`,`status`,`create_by`,`create_time`) VALUES
+(4, '已撤回', '3', 'tb_claim_form_status', 'info', 'N', 'N', '0', 'admin', NOW()),
+(5, '已关闭', '4', 'tb_claim_form_status', 'info', 'N', 'N', '0', 'admin', NOW()),
+(6, '已作废', '5', 'tb_claim_form_status', 'info', 'N', 'N', '0', 'admin', NOW());
+
+DELETE FROM `sys_dict_data` WHERE dict_type='tb_notice_status' AND dict_code IN (174,175,176,177);
+INSERT IGNORE INTO `sys_dict_data` (`dict_sort`,`dict_label`,`dict_value`,`dict_type`,`css_class`,`list_class`,`is_default`,`status`,`create_by`,`create_time`) VALUES
+(5, '已作废', '4', 'tb_notice_status', 'danger', 'N', 'N', '0', 'admin', NOW());
+
+INSERT IGNORE INTO `sys_dict_data` (`dict_sort`,`dict_label`,`dict_value`,`dict_type`,`css_class`,`list_class`,`is_default`,`status`,`create_by`,`create_time`) VALUES
+(4, 'return_inbound', '4', 'tb_stock_flow_type', 'warning', 'N', 'N', '0', 'admin', NOW());
+
+UPDATE `sys_dict_data` SET dict_label='已关闭' WHERE dict_type='tb_personal_apply_status' AND dict_value='4';
+INSERT IGNORE INTO `sys_dict_data` (`dict_sort`,`dict_label`,`dict_value`,`dict_type`,`css_class`,`list_class`,`is_default`,`status`,`create_by`,`create_time`) VALUES
+(6, '已转缺书', '5', 'tb_personal_apply_status', 'warning', 'N', 'N', '0', 'admin', NOW());
+
+INSERT IGNORE INTO `sys_dict_type` (`dict_name`,`dict_type`,`status`,`create_by`,`create_time`,`remark`) VALUES
+('缺书处理状态', 'tb_shortage_status', '0', 'admin', NOW(), '缺书登记处理状态');
+INSERT IGNORE INTO `sys_dict_data` (`dict_sort`,`dict_label`,`dict_value`,`dict_type`,`css_class`,`list_class`,`is_default`,`status`,`create_by`,`create_time`) VALUES
+(1, '未处理', '0', 'tb_shortage_status', 'info', 'N', 'Y', '0', 'admin', NOW()),
+(2, '已纳入采购', '1', 'tb_shortage_status', 'primary', 'N', 'N', '0', 'admin', NOW()),
+(3, '部分补齐', '2', 'tb_shortage_status', 'warning', 'N', 'N', '0', 'admin', NOW()),
+(4, '已补齐', '3', 'tb_shortage_status', 'success', 'N', 'N', '0', 'admin', NOW()),
+(5, '已取消', '4', 'tb_shortage_status', 'info', 'N', 'N', '0', 'admin', NOW()),
+(6, '已关闭', '5', 'tb_shortage_status', 'info', 'N', 'N', '0', 'admin', NOW());
+
+-- ----------------------------
+-- 二次开发—年级/入学年份方案
+-- ----------------------------
+INSERT IGNORE INTO `sys_config` (`config_name`,`config_key`,`config_value`,`config_type`,`create_by`,`create_time`,`remark`) VALUES
+('当前学年', 'textbook.current_academic_year', '2026', 'Y', 'admin', NOW(), '用于计算年级，每年9月更新。如2026表示2026-2027学年');
+
+INSERT IGNORE INTO `sys_dict_type` (`dict_name`,`dict_type`,`status`,`create_by`,`create_time`,`remark`) VALUES
+('入学年份（级）', 'tb_enrollment_year', '0', 'admin', NOW(), '学生入学年份对应的级：22级/23级/24级/25级/通用');
+INSERT IGNORE INTO `sys_dict_data` (`dict_sort`,`dict_label`,`dict_value`,`dict_type`,`css_class`,`list_class`,`is_default`,`status`,`create_by`,`create_time`) VALUES
+(1, '22级', '22级', 'tb_enrollment_year', 'info', 'N', 'N', '0', 'admin', NOW()),
+(2, '23级', '23级', 'tb_enrollment_year', 'primary', 'N', 'N', '0', 'admin', NOW()),
+(3, '24级', '24级', 'tb_enrollment_year', 'warning', 'N', 'N', '0', 'admin', NOW()),
+(4, '25级', '25级', 'tb_enrollment_year', 'success', 'N', 'N', '0', 'admin', NOW()),
+(5, '通用', '通用', 'tb_enrollment_year', 'info', 'N', 'N', '0', 'admin', NOW());
+
+-- ----------------------------
+-- 班级教材绑定表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS textbook_class_binding (
+  binding_id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
+  semester VARCHAR(20) NOT NULL COMMENT '学期',
+  college VARCHAR(100) NOT NULL COMMENT '学院',
+  major VARCHAR(100) NOT NULL COMMENT '专业',
+  class_name VARCHAR(100) NOT NULL COMMENT '班级名称',
+  book_id BIGINT NOT NULL COMMENT '教材ID',
+  isbn VARCHAR(20) NOT NULL COMMENT 'ISBN',
+  book_name VARCHAR(200) NOT NULL COMMENT '教材名称',
+  planned_qty INT NOT NULL DEFAULT 0 COMMENT '计划数量',
+  source CHAR(1) NOT NULL DEFAULT '1' COMMENT '来源:1采购导入',
+  pending_id BIGINT DEFAULT NULL COMMENT '采购单ID',
+  del_flag CHAR(1) NOT NULL DEFAULT '0',
+  create_by VARCHAR(64) DEFAULT '',
+  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (binding_id),
+  UNIQUE KEY uk_class_book (semester, college, major, class_name, book_id, del_flag)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='班级教材绑定表';
 
 SET FOREIGN_KEY_CHECKS = 1;

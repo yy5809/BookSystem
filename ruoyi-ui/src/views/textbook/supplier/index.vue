@@ -85,7 +85,7 @@ export default {
       return m[status] || 'info'
     },
     statusText(status) {
-      const m = { '0': '待采购', '1': '采购中', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }
+      const m = { '0': '待采购', '1': '已下单', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }
       return m[status] || '未知'
     },
     viewPurchase(purchase) {

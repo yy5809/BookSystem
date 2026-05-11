@@ -143,12 +143,13 @@ public class NoticeService {
                                 + "个\n\n请通知各班委按时领取。")));
     }
 
-    public void sendShipmentNotice(Long purchaseId, String purchaseNo, String logisticsCompany, String logisticsNo) {
+    public void sendShipmentNotice(Long purchaseId, String purchaseNo, String logisticsCompany, String logisticsNo, String feedbackInfo) {
+        String content = "【供应商发货】\n采购单号：" + purchaseNo + "\n物流公司：" + logisticsCompany
+                + "\n物流单号：" + logisticsNo + feedbackInfo + "\n\n请及时确认到货。";
         send(buildRoleCtx("shipment_confirm", "warehouse", NoticeBizTypeEnum.SHIPMENT.getCode(), purchaseId,
                 mapOf("purchaseNo", purchaseNo, "logisticsCompany", logisticsCompany, "logisticsNo", logisticsNo,
                         "title", "【供应商发货】采购单号：" + purchaseNo,
-                        "content", "【供应商发货】\n采购单号：" + purchaseNo + "\n物流公司：" + logisticsCompany
-                                + "\n物流单号：" + logisticsNo + "\n\n请及时确认到货。")));
+                        "content", content)));
     }
 
     public List<Map<String, Object>> getSupplierNotices(Long supplierId) {

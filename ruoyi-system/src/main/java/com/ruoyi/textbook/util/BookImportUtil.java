@@ -61,7 +61,7 @@ public class BookImportUtil {
         Sheet sheet = workbook.createSheet("教材信息导入");
         CellStyle headerStyle = createHeaderStyle(workbook);
 
-        String[] headers = {"ISBN", "教材名称", "作者", "出版社", "版次", "定价", "教材类型", "适用课程", "适用专业", "入学年份（级）"};
+        String[] headers = {"ISBN", "教材名称", "作者", "出版社", "版次", "定价", "教材类型", "适用课程", "适用专业", "适用年级"};
         Row headerRow = sheet.createRow(HEADER_ROW);
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
@@ -86,10 +86,10 @@ public class BookImportUtil {
             "   - 出版社（必填）：教材出版社",
             "   - 版次（选填）：如\"第3版\"、\"2023年版\"",
             "   - 定价（选填）：数字，单位元，如 49.00",
-            "   - 教材类型（必填）：1=公共基础课 2=专业基础课 3=专业必修课 4=专业选修课 5=思想政治课",
+            "   - 教材类型（必填）：可直接填中文全称，如\"公共基础课\"、\"专业基础课\"、\"专业必修课\"、\"专业选修课\"、\"思想政治课\"（也支持填数字 1~5）",
             "   - 适用课程（选填）：关联的课程名称",
             "   - 适用专业（选填）：如\"计算机\"、\"机械\"",
-            "   - 入学年份（级）（选填）：22级/23级/24级/25级/通用，填报学生入学年份对应的\"级\"",
+            "   - 适用年级（选填）：大一/大二/大三/大四/通用，填写教材适用的年级",
             "",
             "3. 文件要求：",
             "   - 格式：.xlsx 或 .xls",

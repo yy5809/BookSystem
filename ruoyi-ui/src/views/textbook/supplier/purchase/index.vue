@@ -7,7 +7,7 @@
       <el-form-item label="状态" prop="purchaseStatus">
         <el-select v-model="queryParams.purchaseStatus" placeholder="请选择状态" clearable style="width: 150px">
           <el-option label="待采购" value="0" />
-          <el-option label="采购中" value="1" />
+          <el-option label="已下单" value="1" />
           <el-option label="已接单" value="2" />
           <el-option label="已发货" value="3" />
           <el-option label="已到货" value="4" />
@@ -31,7 +31,7 @@
       <el-table-column label="创建时间" align="center" prop="createTime" width="145" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="185">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-check" @click="handleAccept(scope.row)" v-if="scope.row.purchaseStatus === '1'">确认接单</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit-outline" @click="handleDetail(scope.row)" v-if="scope.row.purchaseStatus === '1'" style="color:#E6A23C">核准接单</el-button>
           <el-button size="mini" type="text" icon="el-icon-truck" @click="handleShipment(scope.row)" v-if="scope.row.purchaseStatus === '2'">确认发货</el-button>
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleDetail(scope.row)">详情</el-button>
         </template>
@@ -119,7 +119,7 @@ export default {
       return m[status] || 'info'
     },
     statusText(status) {
-      const m = { '0': '待采购', '1': '采购中', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }
+      const m = { '0': '待采购', '1': '已下单', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }
       return m[status] || '未知'
     },
     handleDetail(purchase) {
