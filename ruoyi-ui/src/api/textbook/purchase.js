@@ -89,3 +89,39 @@ export function batchSubmitPurchase(data) {
 export function downloadPurchaseTemplate() {
   return request({ url: '/textbook/purchase/template', method: 'get', responseType: 'blob' })
 }
+
+export function submitVerify(buyId) {
+  return request({ url: '/textbook/purchase/submitVerify/' + buyId, method: 'put' })
+}
+export function confirmVerify(buyId, data) {
+  return request({ url: '/textbook/purchase/confirmVerify/' + buyId, method: 'put', params: data })
+}
+export function verifyReject(buyId, remark) {
+  return request({ url: '/textbook/purchase/verifyReject/' + buyId, method: 'put', params: { remark } })
+}
+
+export function checkVerifyReady(buyId) {
+  return request({ url: '/textbook/purchase/verifyCheck/' + buyId, method: 'get' })
+}
+
+export function verifyDetail(detailId, verifyStatus, remark) {
+  return request({ url: '/textbook/purchase/detail/verify/' + detailId, method: 'put', params: { verifyStatus, remark } })
+}
+export function receiveDetail(detailId, receivedQty) {
+  return request({ url: '/textbook/purchase/detail/receive/' + detailId, method: 'put', params: { receivedQty } })
+}
+export function directInboundDetail(detailId) {
+  return request({ url: '/textbook/purchase/detail/directInbound/' + detailId, method: 'put' })
+}
+export function returnDetail(detailId, returnQty, returnReason) {
+  return request({ url: '/textbook/purchase/detail/return/' + detailId, method: 'put', params: { returnQty, returnReason } })
+}
+export function correctDetailInfo(detailId, infoCorrection) {
+  return request({ url: '/textbook/purchase/detail/correctInfo/' + detailId, method: 'put', params: { infoCorrection } })
+}
+export function registerShortageDetail(detailId, remark) {
+  return request({ url: '/textbook/purchase/detail/shortage/' + detailId, method: 'put', params: { remark } })
+}
+export function batchVerify(detailIds, verifyStatus) {
+  return request({ url: '/textbook/purchase/detail/batchVerify', method: 'put', data: detailIds, params: { verifyStatus } })
+}

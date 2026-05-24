@@ -71,9 +71,6 @@ public class PurchaseStateService {
             throw new ServiceException("只有待采购状态的采购单才能确认下单，当前状态："
                     + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus));
         }
-        if (AuditStatusEnum.PENDING.getCode().equals(purchase.getStatus())) {
-            purchase.setStatus(AuditStatusEnum.APPROVED.getCode());
-        }
         purchase.setPurchaseStatus(PurchaseStatusEnum.PURCHASING.getCode());
         log.info("【状态转换】确认下单, purchaseId={}, purchaseNo={}, 待采购→采购中", purchaseId, purchase.getPurchaseNo());
         return purchase;
@@ -114,21 +111,32 @@ public class PurchaseStateService {
                     + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus));
         }
         purchase.setPurchaseStatus(PurchaseStatusEnum.ARRIVED.getCode());
-        purchase.setStatus("4");
         log.info("【状态转换】确认到货, purchaseId={}, purchaseNo={}, 已发货→已到货", purchaseId, purchase.getPurchaseNo());
+        return purchase;
+    }
+
+    public TbPurchase transitionToVerifying(Long purchaseId) {
+        TbPurchase purchase = requirePurchase(purchaseId);
+        String currentPurchaseStatus = purchase.getPurchaseStatus();
+        if (!PurchaseStatusEnum.ARRIVED.getCode().equals(currentPurchaseStatus)) {
+            throw new ServiceException("只有已到货的采购单才能进入核准，当前状态："
+                    + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus));
+        }
+        purchase.setPurchaseStatus(PurchaseStatusEnum.VERIFYING.getCode());
+        log.info("【状态转换】进入核准, purchaseId={}, purchaseNo={}, 已到货→核准中", purchaseId, purchase.getPurchaseNo());
         return purchase;
     }
 
     public TbPurchase transitionToInbound(Long purchaseId) {
         TbPurchase purchase = requirePurchase(purchaseId);
         String currentPurchaseStatus = purchase.getPurchaseStatus();
-        if (!PurchaseStatusEnum.ARRIVED.getCode().equals(currentPurchaseStatus)) {
-            throw new ServiceException("只有已到货的采购单才能验收入库，当前状态："
-                    + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus));
+        if (!PurchaseStatusEnum.VERIFYING.getCode().equals(currentPurchaseStatus)) {
+            throw new ServiceException("只有核准通过的采购单才能验收入库，当前状态："
+                    + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus) + "。请先执行核准验收操作。");
         }
         purchase.setPurchaseStatus(PurchaseStatusEnum.INBOUND.getCode());
-        purchase.setStatus("5");
-        log.info("【状态转换】验收入库, purchaseId={}, purchaseNo={}, 已到货→已入库", purchaseId, purchase.getPurchaseNo());
+        log.info("【状态转换】验收入库, purchaseId={}, purchaseNo={}, 核准中→已入库",
+                purchaseId, purchase.getPurchaseNo());
         return purchase;
     }
 
@@ -144,10 +152,9 @@ public class PurchaseStateService {
 
     public TbPurchase rollbackFromInboundToArrived(Long purchaseId) {
         TbPurchase purchase = requirePurchase(purchaseId);
-        if (!"5".equals(purchase.getStatus())) {
+        if (!PurchaseStatusEnum.INBOUND.getCode().equals(purchase.getPurchaseStatus())) {
             throw new ServiceException("只有已入库的采购单才能回退到已到货状态");
         }
-        purchase.setStatus("4");
         purchase.setPurchaseStatus(PurchaseStatusEnum.ARRIVED.getCode());
         log.info("【状态回退】入库→到货, purchaseId={}, purchaseNo={}", purchaseId, purchase.getPurchaseNo());
         return purchase;
@@ -171,6 +178,7 @@ public class PurchaseStateService {
                     + PurchaseStatusEnum.getDescByCode(currentPurchaseStatus));
         }
         purchase.setStatus(AuditStatusEnum.REJECTED.getCode());
+        purchase.setPurchaseStatus("X");
         purchase.setRejectReason("用户自行取消");
         log.info("【状态转换】取消订单, purchaseId={}, purchaseNo={}, 待采购→已驳回", purchaseId, purchase.getPurchaseNo());
         return purchase;
@@ -189,18 +197,9 @@ public class PurchaseStateService {
         if (purchase == null) {
             throw new ServiceException("采购单不存在");
         }
-        String status = purchase.getStatus();
-        if ("5".equals(status)) {
-            throw new ServiceException("该采购单已入库，禁止删除。已入库的单据不可删除以保证数据完整性。");
-        }
-        if ("4".equals(status)) {
-            throw new ServiceException("该采购单已到货，禁止删除。请先完成入库流程。");
-        }
-        if ("3".equals(status)) {
-            throw new ServiceException("该订单已完成领书，禁止删除。已完成领书的单据不可删除以保证数据完整性。");
-        }
-        if (AuditStatusEnum.APPROVED.getCode().equals(status)) {
-            throw new ServiceException("该订单已审核通过，禁止删除。如需取消请联系库管员驳回。");
+        String ps = purchase.getPurchaseStatus();
+        if (!PurchaseStatusEnum.WAIT_PURCHASE.getCode().equals(ps)) {
+            throw new ServiceException("采购单当前状态为" + PurchaseStatusEnum.getDescByCode(ps) + "，不允许删除。仅待采购状态可删除。");
         }
     }
 
@@ -208,21 +207,9 @@ public class PurchaseStateService {
         if (purchase == null) {
             throw new ServiceException("采购单不存在");
         }
-        String status = purchase.getStatus();
-        if ("5".equals(status)) {
-            throw new ServiceException("该采购单已入库，禁止修改");
-        }
-        if ("4".equals(status)) {
-            throw new ServiceException("该采购单已到货，禁止修改");
-        }
-        if ("3".equals(status)) {
-            throw new ServiceException("该采购单已领书，禁止修改");
-        }
-        if (AuditStatusEnum.APPROVED.getCode().equals(status)) {
-            throw new ServiceException("该订单已审核通过，禁止修改");
-        }
-        if (AuditStatusEnum.REJECTED.getCode().equals(status)) {
-            throw new ServiceException("该采购单已驳回，禁止修改");
+        String ps = purchase.getPurchaseStatus();
+        if (!PurchaseStatusEnum.WAIT_PURCHASE.getCode().equals(ps)) {
+            throw new ServiceException("采购单当前状态为" + PurchaseStatusEnum.getDescByCode(ps) + "，不允许修改。仅待采购状态可修改。");
         }
     }
 
@@ -230,9 +217,9 @@ public class PurchaseStateService {
         if (purchase == null) {
             throw new ServiceException("采购单不存在");
         }
-        String status = purchase.getStatus();
-        if (!"4".equals(status) && !"6".equals(status)) {
-            throw new ServiceException("采购单状态不是'已到货'或'已发货'，无法入库，当前状态：" + status);
+        String ps = purchase.getPurchaseStatus();
+        if (!PurchaseStatusEnum.ARRIVED.getCode().equals(ps) && !PurchaseStatusEnum.VERIFYING.getCode().equals(ps)) {
+            throw new ServiceException("采购单状态不允许入库，当前状态：" + PurchaseStatusEnum.getDescByCode(ps));
         }
     }
 

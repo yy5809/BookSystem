@@ -116,6 +116,14 @@ public class SupplierServiceImpl implements ISupplierService {
             throw new ServiceException("采购单不存在或无权操作");
         }
 
+        List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(purchaseId);
+        long unmarkedCount = details.stream()
+                .filter(d -> d.getSupplierFeedback() == null || "0".equals(d.getSupplierFeedback()))
+                .count();
+        if (unmarkedCount > 0) {
+            throw new ServiceException("还有 " + unmarkedCount + " 条教材明细未核准反馈，请逐项标记为「可供货」「缺货」「信息有误」后再接单");
+        }
+
         TbPurchase acceptedPurchase = purchaseStateService.transitionToAccepted(purchaseId);
         tbPurchaseMapper.updateTbPurchase(acceptedPurchase);
         log.info("【供应商接单】supplierId={}, purchaseId={}, purchaseNo={}", supplier.getSupplierId(), purchaseId, purchase.getPurchaseNo());
@@ -136,15 +144,12 @@ public class SupplierServiceImpl implements ISupplierService {
 
         List<TbPurchaseDetail> details = tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(purchaseId);
         StringBuilder feedbackSummary = new StringBuilder();
-        int shortageCount = 0, errorCount = 0;
         if (details != null) {
             for (TbPurchaseDetail d : details) {
                 if ("2".equals(d.getSupplierFeedback())) {
-                    shortageCount++;
                     if (feedbackSummary.length() > 0) feedbackSummary.append("；");
                     feedbackSummary.append("《").append(d.getBookName()).append("》缺货");
                 } else if ("3".equals(d.getSupplierFeedback())) {
-                    errorCount++;
                     if (feedbackSummary.length() > 0) feedbackSummary.append("；");
                     feedbackSummary.append("《").append(d.getBookName()).append("》信息有误");
                 }
@@ -157,7 +162,7 @@ public class SupplierServiceImpl implements ISupplierService {
         tbPurchaseMapper.updateTbPurchase(shippedPurchase);
         
         String feedbackInfo = feedbackSummary.length() > 0 ? ("\n供应商核准反馈：" + feedbackSummary) : "";
-        noticeService.sendShipmentNotice(purchaseId, purchase.getPurchaseNo(), logisticsCompany, logisticsNo, feedbackInfo);
+        noticeService.sendShipmentNotice(purchaseId, purchase.getPurchaseNo(), logisticsCompany, logisticsNo, feedbackInfo, details);
     }
 
     @Override
@@ -230,19 +235,6 @@ public class SupplierServiceImpl implements ISupplierService {
         target.setSupplierRemark(remark);
         tbPurchaseMapper.updateTbPurchaseDetail(target);
         log.info("【供应商标记明细】purchaseId={}, detailId={}, feedback={}", purchaseId, detailId, feedback);
-
-        boolean hasShortage = false;
-        for (TbPurchaseDetail d : details) {
-            if ("2".equals(d.getSupplierFeedback()) || "3".equals(d.getSupplierFeedback())) {
-                hasShortage = true;
-                break;
-            }
-        }
-        if (hasShortage) {
-            noticeService.sendNoticeToRole("warehouse", "采购单明细需要处理",
-                    "采购单" + purchase.getPurchaseNo() + "有明细被标记为缺货或信息有误，请及时处理。",
-                    "2", purchaseId);
-        }
     }
 
     @Override

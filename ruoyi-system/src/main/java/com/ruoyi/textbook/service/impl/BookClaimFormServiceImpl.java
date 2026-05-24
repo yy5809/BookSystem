@@ -211,6 +211,7 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
                 .count();
 
         bookNoticeMapper.updateIssuedClasses(noticeId, (int) completedForms);
+        log.info("【领书进度更新】noticeId={}, 已完成班级={}/{}, status已由SQL自动更新", noticeId, completedForms, totalForms);
     }
 
     @Override
@@ -227,6 +228,10 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
         }
         if (!"0".equals(form.getStatus())) {
             throw new ServiceException("只有待领取状态的领书单才能撤回");
+        }
+        com.ruoyi.textbook.domain.BookNotice notice = bookNoticeMapper.selectBookNoticeById(form.getNoticeId());
+        if (notice != null && !"0".equals(notice.getStatus())) {
+            throw new ServiceException("领书计划已发布，无法撤回领书单");
         }
         form.setStatus("3");
         form.setUpdateTime(DateUtils.getNowDate());
@@ -246,6 +251,10 @@ public class BookClaimFormServiceImpl implements IBookClaimFormService {
         }
         if ("5".equals(form.getStatus())) {
             throw new ServiceException("已作废的领书单不能关闭");
+        }
+        com.ruoyi.textbook.domain.BookNotice notice = bookNoticeMapper.selectBookNoticeById(form.getNoticeId());
+        if (notice != null && !"0".equals(notice.getStatus())) {
+            throw new ServiceException("领书计划已发布，无法关闭领书单");
         }
         form.setStatus("4");
         form.setCancelReason(closeReason);

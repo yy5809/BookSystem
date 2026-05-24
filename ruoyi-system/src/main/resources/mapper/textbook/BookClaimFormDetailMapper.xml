@@ -36,10 +36,10 @@
     <insert id="insertBookClaimFormDetail" parameterType="com.ruoyi.textbook.domain.BookClaimFormDetail" useGeneratedKeys="true" keyProperty="detailId">
         insert into textbook_claim_form_detail (
             form_id, textbook_id, isbn, book_name, author, publisher,
-            price, planned_qty, issued_qty, create_time
+            price, planned_qty, issued_qty, del_flag, create_time
         ) values (
             #{formId}, #{textbookId}, #{isbn}, #{bookName}, #{author}, #{publisher},
-            #{price}, #{plannedQty}, #{issuedQty}, sysdate()
+            #{price}, #{plannedQty}, #{issuedQty}, '0', sysdate()
         )
     </insert>
 
@@ -58,12 +58,12 @@
     <insert id="batchInsert" parameterType="java.util.List">
         insert into textbook_claim_form_detail (
             form_id, textbook_id, isbn, book_name, author, publisher,
-            price, planned_qty, issued_qty, create_time
+            price, planned_qty, issued_qty, del_flag, create_time
         ) values
         <foreach collection="list" item="item" separator=",">
             (#{item.formId}, #{item.textbookId}, #{item.isbn}, #{item.bookName},
              #{item.author}, #{item.publisher}, #{item.price}, #{item.plannedQty},
-             #{item.issuedQty}, sysdate())
+             #{item.issuedQty}, '0', sysdate())
         </foreach>
     </insert>
 

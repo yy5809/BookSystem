@@ -8,7 +8,8 @@ public enum PurchaseStatusEnum {
     PURCHASING("1", "已下单", Arrays.asList("2", "3")),
     ACCEPTED("2", "已接单", Arrays.asList("3")),
     SHIPPED("3", "已发货", Arrays.asList("4")),
-    ARRIVED("4", "已到货", Arrays.asList("5")),
+    ARRIVED("4", "已到货", Arrays.asList("6")),
+    VERIFYING("6", "核准中", Arrays.asList("5", "4")),
     INBOUND("5", "已入库", Arrays.asList());
 
     private final String code;

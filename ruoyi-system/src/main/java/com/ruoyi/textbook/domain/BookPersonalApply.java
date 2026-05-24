@@ -26,6 +26,15 @@ public class BookPersonalApply extends BaseEntity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date issueTime;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date receivedTime;
+
+    private String receiveOperator;
+
+    private String receiveLocation;
+
+    private String shortageStatus;
+
     private String delFlag;
     private String remark;
     private Boolean registerShortage;
@@ -61,6 +70,19 @@ public class BookPersonalApply extends BaseEntity {
     public void setAuditTime(Date auditTime) { this.auditTime = auditTime; }
     public Date getIssueTime() { return issueTime; }
     public void setIssueTime(Date issueTime) { this.issueTime = issueTime; }
+
+    public Date getReceivedTime() { return receivedTime; }
+    public void setReceivedTime(Date receivedTime) { this.receivedTime = receivedTime; }
+
+    public String getReceiveOperator() { return receiveOperator; }
+    public void setReceiveOperator(String receiveOperator) { this.receiveOperator = receiveOperator; }
+
+    public String getReceiveLocation() { return receiveLocation; }
+    public void setReceiveLocation(String receiveLocation) { this.receiveLocation = receiveLocation; }
+
+    public String getShortageStatus() { return shortageStatus; }
+    public void setShortageStatus(String shortageStatus) { this.shortageStatus = shortageStatus; }
+
     public String getDelFlag() { return delFlag; }
     public void setDelFlag(String delFlag) { this.delFlag = delFlag; }
     public String getRemark() { return remark; }

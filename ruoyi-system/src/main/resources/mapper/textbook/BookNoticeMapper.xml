@@ -110,10 +110,11 @@
 
     <update id="updateIssuedClasses">
         update textbook_notice set issued_classes = #{issuedClasses},
-            <choose>
-                <when test="issuedClasses > 0 and issuedClasses &lt; total_classes">status = '2'</when>
-                <when test="issuedClasses >= total_classes and total_classes > 0">status = '3'</when>
-            </choose>,
+            status = CASE
+                WHEN total_classes > 0 AND #{issuedClasses} > 0 AND #{issuedClasses} &lt; total_classes THEN '2'
+                WHEN total_classes > 0 AND #{issuedClasses} >= total_classes THEN '3'
+                ELSE status
+            END,
             update_time = sysdate()
         where notice_id = #{noticeId} and del_flag = '0'
     </update>

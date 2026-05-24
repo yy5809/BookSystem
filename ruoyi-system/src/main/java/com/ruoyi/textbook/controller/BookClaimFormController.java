@@ -173,9 +173,10 @@ public class BookClaimFormController extends BaseController {
     @PreAuthorize("@ss.hasPermi('textbook:claimForm:outbound') and @ss.hasAnyRoles('admin,warehouse')")
     @Log(title = "部分出库", businessType = BusinessType.UPDATE)
     @PostMapping("/partialIssue")
-    public AjaxResult partialIssue(@RequestParam Long formId,
-                                   @RequestParam Integer issuedQty,
-                                   @RequestParam(required = false) String receiverName) {
+    public AjaxResult partialIssue(@RequestBody Map<String, Object> data) {
+        Long formId = Long.valueOf(data.get("formId").toString());
+        Integer issuedQty = data.get("issuedQty") != null ? Integer.valueOf(data.get("issuedQty").toString()) : 0;
+        String receiverName = (String) data.get("receiverName");
         try {
             Long operatorId = SecurityUtils.getUserId();
             String operatorName = SecurityUtils.getLoginUser().getUser().getNickName();

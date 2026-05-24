@@ -67,6 +67,8 @@ public interface TbPurchaseMapper
      */
     public int insertTbPurchaseDetail(TbPurchaseDetail tbPurchaseDetail);
 
+    public int insertTbPurchaseDetailBatch(List<TbPurchaseDetail> detailList);
+
     /**
      * 查询购书明细列表
      *
@@ -110,6 +112,8 @@ public interface TbPurchaseMapper
     public int countPendingShipmentBySupplierId(Long supplierId);
 
     public int updateTbPurchaseDetail(TbPurchaseDetail detail);
+
+    public TbPurchaseDetail getPurchaseDetailById(Long detailId);
 
     public int deleteTbPurchaseDetailByPurchaseId(Long purchaseId);
 }

@@ -46,11 +46,8 @@ export function auditApply(data) {
   })
 }
 
-export function issueApply(applyId) {
-  return request({
-    url: '/textbook/personalApply/issue/' + applyId,
-    method: 'put'
-  })
+export function issueApply(applyId, data) {
+  return request({ url: '/textbook/personalApply/issue/' + applyId, method: 'put', data })
 }
 
 export function delPersonalApply(applyId) {

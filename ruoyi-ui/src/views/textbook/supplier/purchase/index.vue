@@ -29,9 +29,10 @@
         </template>
       </el-table-column>
       <el-table-column label="创建时间" align="center" prop="createTime" width="145" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="185">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="280">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-edit-outline" @click="handleDetail(scope.row)" v-if="scope.row.purchaseStatus === '1'" style="color:#E6A23C">核准接单</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit-outline" @click="handleDetail(scope.row)" v-if="scope.row.purchaseStatus === '1'" style="color:#E6A23C">核准反馈</el-button>
+          <el-button size="mini" type="text" icon="el-icon-close" @click="handleReject(scope.row)" v-if="scope.row.purchaseStatus === '1'" style="color:#F56C6C">拒单</el-button>
           <el-button size="mini" type="text" icon="el-icon-truck" @click="handleShipment(scope.row)" v-if="scope.row.purchaseStatus === '2'">确认发货</el-button>
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleDetail(scope.row)">详情</el-button>
         </template>
@@ -64,7 +65,7 @@
 </template>
 
 <script>
-import { listSupplierPurchases, acceptOrder, confirmShipment } from '@/api/textbook/supplier'
+import { listSupplierPurchases, confirmShipment, rejectOrder } from '@/api/textbook/supplier'
 
 export default {
   name: "SupplierPurchaseList",
@@ -125,11 +126,15 @@ export default {
     handleDetail(purchase) {
       this.$router.push(`/textbook/supplierPurchase/${purchase.buyId}`)
     },
-    handleAccept(purchase) {
-      this.$modal.confirm('确认接单采购单 ' + purchase.purchaseNo + ' ？').then(() => {
-        return acceptOrder(purchase.buyId)
+    handleReject(purchase) {
+      this.$prompt('请输入拒单原因', '拒单', {
+        confirmButtonText: '确认拒单',
+        cancelButtonText: '取消',
+        inputPlaceholder: '请填写拒单原因（如：缺货、信息有误等）'
+      }).then(({ value }) => {
+        return rejectOrder(purchase.buyId, value || '供应商拒单')
       }).then(() => {
-        this.$modal.msgSuccess('已接单')
+        this.$modal.msgSuccess('已拒单，采购单已退回')
         this.getList()
       }).catch(() => {})
     },

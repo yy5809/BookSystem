@@ -1,6 +1,7 @@
 package com.ruoyi.textbook.service;
 
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.domain.TbSupplier;
 import com.ruoyi.textbook.domain.notify.NotificationContext;
 import com.ruoyi.textbook.domain.notify.RecipientType;
@@ -143,13 +144,42 @@ public class NoticeService {
                                 + "个\n\n请通知各班委按时领取。")));
     }
 
-    public void sendShipmentNotice(Long purchaseId, String purchaseNo, String logisticsCompany, String logisticsNo, String feedbackInfo) {
-        String content = "【供应商发货】\n采购单号：" + purchaseNo + "\n物流公司：" + logisticsCompany
-                + "\n物流单号：" + logisticsNo + feedbackInfo + "\n\n请及时确认到货。";
+    public void sendShipmentNotice(Long purchaseId, String purchaseNo, String logisticsCompany,
+            String logisticsNo, String feedbackInfo, List<TbPurchaseDetail> details) {
+        StringBuilder content = new StringBuilder();
+        content.append("【供应商发货通知】\n");
+        content.append("采购单号：").append(purchaseNo).append("\n");
+        content.append("物流公司：").append(logisticsCompany).append("\n");
+        content.append("物流单号：").append(logisticsNo).append("\n");
+        if (feedbackInfo != null && !feedbackInfo.isEmpty()) {
+            content.append(feedbackInfo).append("\n");
+        }
+        if (details != null && !details.isEmpty()) {
+            content.append("\n━━━━━ 发货明细 ━━━━━\n");
+            int idx = 1;
+            for (TbPurchaseDetail d : details) {
+                content.append(idx++).append(". 《").append(d.getBookName()).append("》");
+                if (d.getIsbn() != null && !d.getIsbn().isEmpty()) {
+                    content.append(" [ISBN:").append(d.getIsbn()).append("]");
+                }
+                if (d.getAuthor() != null && !d.getAuthor().isEmpty()) {
+                    content.append(" 作者:").append(d.getAuthor());
+                }
+                if (d.getPublisher() != null && !d.getPublisher().isEmpty()) {
+                    content.append(" 出版社:").append(d.getPublisher());
+                }
+                content.append(" ×").append(d.getQuantity()).append("本");
+                String fb = d.getSupplierFeedback();
+                if ("2".equals(fb)) content.append(" [缺货]");
+                else if ("3".equals(fb)) content.append(" [信息有误]");
+                content.append("\n");
+            }
+        }
+        content.append("\n请及时确认到货并安排入库。");
+        String title = "【供应商发货】采购单号：" + purchaseNo;
         send(buildRoleCtx("shipment_confirm", "warehouse", NoticeBizTypeEnum.SHIPMENT.getCode(), purchaseId,
                 mapOf("purchaseNo", purchaseNo, "logisticsCompany", logisticsCompany, "logisticsNo", logisticsNo,
-                        "title", "【供应商发货】采购单号：" + purchaseNo,
-                        "content", content)));
+                        "title", title, "content", content.toString())));
     }
 
     public List<Map<String, Object>> getSupplierNotices(Long supplierId) {

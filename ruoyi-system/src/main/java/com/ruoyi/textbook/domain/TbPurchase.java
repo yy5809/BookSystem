@@ -45,7 +45,7 @@ public class TbPurchase extends BaseEntity {
     @Excel(name = "申请时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime submitTime;
 
-    @Excel(name = "状态", readConverterExp = "0=待审核,1=已通过,2=已驳回,3=已领书,4=已到货,5=已入库,6=已发货")
+    @Excel(name = "状态", readConverterExp = "0=待审核,1=已通过,2=已驳回,3=已领书")
     private String status;
 
     private Long auditUserId;
@@ -80,10 +80,18 @@ public class TbPurchase extends BaseEntity {
     private String logisticsCompany;
     private String invoiceNo;
 
-    @Excel(name = "采购状态", readConverterExp = "0=待采购,1=已下单,2=已接单,3=已发货,4=已到货,5=已入库")
+    @Excel(name = "采购状态", readConverterExp = "0=待采购,1=已下单,2=已接单,3=已发货,4=已到货,5=已入库,6=核准中")
     private String purchaseStatus;
 
     private String archived;
+
+    private Long verifyUserId;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime verifyTime;
+    private String verifyResult;
+    private String verifyRemark;
+    private String qualityCheckResult;
+    private Integer actualQtyReceived;
 
     public Long getBuyId() { return buyId; }
     public void setBuyId(Long buyId) { this.buyId = buyId; }
@@ -141,14 +149,28 @@ public class TbPurchase extends BaseEntity {
     public String getArchived() { return archived; }
     public void setArchived(String archived) { this.archived = archived; }
 
+    public Long getVerifyUserId() { return verifyUserId; }
+    public void setVerifyUserId(Long verifyUserId) { this.verifyUserId = verifyUserId; }
+    public LocalDateTime getVerifyTime() { return verifyTime; }
+    public void setVerifyTime(LocalDateTime verifyTime) { this.verifyTime = verifyTime; }
+    public String getVerifyResult() { return verifyResult; }
+    public void setVerifyResult(String verifyResult) { this.verifyResult = verifyResult; }
+    public String getVerifyRemark() { return verifyRemark; }
+    public void setVerifyRemark(String verifyRemark) { this.verifyRemark = verifyRemark; }
+    public String getQualityCheckResult() { return qualityCheckResult; }
+    public void setQualityCheckResult(String qualityCheckResult) { this.qualityCheckResult = qualityCheckResult; }
+    public Integer getActualQtyReceived() { return actualQtyReceived; }
+    public void setActualQtyReceived(Integer actualQtyReceived) { this.actualQtyReceived = actualQtyReceived; }
+
     public boolean isPending() { return "0".equals(this.status); }
     public boolean isApproved() { return "1".equals(this.status); }
     public boolean isReceived() { return "3".equals(this.status); }
-    public boolean isArrived() { return "4".equals(this.status); }
-    public boolean isInbound() { return "5".equals(this.status); }
-    public boolean isShipped() { return "6".equals(this.status); }
+    public boolean isArrived() { return com.ruoyi.textbook.enums.PurchaseStatusEnum.ARRIVED.getCode().equals(this.purchaseStatus); }
+    public boolean isInbound() { return com.ruoyi.textbook.enums.PurchaseStatusEnum.INBOUND.getCode().equals(this.purchaseStatus); }
+    public boolean isShipped() { return com.ruoyi.textbook.enums.PurchaseStatusEnum.SHIPPED.getCode().equals(this.purchaseStatus); }
+    public boolean isVerifying() { return "6".equals(this.purchaseStatus); }
     public boolean canDelete() { return isPending(); }
-    public boolean canInbound() { return isArrived() || isShipped(); }
+    public boolean canInbound() { return isArrived() || isShipped() || isVerifying(); }
     public boolean canCancel(Long currentUserId) { return isPending() && this.userId != null && this.userId.equals(currentUserId); }
 
     @Override

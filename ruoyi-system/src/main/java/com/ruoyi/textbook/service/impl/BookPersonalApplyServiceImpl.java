@@ -244,25 +244,42 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int issueApply(Long applyId) {
+    public int issueApply(Long applyId, Integer receivedQty, String location, String remark) {
         BookPersonalApply existingApply = bookPersonalApplyMapper.selectBookPersonalApplyById(applyId);
         if (existingApply == null) {
             throw new ServiceException("申请记录不存在");
         }
 
-        if (!"1".equals(existingApply.getStatus())) {
-            throw new ServiceException("只有审核通过的申请才能出库");
+        String status = existingApply.getStatus();
+        String ss = existingApply.getShortageStatus();
+        log.info("【确认领书】applyId={}, status={}, shortageStatus={}", applyId, status, ss);
+
+        if (!"1".equals(status)) {
+            if ("3".equals(ss)) {
+                int restored = bookPersonalApplyMapper.restoreToApproved(applyId,
+                        "缺书已补货入库，确认领书时自动恢复",
+                        SecurityUtils.getUsername(), DateUtils.getNowDate());
+                if (restored == 0) {
+                    throw new ServiceException("状态恢复失败，请刷新后重试");
+                }
+                log.info("【确认领书】缺书status=3已入库，自动恢复申请状态, applyId={}", applyId);
+            } else {
+                String tip = ss != null ? "已驳回(缺书进度" + ss + ")" : status;
+                throw new ServiceException("只有审核通过的申请才能确认领书，当前状态：" + tip);
+            }
         }
 
-        if (existingApply.getApplyQty() == null || existingApply.getApplyQty() <= 0) {
-            throw new ServiceException("申请数量无效");
+        int qty = receivedQty != null && receivedQty > 0 ? receivedQty : existingApply.getApplyQty();
+        if (qty > existingApply.getApplyQty()) {
+            throw new ServiceException("实发数量不能超过申请数量");
         }
 
         try {
-            stockOperationService.deductStock(existingApply.getTextbookId(), existingApply.getApplyQty(), "2", existingApply.getApplyNo(), SecurityUtils.getLoginUser().getUser().getNickName());
+            stockOperationService.deductStock(existingApply.getTextbookId(), qty, "2", existingApply.getApplyNo(),
+                    SecurityUtils.getLoginUser().getUser().getNickName());
         } catch (ServiceException e) {
             if (e.getMessage().contains("库存不足") || e.getMessage().contains("并发冲突")) {
-                throw new ServiceException("出库失败：" + e.getMessage() + "。该教材库存可能在审核通过后被其他操作扣减，请驳回此申请并建议教师重新提交。");
+                throw new ServiceException("领书确认失败：" + e.getMessage() + "。请刷新后重试。");
             }
             throw e;
         }
@@ -271,12 +288,19 @@ public class BookPersonalApplyServiceImpl implements IBookPersonalApplyService {
         apply.setApplyId(applyId);
         apply.setStatus("3");
         apply.setIssueTime(new Date());
+        apply.setReceivedTime(new Date());
+        apply.setReceiveOperator(SecurityUtils.getLoginUser().getUser().getNickName());
+        apply.setReceiveLocation(location);
         apply.setUpdateBy(SecurityUtils.getUsername());
 
         int result = bookPersonalApplyMapper.updateBookPersonalApply(apply);
 
         if (result > 0) {
-            noticeService.sendNoticeToUser(existingApply.getTeacherId(), "个人领书出库完成", "您的《" + existingApply.getBookName() + "》领书申请已完成出库，感谢您的使用。", "1", applyId);
+            String notifyContent = "您的《" + existingApply.getBookName() + "》已领取，实发" + qty + "本";
+            if (location != null && !location.isEmpty()) {
+                notifyContent += "，领取地点：" + location;
+            }
+            noticeService.sendNoticeToUser(existingApply.getTeacherId(), "领书确认通知", notifyContent, "1", applyId);
         }
 
         return result;

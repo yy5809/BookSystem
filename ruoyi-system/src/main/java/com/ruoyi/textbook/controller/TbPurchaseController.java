@@ -1,6 +1,9 @@
 package com.ruoyi.textbook.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.HashMap;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.file.FileUtils;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
+import com.ruoyi.textbook.constants.TextbookConstants;
 import com.ruoyi.textbook.domain.dto.AuditRequest;
 import com.ruoyi.textbook.service.ITbBuyService;
 
@@ -90,6 +94,106 @@ public class TbPurchaseController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "提交核准", businessType = BusinessType.UPDATE)
+    @PutMapping("/submitVerify/{id}")
+    public AjaxResult submitVerify(@PathVariable("id") Long buyId) {
+        return toAjax(tbBuyService.submitVerification(buyId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:query')")
+    @GetMapping("/verifyCheck/{id}")
+    public AjaxResult checkVerifyReady(@PathVariable("id") Long buyId) {
+        Map<String, Object> result = new HashMap<>();
+        List<TbPurchaseDetail> details = tbBuyService.selectDetailsByPurchaseId(buyId);
+        boolean hasIssue = false;
+        List<Map<String, String>> issueBooks = new ArrayList<>();
+        for (TbPurchaseDetail d : details) {
+            if (TextbookConstants.SUPPLIER_FEEDBACK_SHORTAGE.equals(d.getSupplierFeedback())) {
+                hasIssue = true;
+                Map<String, String> m = new HashMap<>();
+                m.put("bookName", d.getBookName()); m.put("issue", "缺货");
+                issueBooks.add(m);
+            } else if (TextbookConstants.SUPPLIER_FEEDBACK_INFO_ERROR.equals(d.getSupplierFeedback())) {
+                hasIssue = true;
+                Map<String, String> m = new HashMap<>();
+                m.put("bookName", d.getBookName()); m.put("issue", "信息有误");
+                issueBooks.add(m);
+            }
+        }
+        result.put("canVerify", !hasIssue);
+        result.put("issueBooks", issueBooks);
+        return AjaxResult.success(result);
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "核准确认", businessType = BusinessType.UPDATE)
+    @PutMapping("/confirmVerify/{id}")
+    public AjaxResult confirmVerify(@PathVariable("id") Long buyId,
+            @RequestParam String verifyResult,
+            @RequestParam(required = false) String verifyRemark,
+            @RequestParam(required = false) String qualityCheckResult,
+            @RequestParam(required = false) Integer actualQtyReceived,
+            @RequestParam(required = false) String invoiceNo) {
+        return toAjax(tbBuyService.confirmVerify(buyId, verifyResult, verifyRemark, qualityCheckResult, actualQtyReceived, invoiceNo));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "核准退回", businessType = BusinessType.UPDATE)
+    @PutMapping("/verifyReject/{id}")
+    public AjaxResult verifyReject(@PathVariable("id") Long buyId, @RequestParam String remark) {
+        return toAjax(tbBuyService.returnToArrived(buyId, remark));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "明细核准", businessType = BusinessType.UPDATE)
+    @PutMapping("/detail/verify/{detailId}")
+    public AjaxResult verifyDetail(@PathVariable Long detailId, @RequestParam String verifyStatus, @RequestParam(required = false) String remark) {
+        return toAjax(tbBuyService.verifyDetail(detailId, verifyStatus, remark));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "明细收货", businessType = BusinessType.UPDATE)
+    @PutMapping("/detail/receive/{detailId}")
+    public AjaxResult receiveDetail(@PathVariable Long detailId, @RequestParam(required = false) Integer receivedQty) {
+        return toAjax(tbBuyService.receiveDetail(detailId, receivedQty));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "单条核准入库", businessType = BusinessType.UPDATE)
+    @PutMapping("/detail/directInbound/{detailId}")
+    public AjaxResult directInboundDetail(@PathVariable Long detailId) {
+        return toAjax(tbBuyService.directInboundDetail(detailId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "明细退货", businessType = BusinessType.UPDATE)
+    @PutMapping("/detail/return/{detailId}")
+    public AjaxResult returnDetail(@PathVariable Long detailId, @RequestParam(required = false) Integer returnQty, @RequestParam String returnReason) {
+        return toAjax(tbBuyService.returnDetail(detailId, returnQty, returnReason));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "信息修正", businessType = BusinessType.UPDATE)
+    @PutMapping("/detail/correctInfo/{detailId}")
+    public AjaxResult correctDetailInfo(@PathVariable Long detailId, @RequestParam String infoCorrection) {
+        return toAjax(tbBuyService.correctDetailInfo(detailId, infoCorrection));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "缺货登记", businessType = BusinessType.UPDATE)
+    @PutMapping("/detail/shortage/{detailId}")
+    public AjaxResult registerShortage(@PathVariable Long detailId, @RequestParam(required = false) String remark) {
+        return toAjax(tbBuyService.registerShortageDetail(detailId, remark));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
+    @Log(title = "批量核准明细", businessType = BusinessType.UPDATE)
+    @PutMapping("/detail/batchVerify")
+    public AjaxResult batchVerifyDetails(@RequestBody List<Long> detailIds, @RequestParam String verifyStatus) {
+        return toAjax(tbBuyService.batchVerifyDetails(detailIds, verifyStatus));
+    }
+
+    @PreAuthorize("@ss.hasPermi('textbook:purchase:receive')")
     @Log(title = "验收入库", businessType = BusinessType.UPDATE)
     @PutMapping("/confirmInbound/{id}")
     public AjaxResult confirmInbound(@PathVariable("id") Long buyId) {
@@ -146,11 +250,9 @@ public class TbPurchaseController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('textbook:purchase:import')")
     @GetMapping("/template")
-    public void downloadTemplate(HttpServletResponse response) {
-        try {
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            FileUtils.setAttachmentResponseHeader(response, "采购单导入模板.xlsx");
-        } catch (Exception ignored) {
-        }
+    public void downloadTemplate(HttpServletResponse response) throws Exception {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        FileUtils.setAttachmentResponseHeader(response, "采购单导入模板.xlsx");
+        com.ruoyi.textbook.util.ExcelImportUtil.generateTemplate(response.getOutputStream());
     }
 }

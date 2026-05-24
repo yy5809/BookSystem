@@ -90,20 +90,31 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
         String noticeNo = "LS" + DateUtils.dateTimeNow("yyyyMMddHHmmss")
                 + IdUtils.fastSimpleUUID().substring(0, 6).toUpperCase();
         bookNotice.setNoticeNo(noticeNo);
-        bookNotice.setStatus("1");
+        bookNotice.setStatus("0");
         bookNotice.setTotalClasses(0);
         bookNotice.setIssuedClasses(0);
         bookNotice.setCreateTime(DateUtils.getNowDate());
         int result = bookNoticeMapper.insertBookNotice(bookNotice);
 
         if (result > 0 && bookNotice.getDetails() != null && !bookNotice.getDetails().isEmpty()) {
-            List<BookClaimForm> forms = generateClaimFormsByClass(bookNotice);
-            if (forms.isEmpty()) {
-                throw new ServiceException("生成领书单失败，请检查领书明细");
+            List<TextbookNoticeDetail> noticeDetails = new ArrayList<>();
+            for (BookClaimFormDetail detail : bookNotice.getDetails()) {
+                TextbookNoticeDetail nd = new TextbookNoticeDetail();
+                nd.setNoticeId(bookNotice.getNoticeId());
+                nd.setTextbookId(detail.getTextbookId());
+                nd.setIsbn(detail.getIsbn());
+                nd.setBookName(detail.getBookName());
+                nd.setPlannedQty(detail.getPlannedQty());
+                nd.setCollegeId(detail.getCollegeId());
+                nd.setMajorId(detail.getMajorId());
+                nd.setClassId(detail.getClassId());
+                nd.setClassName(detail.getClassName());
+                nd.setGradeLevel(detail.getGradeLevel());
+                nd.setCreateBy(bookNotice.getCreateBy());
+                noticeDetails.add(nd);
             }
-            bookNotice.setTotalClasses(forms.size());
-            bookNoticeMapper.updateBookNotice(bookNotice);
-            log.info("【领书管理-保存并生成】通知编号={}, 学期={}, 班级数={}", noticeNo, bookNotice.getSemester(), forms.size());
+            textbookNoticeDetailMapper.batchInsert(noticeDetails);
+            log.info("【领书管理-保存草稿】通知编号={}, 学期={}, 明细数={}", noticeNo, bookNotice.getSemester(), noticeDetails.size());
         }
         return result;
     }
@@ -192,38 +203,42 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
             throw new ServiceException("只有草稿状态的通知才能发布");
         }
 
+        loadNoticeDetailsIfNeeded(notice);
+        if (notice.getDetails() == null || notice.getDetails().isEmpty()) {
+            throw new ServiceException("领书明细为空，请先加载采购绑定数据");
+        }
+        log.info("【发布】加载明细数={}, noticeId={}", notice.getDetails().size(), noticeId);
+
         List<String> warnings = new ArrayList<>();
-        if (notice.getDetails() != null && !notice.getDetails().isEmpty()) {
-            Map<Long, Integer> bookDemandMap = new HashMap<>();
-            Map<Long, String> bookNameMap = new HashMap<>();
-            for (BookClaimFormDetail detail : notice.getDetails()) {
-                bookDemandMap.merge(detail.getTextbookId(), detail.getPlannedQty(), Integer::sum);
-                bookNameMap.putIfAbsent(detail.getTextbookId(), detail.getBookName());
-            }
-            for (Map.Entry<Long, Integer> entry : bookDemandMap.entrySet()) {
-                TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(entry.getKey());
-                if (inventory == null) {
-                    warnings.add("教材《" + bookNameMap.get(entry.getKey()) + "》库存记录不存在");
-                } else if (inventory.getStockNum() < entry.getValue()) {
-                    warnings.add("教材《" + bookNameMap.get(entry.getKey()) + "》库存不足，当前库存：" + inventory.getStockNum() + "，总需求：" + entry.getValue());
-                }
+        Map<Long, Integer> bookDemandMap = new HashMap<>();
+        Map<Long, String> bookNameMap = new HashMap<>();
+        for (BookClaimFormDetail detail : notice.getDetails()) {
+            bookDemandMap.merge(detail.getTextbookId(), detail.getPlannedQty(), Integer::sum);
+            bookNameMap.putIfAbsent(detail.getTextbookId(), detail.getBookName());
+        }
+        for (Map.Entry<Long, Integer> entry : bookDemandMap.entrySet()) {
+            TbInventory inventory = tbInventoryMapper.selectTbInventoryByBookId(entry.getKey());
+            if (inventory == null) {
+                warnings.add("教材《" + bookNameMap.get(entry.getKey()) + "》库存记录不存在");
+            } else if (inventory.getStockNum() < entry.getValue()) {
+                warnings.add("教材《" + bookNameMap.get(entry.getKey()) + "》库存不足，当前库存：" + inventory.getStockNum() + "，总需求：" + entry.getValue());
             }
         }
-
         if (!warnings.isEmpty()) {
             log.warn("【领书通知发布】库存预警: {}", String.join("; ", warnings));
-            throw new ServiceException("库存不足，无法发布领书通知：" + String.join("; ", warnings));
         }
 
         List<BookClaimForm> forms = generateClaimFormsByClass(notice);
         if (forms == null || forms.isEmpty()) {
-            throw new ServiceException("请先添加领书明细后再发布");
+            throw new ServiceException("领书单生成失败，明细数=" + notice.getDetails().size() + "，请检查班级分组是否正确");
         }
 
         int rowsAffected = bookNoticeMapper.updateNoticeStatusWithExpected(noticeId, "0", "1");
         if (rowsAffected <= 0) {
             throw new ServiceException("发布失败，通知状态可能已被其他操作修改，请刷新后重试");
         }
+        log.info("【状态已更新】noticeId={}, status: 0→1, rowsAffected={}", noticeId, rowsAffected);
+        notice.setStatus("1");
 
         notice.setTotalClasses(forms.size());
         notice.setUpdateTime(DateUtils.getNowDate());
@@ -231,8 +246,8 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
 
         noticeService.sendNoticePublishNotice(noticeId, notice.getSemester(), forms.size());
 
-        log.info("【领书通知发布】通知编号={}, 学期={}, 班级数={}", notice.getNoticeNo(), notice.getSemester(), forms.size());
-        return 1;
+        log.info("【领书通知发布】通知编号={}, 学期={}, 班级数={}, 明细数={}", notice.getNoticeNo(), notice.getSemester(), forms.size(), notice.getDetails().size());
+        return forms.size();
     }
     
     // 按班级生成领书单
@@ -251,26 +266,21 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
         // 按班级分组
         Map<String, List<BookClaimFormDetail>> classMap = new HashMap<>();
         for (BookClaimFormDetail detail : notice.getDetails()) {
-            String classKey = detail.getCollegeId() + "-" + detail.getMajorId() + "-" + detail.getClassId();
-            if (!classMap.containsKey(classKey)) {
-                classMap.put(classKey, new ArrayList<>());
-            }
-            classMap.get(classKey).add(detail);
+            String classKey = detail.getClassName() != null ? detail.getClassName() : "未命名班级";
+            classMap.computeIfAbsent(classKey, k -> new ArrayList<>()).add(detail);
         }
         
-        // 为每个班级生成领书单
         List<BookClaimForm> forms = new ArrayList<>();
         for (Map.Entry<String, List<BookClaimFormDetail>> entry : classMap.entrySet()) {
             List<BookClaimFormDetail> classDetails = entry.getValue();
             if (!classDetails.isEmpty()) {
                 BookClaimFormDetail firstDetail = classDetails.get(0);
                 
-                // 创建领书单
                 BookClaimForm form = new BookClaimForm();
                 form.setNoticeId(notice.getNoticeId());
-                form.setCollegeId(firstDetail.getCollegeId());
-                form.setMajorId(firstDetail.getMajorId());
-                form.setClassId(firstDetail.getClassId());
+                form.setCollegeId(0L);
+                form.setMajorId(0L);
+                form.setClassId(0L);
                 form.setClassName(firstDetail.getClassName());
                 form.setGradeLevel(firstDetail.getGradeLevel());
                 form.setStatus("0");
@@ -315,11 +325,37 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
 
         List<BookClaimForm> existingForms = bookClaimFormMapper.selectBookClaimFormsByNoticeId(noticeId);
         if (existingForms != null && !existingForms.isEmpty()) {
+            log.info("【查询领书单】noticeId={}, 已有表单数={}", noticeId, existingForms.size());
             return existingForms;
         }
         
-        // 生成领书单
-        return generateClaimFormsByClass(notice);
+        loadNoticeDetailsIfNeeded(notice);
+        log.info("【查询领书单】noticeId={}, 明细数={}, 将按班级生成", noticeId,
+                notice.getDetails() != null ? notice.getDetails().size() : 0);
+        List<BookClaimForm> generated = generateClaimFormsByClass(notice);
+        log.info("【查询领书单】noticeId={}, 生成表单数={}", noticeId, generated.size());
+        return generated;
+    }
+
+    private void loadNoticeDetailsIfNeeded(BookNotice notice) {
+        if (notice.getDetails() != null && !notice.getDetails().isEmpty()) return;
+        List<TextbookNoticeDetail> noticeDetails = textbookNoticeDetailMapper.selectByNoticeId(notice.getNoticeId());
+        if (noticeDetails == null || noticeDetails.isEmpty()) return;
+        List<BookClaimFormDetail> details = new ArrayList<>();
+        for (TextbookNoticeDetail nd : noticeDetails) {
+            BookClaimFormDetail d = new BookClaimFormDetail();
+            d.setTextbookId(nd.getTextbookId());
+            d.setIsbn(nd.getIsbn());
+            d.setBookName(nd.getBookName());
+            d.setPlannedQty(nd.getPlannedQty());
+            d.setCollegeId(nd.getCollegeId());
+            d.setMajorId(nd.getMajorId());
+            d.setClassId(nd.getClassId());
+            d.setClassName(nd.getClassName());
+            d.setGradeLevel(nd.getGradeLevel());
+            details.add(d);
+        }
+        notice.setDetails(details);
     }
 
     @Override
@@ -383,8 +419,14 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
                 textbookClassBindingMapper.selectBySemester(semester);
         if (bindings == null || bindings.isEmpty()) return java.util.Collections.emptyList();
 
+        java.util.Set<String> usedKeys = getUsedBindingKeys(semester);
+        log.info("【加载绑定】学期={}, 总绑定数={}, 已占用={}", semester, bindings.size(), usedKeys.size());
+
         java.util.Map<String, java.util.Map<String, Object>> collegeMajorMap = new java.util.LinkedHashMap<>();
         for (com.ruoyi.textbook.domain.TextbookClassBinding b : bindings) {
+            String bindingKey = b.getClassName() + "|" + b.getBookId();
+            if (usedKeys.contains(bindingKey)) continue;
+
             String key = b.getCollege() + "|" + b.getMajor();
             collegeMajorMap.computeIfAbsent(key, k -> {
                 java.util.Map<String, Object> cm = new java.util.LinkedHashMap<>();
@@ -421,5 +463,23 @@ public class BookNoticeServiceImpl implements IBookNoticeService {
             result.add(cm);
         }
         return result;
+    }
+
+    private java.util.Set<String> getUsedBindingKeys(String semester) {
+        java.util.Set<String> keys = new java.util.HashSet<>();
+        com.ruoyi.textbook.domain.BookNotice query = new com.ruoyi.textbook.domain.BookNotice();
+        query.setSemester(semester);
+        java.util.List<com.ruoyi.textbook.domain.BookNotice> notices = bookNoticeMapper.selectBookNoticeList(query);
+        for (com.ruoyi.textbook.domain.BookNotice n : notices) {
+            if ("0".equals(n.getStatus())) continue;
+            java.util.List<com.ruoyi.textbook.domain.TextbookNoticeDetail> details =
+                    textbookNoticeDetailMapper.selectByNoticeId(n.getNoticeId());
+            if (details != null) {
+                for (com.ruoyi.textbook.domain.TextbookNoticeDetail d : details) {
+                    keys.add(d.getClassName() + "|" + d.getTextbookId());
+                }
+            }
+        }
+        return keys;
     }
 }

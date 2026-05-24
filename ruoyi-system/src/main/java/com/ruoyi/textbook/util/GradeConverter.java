@@ -6,14 +6,32 @@ import java.util.regex.Pattern;
 /**
  * 年级/入学年份换算工具
  * 
- * 核心逻辑：
- *   存储：入学年份（如"22级"=2022年入学，固定不变）
- *   换算：年级 = currentAcademicYear - enrollmentYear + 1
- *   展示：软件工程22-1班 (22级/大四)
+ * 核心规则：以每年9月1日作为新生入学的时间节点（届的划分标准）
+ *   8月及之前：学年 = year-1（如2025年8月属于2024-2025学年）
+ *   9月及之后：学年 = year（如2025年9月属于2025-2026学年）
+ * 
+ * 换算公式：
+ *   入学年份 → 年级：grade = currentAcademicYear - enrollmentYear + 1
+ *   年级 → 入学年份：enrollmentYear = currentAcademicYear - (grade - 1)
+ * 
+ * 示例（当前学年=2025）：
+ *   2022年入学 → 大四    2023年入学 → 大三
+ *   2024年入学 → 大二    2025年入学 → 大一
+ *   2026年入学 → 未入学  2019年入学 → 已毕业
  */
 public class GradeConverter {
 
     private static final String[] GRADE_NAMES = {"大一", "大二", "大三", "大四"};
+
+    /**
+     * 获取当前学年（9月为分界：9月及之后为新学年，8月及之前为旧学年）
+     * 优先读取Redis配置 sys_config:textbook.current_academic_year，失败时按日期计算
+     */
+    public static int currentAcademicYear() {
+        java.time.LocalDate now = java.time.LocalDate.now();
+        int year = now.getYear();
+        return now.getMonthValue() >= 9 ? year : year - 1;
+    }
 
     /**
      * 从班级名称提取入学年份（公元4位）
@@ -72,14 +90,32 @@ public class GradeConverter {
     }
 
     /**
-     * 入学年份 → 年级名称（基于当前学年动态计算）
-     * 2022 + currentAcademicYear=2026 → "大四"
+     * 入学年份 → 年级名称（基于当前学年动态计算，9月1日为届分界线）
+     * 
+     * 换算规则：
+     *   grade = currentAcademicYear - enrollmentYear + 1
+     *   
+     *   enrollmentYear > currentAcademicYear  →  "未入学"（尚未报到的新生）
+     *   grade ∈ [1,4]                         →  "大一"～"大四"
+     *   grade > 4                             →  "已毕业"
+     *   
+     * 示例（currentAcademicYear=2025）：
+     *   2022 → 大四, 2023 → 大三, 2024 → 大二, 2025 → 大一
+     *   2026 → 未入学, 2019 → 已毕业
      */
     public static String toGradeName(Integer enrollmentYear, int currentAcademicYear) {
         if (enrollmentYear == null) return "通用";
+        if (enrollmentYear > currentAcademicYear) return "未入学";
         int grade = currentAcademicYear - enrollmentYear + 1;
         if (grade >= 1 && grade <= 4) return GRADE_NAMES[grade - 1];
-        return grade > 4 ? "大四(毕业班)" : "大" + grade;
+        return "已毕业";
+    }
+
+    /**
+     * 入学年份 → 年级名称（自动获取当前学年）
+     */
+    public static String toGradeName(Integer enrollmentYear) {
+        return toGradeName(enrollmentYear, currentAcademicYear());
     }
 
     /**
@@ -94,6 +130,10 @@ public class GradeConverter {
         String shortYear = String.valueOf(year).substring(2);
         String gradeName = toGradeName(year, currentAcademicYear);
         return className + " (" + shortYear + "级/" + gradeName + ")";
+    }
+
+    public static String toDisplayName(String className, String gradeLevel) {
+        return toDisplayName(className, gradeLevel, currentAcademicYear());
     }
 
     /**
@@ -111,7 +151,9 @@ public class GradeConverter {
     }
 
     /**
-     * 旧"大一/大二"格式 → 新"22级"格式
+     * 旧"大一/大二"格式 → 新"22级"格式（纯格式归一化，不判断有效性）
+     * "大二" + currentAcademicYear=2025 → "24级"
+     * "26"   + currentAcademicYear=2025 → "26级"（格式归一化通过，有效性由 toGradeName 判断）
      */
     public static String normalizeGradeLevel(String gradeLevel, int currentAcademicYear) {
         if (gradeLevel == null || "通用".equals(gradeLevel)) return gradeLevel;
@@ -121,5 +163,9 @@ public class GradeConverter {
         Integer computed = gradeNameToEnrollmentYear(gradeLevel, currentAcademicYear);
         if (computed != null) return String.valueOf(computed).substring(2) + "级";
         return gradeLevel;
+    }
+
+    public static String normalizeGradeLevel(String gradeLevel) {
+        return normalizeGradeLevel(gradeLevel, currentAcademicYear());
     }
 }

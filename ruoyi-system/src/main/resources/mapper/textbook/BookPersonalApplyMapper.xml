@@ -19,6 +19,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="auditBy"    column="audit_by"    />
         <result property="auditTime"  column="audit_time"  />
         <result property="issueTime"  column="issue_time"  />
+        <result property="receivedTime"  column="received_time"  />
+        <result property="receiveOperator"  column="receive_operator"  />
+        <result property="receiveLocation"  column="receive_location"  />
+        <result property="shortageStatus" column="shortage_status"/>
         <result property="createBy"   column="create_by"   />
         <result property="createTime" column="create_time" />
         <result property="updateBy"   column="update_by"   />
@@ -28,49 +32,52 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectBookPersonalApplyVo">
-        select apply_id, apply_no, teacher_id, teacher_name, textbook_id, isbn, book_name, apply_qty, purpose,
-               status, audit_opinion, audit_by, audit_time, issue_time, create_by, create_time, update_by, update_time,
-               del_flag, remark
-        from textbook_personal_apply
+        select pa.apply_id, pa.apply_no, pa.teacher_id, pa.teacher_name, pa.textbook_id, pa.isbn, pa.book_name, pa.apply_qty, pa.purpose,
+               pa.status, pa.audit_opinion, pa.audit_by, pa.audit_time, pa.issue_time, pa.received_time, pa.receive_operator, pa.receive_location,
+               (select max(l.handle_status) from textbook_lack l
+                where l.source in ('1','3') and l.source_id = pa.apply_id and l.del_flag = '0') as shortage_status,
+               pa.create_by, pa.create_time, pa.update_by, pa.update_time,
+               pa.del_flag, pa.remark
+        from textbook_personal_apply pa
     </sql>
 
     <select id="selectBookPersonalApplyList" parameterType="com.ruoyi.textbook.domain.BookPersonalApply" resultMap="BookPersonalApplyResult">
         <include refid="selectBookPersonalApplyVo"/>
         <where>
-            del_flag = '0'
-            <if test="applyNo != null and applyNo != ''"> AND apply_no like concat('%', #{applyNo}, '%')</if>
-            <if test="teacherName != null and teacherName != ''"> AND teacher_name like concat('%', #{teacherName}, '%')</if>
-            <if test="isbn != null and isbn != ''"> AND isbn like concat('%', #{isbn}, '%')</if>
-            <if test="bookName != null and bookName != ''"> AND book_name like concat('%', #{bookName}, '%')</if>
-            <if test="status != null and status != ''"> AND status = #{status}</if>
-            <if test="params.beginTime != null and params.beginTime != ''"> AND date_format(create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')</if>
-            <if test="params.endTime != null and params.endTime != ''"> AND date_format(create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')</if>
+            pa.del_flag = '0'
+            <if test="applyNo != null and applyNo != ''"> AND pa.apply_no like concat('%', #{applyNo}, '%')</if>
+            <if test="teacherName != null and teacherName != ''"> AND pa.teacher_name like concat('%', #{teacherName}, '%')</if>
+            <if test="isbn != null and isbn != ''"> AND pa.isbn like concat('%', #{isbn}, '%')</if>
+            <if test="bookName != null and bookName != ''"> AND pa.book_name like concat('%', #{bookName}, '%')</if>
+            <if test="status != null and status != ''"> AND pa.status = #{status}</if>
+            <if test="params.beginTime != null and params.beginTime != ''"> AND date_format(pa.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')</if>
+            <if test="params.endTime != null and params.endTime != ''"> AND date_format(pa.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')</if>
             ${params.dataScope}
         </where>
-        order by create_time desc
+        order by pa.create_time desc
     </select>
 
     <select id="selectMyApplyList" parameterType="com.ruoyi.textbook.domain.BookPersonalApply" resultMap="BookPersonalApplyResult">
         <include refid="selectBookPersonalApplyVo"/>
         <where>
-            del_flag = '0' AND teacher_id = #{teacherId}
-            <if test="status != null and status != ''"> AND status = #{status}</if>
-            <if test="params.beginTime != null and params.beginTime != ''"> AND date_format(create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')</if>
-            <if test="params.endTime != null and params.endTime != ''"> AND date_format(create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')</if>
+            pa.del_flag = '0' AND pa.teacher_id = #{teacherId}
+            <if test="status != null and status != ''"> AND pa.status = #{status}</if>
+            <if test="params.beginTime != null and params.beginTime != ''"> AND date_format(pa.create_time,'%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')</if>
+            <if test="params.endTime != null and params.endTime != ''"> AND date_format(pa.create_time,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')</if>
         </where>
-        order by create_time desc
+        order by pa.create_time desc
     </select>
 
     <select id="selectBookPersonalApplyById" parameterType="Long" resultMap="BookPersonalApplyResult">
         <include refid="selectBookPersonalApplyVo"/>
-        where apply_id = #{applyId} and del_flag = '0'
+        where pa.apply_id = #{applyId} and pa.del_flag = '0'
     </select>
 
     <select id="selectBookPersonalApplyByIds" parameterType="java.util.List" resultMap="BookPersonalApplyResult">
         <include refid="selectBookPersonalApplyVo"/>
-        where apply_id in
+        where pa.apply_id in
         <foreach item="applyId" collection="list" open="(" separator="," close=")">#{applyId}</foreach>
-        and del_flag = '0'
+        and pa.del_flag = '0'
     </select>
 
     <insert id="insertBookPersonalApply" parameterType="com.ruoyi.textbook.domain.BookPersonalApply" useGeneratedKeys="true" keyProperty="applyId">
@@ -108,11 +115,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="auditBy != null and auditBy != ''">audit_by = #{auditBy},</if>
             <if test="auditTime != null">audit_time = #{auditTime},</if>
             <if test="issueTime != null">issue_time = #{issueTime},</if>
+            <if test="receivedTime != null">received_time = #{receivedTime},</if>
+            <if test="receiveOperator != null">receive_operator = #{receiveOperator},</if>
+            <if test="receiveLocation != null">receive_location = #{receiveLocation},</if>
             <if test="status != null and status != ''">status = #{status},</if>
             <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
             update_time = sysdate()
         </set>
         where apply_id = #{applyId} and del_flag = '0'
+    </update>
+
+    <update id="restoreToApproved">
+        UPDATE textbook_personal_apply
+        SET status = '1', audit_opinion = #{auditOpinion}, update_by = #{updateBy}, update_time = #{updateTime}
+        WHERE apply_id = #{applyId} AND del_flag = '0'
     </update>
 
     <delete id="deleteBookPersonalApplyByIds" parameterType="String">

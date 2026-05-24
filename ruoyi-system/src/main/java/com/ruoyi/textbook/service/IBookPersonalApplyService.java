@@ -11,7 +11,7 @@ public interface IBookPersonalApplyService {
     public int updateBookPersonalApply(BookPersonalApply bookPersonalApply);
     public int deleteBookPersonalApplyByIds(Long[] applyIds);
     public int auditApply(BookPersonalApply bookPersonalApply);
-    public int issueApply(Long applyId);
+    public int issueApply(Long applyId, Integer receivedQty, String location, String remark);
     public int cancelApply(Long applyId, Long currentUserId);
 
     /**

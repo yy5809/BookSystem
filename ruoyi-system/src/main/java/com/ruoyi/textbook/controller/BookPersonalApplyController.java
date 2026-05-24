@@ -1,6 +1,7 @@
 package com.ruoyi.textbook.controller;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -84,10 +85,13 @@ public class BookPersonalApplyController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:personalApply:issue') and @ss.hasAnyRoles('admin,warehouse')")
-    @Log(title = "Personal Apply Issue", businessType = BusinessType.UPDATE)
+    @Log(title = "确认教师领书", businessType = BusinessType.UPDATE)
     @PutMapping("/issue/{applyId}")
-    public AjaxResult issue(@PathVariable Long applyId) {
-        return toAjax(bookPersonalApplyService.issueApply(applyId));
+    public AjaxResult issue(@PathVariable Long applyId, @RequestBody Map<String, Object> data) {
+        Integer receivedQty = data.get("receivedQty") != null ? ((Number) data.get("receivedQty")).intValue() : null;
+        String location = (String) data.getOrDefault("location", "仓库");
+        String remark = (String) data.get("remark");
+        return toAjax(bookPersonalApplyService.issueApply(applyId, receivedQty, location, remark));
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:myApply:add')")

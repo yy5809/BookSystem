@@ -55,6 +55,7 @@
 
     <div style="text-align: right; margin-top: 15px;" v-if="purchaseInfo.purchaseStatus === '1' || purchaseInfo.purchaseStatus === '2'">
       <el-button type="success" icon="el-icon-check" size="mini" @click="handleAccept" v-if="purchaseInfo.purchaseStatus === '1'" :disabled="unmarkedCount > 0">确认接单</el-button>
+      <el-button type="danger" icon="el-icon-close" size="mini" @click="handleReject" v-if="purchaseInfo.purchaseStatus === '1'">拒单</el-button>
       <el-button type="primary" icon="el-icon-truck" size="mini" @click="handleShipment" v-if="purchaseInfo.purchaseStatus === '2'">确认发货</el-button>
     </div>
 
@@ -82,7 +83,7 @@
 </template>
 
 <script>
-import { getSupplierPurchaseDetail, acceptOrder, confirmShipment, markDetail } from '@/api/textbook/supplier'
+import { getSupplierPurchaseDetail, acceptOrder, confirmShipment, markDetail, rejectOrder } from '@/api/textbook/supplier'
 
 export default {
   name: "SupplierPurchaseDetail",
@@ -137,6 +138,18 @@ export default {
       }).then(() => {
         this.$modal.msgSuccess('已接单')
         this.loadDetail()
+      }).catch(() => {})
+    },
+    handleReject() {
+      this.$prompt('请输入拒单原因', '拒单', {
+        confirmButtonText: '确认拒单',
+        cancelButtonText: '取消',
+        inputPlaceholder: '请填写拒单原因（如：缺货、信息有误等）'
+      }).then(({ value }) => {
+        return rejectOrder(this.purchaseInfo.buyId, value || '供应商拒单')
+      }).then(() => {
+        this.$modal.msgSuccess('已拒单，采购单已退回')
+        this.$router.go(-1)
       }).catch(() => {})
     },
     markFeedback(row, feedback) {

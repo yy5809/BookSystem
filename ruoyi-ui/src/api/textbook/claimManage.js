@@ -58,8 +58,8 @@ export function getPersonalApply(applyId) {
 export function auditApply(data) {
   return request({ url: '/textbook/personalApply/audit', method: 'put', data })
 }
-export function issuePersonalApply(applyId) {
-  return request({ url: '/textbook/personalApply/issue/' + applyId, method: 'put' })
+export function issuePersonalApply(applyId, data) {
+  return request({ url: '/textbook/personalApply/issue/' + applyId, method: 'put', data })
 }
 export function cancelPersonalApply(applyId) {
   return request({ url: '/textbook/personalApply/cancel/' + applyId, method: 'put' })
@@ -104,8 +104,8 @@ export function partialIssue(data) {
   return request({ url: '/textbook/claimForm/partialIssue', method: 'post', data })
 }
 
-export function checkDuplicate(formId, className) {
-  return request({ url: '/textbook/claimForm/checkDuplicate', method: 'get', params: { formId, className } })
+export function checkDuplicate(noticeId, className) {
+  return request({ url: '/textbook/claimForm/checkDuplicate', method: 'get', params: { noticeId, className } })
 }
 
 export function returnToStock(data) {
@@ -115,3 +115,16 @@ export function returnToStock(data) {
 export function listBook(query) {
   return request({ url: '/textbook/book/list', method: 'get', params: query })
 }
+
+export function getBindingData(semester) {
+  return request({ url: '/textbook/notice/bindingData/' + semester, method: 'get' })
+}
+
+export function exportPdf(formId) {
+  return request({
+    url: '/textbook/claimForm/pdf/' + formId,
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+

@@ -78,6 +78,16 @@ public class TbPurchaseDetail extends BaseEntity
 
     private String supplierRemark;
 
+    private String verifyStatus;
+
+    private Integer receivedQty;
+
+    private Integer returnQty;
+
+    private String returnReason;
+
+    private String infoCorrection;
+
     // remark inherited from BaseEntity
 
     public void setDetailId(Long detailId)
@@ -194,6 +204,16 @@ public class TbPurchaseDetail extends BaseEntity
     public String getSupplierFeedback() { return supplierFeedback; }
     public void setSupplierRemark(String supplierRemark) { this.supplierRemark = supplierRemark; }
     public String getSupplierRemark() { return supplierRemark; }
+    public String getVerifyStatus() { return verifyStatus; }
+    public void setVerifyStatus(String verifyStatus) { this.verifyStatus = verifyStatus; }
+    public Integer getReceivedQty() { return receivedQty; }
+    public void setReceivedQty(Integer receivedQty) { this.receivedQty = receivedQty; }
+    public Integer getReturnQty() { return returnQty; }
+    public void setReturnQty(Integer returnQty) { this.returnQty = returnQty; }
+    public String getReturnReason() { return returnReason; }
+    public void setReturnReason(String returnReason) { this.returnReason = returnReason; }
+    public String getInfoCorrection() { return infoCorrection; }
+    public void setInfoCorrection(String infoCorrection) { this.infoCorrection = infoCorrection; }
 
     @Override
     public String toString() {

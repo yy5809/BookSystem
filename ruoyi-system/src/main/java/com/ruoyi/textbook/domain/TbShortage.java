@@ -29,7 +29,7 @@ public class TbShortage extends BaseEntity {
     @Excel(name = "登记人姓名")
     private String registerName;
 
-    @Excel(name = "处理状态", readConverterExp = "0=未处理,1=已纳入采购,2=已到货,3=已完成,4=已取消,5=已关闭")
+    @Excel(name = "处理状态", readConverterExp = "0=未处理,1=已纳入采购,2=部分补齐,3=已补齐,4=已取消,5=已关闭")
     private String handleStatus;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -42,7 +42,7 @@ public class TbShortage extends BaseEntity {
     @Excel(name = "来源购书单ID")
     private Long purchaseId;
 
-    @Excel(name = "缺书来源", readConverterExp = "1=领书缺货,2=库存预警")
+    @Excel(name = "缺书来源", readConverterExp = "1=领书缺货,2=库存预警,3=个人申请")
     private String source;
 
     @Excel(name = "来源记录ID")

@@ -23,14 +23,20 @@
           </template>
         </el-table-column>
         <el-table-column label="提交时间" prop="submitTime" width="145" align="center"/>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="350">
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="380">
           <template slot-scope="scope">
             <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
             <el-button size="mini" type="text" icon="el-icon-check" style="color:#67C23A" @click="handleAudit(scope.row)" v-if="scope.row.auditStatus === '0'" v-hasRole="['admin','warehouse']">通过</el-button>
             <el-button size="mini" type="text" icon="el-icon-close" style="color:#F56C6C" @click="handleReject(scope.row)" v-if="scope.row.auditStatus === '0'" v-hasRole="['admin','warehouse']">驳回</el-button>
             <el-button size="mini" type="text" icon="el-icon-s-claim" style="color:#E6A23A" @click="handleConfirmOrder(scope.row)" v-if="scope.row.purchaseStatus === '0'" v-hasRole="['admin','warehouse']">确认下单</el-button>
             <el-button size="mini" type="text" icon="el-icon-truck" style="color:#409EFF" @click="handleConfirmArrived(scope.row)" v-if="scope.row.purchaseStatus === '3'" v-hasRole="['admin','warehouse']">确认到货</el-button>
-            <el-button size="mini" type="text" icon="el-icon-s-data" style="color:#67C23A" @click="handleConfirmInbound(scope.row)" v-if="scope.row.purchaseStatus === '4'" v-hasRole="['admin','warehouse']">确认入库</el-button>
+            <el-button size="mini" type="text" icon="el-icon-s-check" style="color:#E6A23C" @click="handleSubmitVerify(scope.row)" v-if="scope.row.purchaseStatus === '4'" v-hasRole="['admin','warehouse']">提交核准</el-button>
+            <template v-if="scope.row.purchaseStatus === '6'">
+              <el-button size="mini" type="warning" icon="el-icon-s-tools" @click="handleVerifyDialog(scope.row)" v-if="!scope.row.verifyResult" v-hasRole="['admin','warehouse']">核准验收</el-button>
+              <el-tag v-if="scope.row.verifyResult" type="success" size="small">已验收</el-tag>
+              <el-button size="mini" type="success" icon="el-icon-s-data" @click="handleConfirmInbound(scope.row)" v-if="scope.row.verifyResult" v-hasRole="['admin','warehouse']">确认入库</el-button>
+            </template>
+            <el-button size="mini" type="text" icon="el-icon-circle-close" style="color:#F56C6C" @click="handleCancel(scope.row)" v-if="scope.row.purchaseStatus === '0'" v-hasRole="['admin','warehouse']">取消</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -285,11 +291,51 @@
         <el-button type="warning" @click="confirmOrder" :disabled="!dispatchSupplierId">确认下单并通知供应商</el-button>
       </div>
     </el-dialog>
+
+    <!-- 库管员核准弹窗 -->
+    <el-dialog title="库管员核准 — 到货验收" :visible.sync="verifyOpen" width="650px" append-to-body :close-on-click-modal="false">
+      <div v-if="verifyForm.buyId">
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="采购单号">{{ verifyForm.purchaseNo }}</el-descriptions-item>
+        </el-descriptions>
+        <el-divider content-position="left">核准信息</el-divider>
+        <el-form :model="verifyForm" label-width="100px" size="small">
+          <el-form-item label="核准结果" required>
+            <el-radio-group v-model="verifyForm.verifyResult">
+              <el-radio label="pass">核准通过</el-radio>
+              <el-radio label="partial">部分通过</el-radio>
+              <el-radio label="reject">退回重检</el-radio>
+            </el-radio-group>
+          </el-form-item>
+          <el-form-item label="质检结果" required>
+            <el-select v-model="verifyForm.qualityCheckResult" style="width:100%">
+              <el-option label="合格 — 数量/品相/版本均正确" value="合格" />
+              <el-option label="部分合格 — 存在少量差异" value="部分合格" />
+              <el-option label="不合格 — 需退回供应商" value="不合格" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="实收数量">
+            <el-input-number v-model="verifyForm.actualQtyReceived" :min="1" style="width:100%" placeholder="核对后填实际收到的总数量" />
+          </el-form-item>
+          <el-form-item label="发票号">
+            <el-input v-model="verifyForm.invoiceNo" placeholder="选填，便于后续财务核对" />
+          </el-form-item>
+          <el-form-item label="核准备注">
+            <el-input v-model="verifyForm.verifyRemark" type="textarea" :rows="3" placeholder="数量差异、破损、版本不符等具体情况" />
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="verifyOpen = false">取 消</el-button>
+        <el-button type="danger" @click="handleVerifyReject" v-if="verifyForm.verifyResult === 'reject'">确认退回</el-button>
+        <el-button type="primary" @click="handleConfirmVerify">核准确认并完成验收</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { listPurchase, auditPurchase, confirmOrder, confirmArrived, confirmInbound, previewPurchaseExcel, confirmPurchaseImport, downloadImportTemplate } from '@/api/textbook/purchase'
+import { listPurchase, auditPurchase, confirmOrder, confirmArrived, confirmInbound, submitVerify, confirmVerify, verifyReject, cancelPurchase, checkVerifyReady, previewPurchaseExcel, confirmPurchaseImport, downloadImportTemplate } from '@/api/textbook/purchase'
 import { listSupplierOptions } from '@/api/textbook/supplier'
 
 export default {
@@ -316,7 +362,9 @@ export default {
       dispatchOpen: false,
       dispatchData: {},
       dispatchSupplierId: null,
-      supplierOptions: []
+      supplierOptions: [],
+      verifyOpen: false,
+      verifyForm: { buyId: null, purchaseNo: '', verifyResult: 'pass', verifyRemark: '', qualityCheckResult: '合格', actualQtyReceived: null, invoiceNo: '' }
     }
   },
   created() {
@@ -396,15 +444,73 @@ export default {
         this.getList()
       })
     },
+    handleCancel(row) {
+      this.$modal.confirm('确认取消采购单 ' + row.purchaseNo + '？取消后无法恢复。').then(() => {
+        return cancelPurchase(row.buyId)
+      }).then(() => {
+        this.$modal.msgSuccess('已取消')
+        this.getList()
+      }).catch(() => {})
+    },
+    handleSubmitVerify(row) {
+      checkVerifyReady(row.buyId).then(res => {
+        const data = res.data
+        let confirmMsg = '确认将采购单 ' + row.purchaseNo + ' 提交库管员核准？提交后将进入核准中状态。'
+        if (!data.canVerify) {
+          const names = (data.issueBooks || []).map(b => b.bookName + '(' + b.issue + ')').join('、')
+          confirmMsg += '\n\n⚠ 以下教材已被供应商标记为异常，将跳过入库：' + names + '\n正常教材可单独核准入库。'
+        }
+        this.$modal.confirm(confirmMsg).then(() => {
+          return submitVerify(row.buyId)
+        }).then(() => {
+          this.$modal.msgSuccess('已提交核准，请等待库管员验收')
+          this.getList()
+        }).catch(() => {})
+      }).catch(() => {})
+    },
+    handleVerifyDialog(row) {
+      this.verifyForm = {
+        buyId: row.buyId,
+        purchaseNo: row.purchaseNo,
+        verifyResult: 'pass',
+        verifyRemark: '',
+        qualityCheckResult: '合格',
+        actualQtyReceived: row.buyNum || null,
+        invoiceNo: ''
+      }
+      this.verifyOpen = true
+    },
+    handleConfirmVerify() {
+      confirmVerify(this.verifyForm.buyId, {
+        verifyResult: this.verifyForm.verifyResult,
+        verifyRemark: this.verifyForm.verifyRemark,
+        qualityCheckResult: this.verifyForm.qualityCheckResult,
+        actualQtyReceived: this.verifyForm.actualQtyReceived,
+        invoiceNo: this.verifyForm.invoiceNo
+      }).then(() => {
+        this.$modal.msgSuccess('核准完成，可进行入库操作')
+        this.verifyOpen = false
+        this.getList()
+      }).catch(() => {})
+    },
+    handleVerifyReject() {
+      this.$modal.confirm('确认退回采购单 ' + this.verifyForm.purchaseNo + ' 到已到货状态？').then(() => {
+        return verifyReject(this.verifyForm.buyId, this.verifyForm.verifyRemark || '核验不通过')
+      }).then(() => {
+        this.$modal.msgSuccess('已退回')
+        this.verifyOpen = false
+        this.getList()
+      }).catch(() => {})
+    },
 
     pStatusText(status) {
-      return { '0': '待采购', '1': '已下单', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库' }[status] || '未知'
+      return { '0': '待采购', '1': '已下单', '2': '已接单', '3': '已发货', '4': '已到货', '5': '已入库', '6': '核准中', 'X': '已取消' }[status] || '未知'
     },
     pStatusTag(status) {
-      return { '0': 'info', '1': 'warning', '2': '', '3': '', '4': 'info', '5': 'success' }[status] || 'info'
+      return { '0': 'info', '1': 'warning', '2': '', '3': '', '4': 'info', '5': 'success', '6': 'warning', 'X': 'danger' }[status] || 'info'
     },
     statusTagType(status) {
-      const map = { '0': 'warning', '1': 'success', '2': 'danger', '3': '', '4': 'info', '5': 'success', '6': '' }
+      const map = { '0': 'warning', '1': 'success', '2': 'danger', '3': '', '4': 'info', '5': 'success', '6': 'warning' }
       return map[status] || ''
     },
 

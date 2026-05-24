@@ -26,6 +26,12 @@
         <result property="invoiceNo" column="invoice_no"/>
         <result property="purchaseStatus" column="purchase_status"/>
         <result property="archived" column="archived"/>
+        <result property="verifyUserId" column="verify_user_id"/>
+        <result property="verifyTime" column="verify_time"/>
+        <result property="verifyResult" column="verify_result"/>
+        <result property="verifyRemark" column="verify_remark"/>
+        <result property="qualityCheckResult" column="quality_check_result"/>
+        <result property="actualQtyReceived" column="actual_qty_received"/>
     </resultMap>
 
     <sql id="selectTbPurchaseVo">
@@ -35,7 +41,8 @@
                t.submit_time, t.create_time,
                t.del_flag, t.funding_source, t.file_hash,
                t.supplier_id, t.purchase_status, t.archived,
-               t.logistics_no, t.logistics_company, t.invoice_no
+               t.logistics_no, t.logistics_company, t.invoice_no,
+               t.verify_user_id, t.verify_time, t.verify_result, t.verify_remark, t.quality_check_result, t.actual_qty_received
         FROM textbook_buy t WHERE t.del_flag = '0'
     </sql>
 
@@ -115,10 +122,16 @@
             <if test="auditOpinion != null">audit_opinion=#{auditOpinion},</if>
             <if test="status == '3'">receive_time=NOW(),</if>
             <if test="supplierId != null">supplier_id=#{supplierId},</if>
-            <if test="purchaseStatus != null and purchaseStatus != ''">purchase_status=#{purchaseStatus},</if>
+            <if test="purchaseStatus != null">purchase_status=#{purchaseStatus},</if>
             <if test="logisticsNo != null">logistics_no=#{logisticsNo},</if>
             <if test="logisticsCompany != null">logistics_company=#{logisticsCompany},</if>
             <if test="invoiceNo != null">invoice_no=#{invoiceNo},</if>
+            <if test="verifyUserId != null">verify_user_id=#{verifyUserId},</if>
+            <if test="verifyTime != null">verify_time=#{verifyTime},</if>
+            <if test="verifyResult != null">verify_result=#{verifyResult},</if>
+            <if test="verifyRemark != null">verify_remark=#{verifyRemark},</if>
+            <if test="qualityCheckResult != null">quality_check_result=#{qualityCheckResult},</if>
+            <if test="actualQtyReceived != null">actual_qty_received=#{actualQtyReceived},</if>
         </set> WHERE buy_id=#{buyId} AND del_flag='0'
     </update>
 
@@ -149,6 +162,11 @@
         <result property="grade" column="grade"/>
         <result property="supplierFeedback" column="supplier_feedback"/>
         <result property="supplierRemark" column="supplier_remark"/>
+        <result property="verifyStatus" column="verify_status"/>
+        <result property="receivedQty" column="received_qty"/>
+        <result property="returnQty" column="return_qty"/>
+        <result property="returnReason" column="return_reason"/>
+        <result property="infoCorrection" column="info_correction"/>
     </resultMap>
 
     <insert id="insertTbPurchaseDetail" useGeneratedKeys="true" keyProperty="detailId">
@@ -156,10 +174,19 @@
         VALUES(#{purchaseId}, #{bookId}, #{bookName}, #{isbn}, #{quantity}, #{unitPrice}, #{totalPrice}, #{edition}, #{textbookType}, #{college}, #{major}, #{grade})
     </insert>
 
+    <insert id="insertTbPurchaseDetailBatch">
+        INSERT INTO textbook_purchase_detail(purchase_id, book_id, book_name, isbn, quantity, unit_price, total_price, edition, textbook_type, college, major, grade) VALUES
+        <foreach item="item" collection="list" separator=",">
+            (#{item.purchaseId}, #{item.bookId}, #{item.bookName}, #{item.isbn}, #{item.quantity}, #{item.unitPrice}, #{item.totalPrice}, #{item.edition}, #{item.textbookType}, #{item.college}, #{item.major}, #{item.grade})
+        </foreach>
+    </insert>
+
     <select id="selectTbPurchaseDetailListByPurchaseId" parameterType="Long" resultMap="TbPurchaseDetailResult">
         SELECT pd.detail_id, pd.purchase_id, pd.book_id, pd.book_name, pd.isbn, pd.quantity, pd.unit_price, pd.total_price,
                pd.edition, pd.textbook_type, pd.college, pd.major, pd.grade,
-               pd.supplier_feedback, pd.supplier_remark, ti.author, ti.publisher
+               pd.supplier_feedback, pd.supplier_remark,
+               pd.verify_status, pd.received_qty, pd.return_qty, pd.return_reason, pd.info_correction,
+               ti.author, ti.publisher
         FROM textbook_purchase_detail pd
         LEFT JOIN textbook_info ti ON pd.book_id = ti.book_id
         WHERE pd.purchase_id = #{purchaseId}
@@ -169,7 +196,9 @@
     <select id="selectTbPurchaseDetailListByPurchaseIds" parameterType="java.util.List" resultMap="TbPurchaseDetailResult">
         SELECT pd.detail_id, pd.purchase_id, pd.book_id, pd.book_name, pd.isbn, pd.quantity, pd.unit_price, pd.total_price,
                pd.edition, pd.textbook_type, pd.college, pd.major, pd.grade,
-               pd.supplier_feedback, pd.supplier_remark, ti.author, ti.publisher
+               pd.supplier_feedback, pd.supplier_remark,
+               pd.verify_status, pd.received_qty, pd.return_qty, pd.return_reason, pd.info_correction,
+               ti.author, ti.publisher
         FROM textbook_purchase_detail pd
         LEFT JOIN textbook_info ti ON pd.book_id = ti.book_id
         WHERE pd.purchase_id IN
@@ -216,6 +245,11 @@
             <if test="quantity != null">quantity=#{quantity},</if>
             <if test="supplierFeedback != null">supplier_feedback=#{supplierFeedback},</if>
             <if test="supplierRemark != null">supplier_remark=#{supplierRemark},</if>
+            <if test="verifyStatus != null">verify_status=#{verifyStatus},</if>
+            <if test="receivedQty != null">received_qty=#{receivedQty},</if>
+            <if test="returnQty != null">return_qty=#{returnQty},</if>
+            <if test="returnReason != null">return_reason=#{returnReason},</if>
+            <if test="infoCorrection != null">info_correction=#{infoCorrection},</if>
         </set>
         WHERE detail_id=#{detailId}
     </update>
@@ -223,4 +257,15 @@
     <delete id="deleteTbPurchaseDetailByPurchaseId" parameterType="Long">
         DELETE FROM textbook_purchase_detail WHERE purchase_id=#{purchaseId}
     </delete>
+
+    <select id="getPurchaseDetailById" parameterType="Long" resultMap="TbPurchaseDetailResult">
+        SELECT pd.detail_id, pd.purchase_id, pd.book_id, pd.book_name, pd.isbn, pd.quantity, pd.unit_price, pd.total_price,
+               pd.edition, pd.textbook_type, pd.college, pd.major, pd.grade,
+               pd.supplier_feedback, pd.supplier_remark,
+               pd.verify_status, pd.received_qty, pd.return_qty, pd.return_reason, pd.info_correction,
+               ti.author, ti.publisher
+        FROM textbook_purchase_detail pd
+        LEFT JOIN textbook_info ti ON pd.book_id = ti.book_id
+        WHERE pd.detail_id = #{detailId}
+    </select>
 </mapper>

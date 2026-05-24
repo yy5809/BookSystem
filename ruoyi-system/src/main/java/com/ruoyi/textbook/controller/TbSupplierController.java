@@ -12,6 +12,7 @@ import com.ruoyi.textbook.domain.TbSupplier;
 import com.ruoyi.textbook.domain.vo.SupplierVO;
 import com.ruoyi.textbook.service.ITbPurchaseService;
 import com.ruoyi.textbook.service.ITbSupplierService;
+import com.ruoyi.textbook.service.ISupplierAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +48,9 @@ public class TbSupplierController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:supplier:add') and @ss.hasAnyRoles('admin,warehouse')")
-    @Log(title = "供应商", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody TbSupplier tbSupplier) {
-        tbSupplier.setCreateBy(getUsername());
-        return toAjax(tbSupplierService.insertTbSupplier(tbSupplier));
+        return AjaxResult.error("请使用供应商账号管理接口 /textbook/supplierAccount 添加供应商，该接口会自动创建系统登录账号并绑定 supplier 角色");
     }
 
     @PreAuthorize("@ss.hasPermi('textbook:supplier:edit') and @ss.hasAnyRoles('admin,warehouse')")
@@ -75,6 +74,7 @@ public class TbSupplierController extends BaseController {
         TbSupplier query = new TbSupplier();
         query.setStatus("0");
         List<TbSupplier> all = tbSupplierService.selectTbSupplierList(query);
+        all.removeIf(s -> s.getUserId() == null);
         return AjaxResult.success(all);
     }
 

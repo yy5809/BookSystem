@@ -14,6 +14,16 @@ public interface ITbBuyService {
     int audit(Long buyId, String status, String rejectReason);
     int confirmOrder(Long buyId, Long supplierId);
     int confirmArrived(Long buyId);
+    int submitVerification(Long buyId);
+    int confirmVerify(Long buyId, String verifyResult, String verifyRemark, String qualityCheckResult, Integer actualQtyReceived, String invoiceNo);
+    int returnToArrived(Long buyId, String remark);
+    int verifyDetail(Long detailId, String verifyStatus, String verifyRemark);
+    int receiveDetail(Long detailId, Integer receivedQty);
+    int returnDetail(Long detailId, Integer returnQty, String returnReason);
+    int correctDetailInfo(Long detailId, String infoCorrection);
+    int registerShortageDetail(Long detailId, String remark);
+    int batchVerifyDetails(List<Long> detailIds, String verifyStatus);
+    int directInboundDetail(Long detailId);
     int confirmInbound(Long buyId);
     int confirmReceive(Long buyId);
     int delete(Long[] buyIds);
