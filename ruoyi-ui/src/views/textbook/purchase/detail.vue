@@ -4,6 +4,7 @@
       <template slot="header">
         <span>采购单详情</span>
         <el-button type="primary" size="small" style="margin-left: 20px" @click="goBack">返回列表</el-button>
+        <el-button type="danger" size="small" icon="el-icon-delete" style="float: right" @click="handleDelete" v-hasPermi="['textbook:purchase:remove']" :disabled="!canDelete">删除采购单</el-button>
       </template>
 
       <el-form :model="purchaseInfo" label-width="100px" size="small">
@@ -33,19 +34,19 @@
 
       <el-card class="detail-card">
         <template slot="header"><span>采购明细</span></template>
-        <el-table :data="purchaseDetails" border stripe>
+        <el-table :data="purchaseDetails" border stripe style="width: 100%">
           <el-table-column label="ISBN" prop="isbn" width="135" align="center" />
           <el-table-column label="教材名称" prop="bookName" min-width="150" show-overflow-tooltip />
           <el-table-column label="版次" prop="edition" width="70" align="center" />
           <el-table-column label="作者" prop="author" width="70" show-overflow-tooltip />
-          <el-table-column label="出版社" prop="publisher" width="90" show-overflow-tooltip />
+          <el-table-column label="出版社" align="center" prop="publisher" width="90" show-overflow-tooltip />
           <el-table-column label="教材类型" width="90" align="center">
             <template slot-scope="scope">
               <dict-tag :options="dict.type.textbook_type" :value="scope.row.textbookType" />
             </template>
           </el-table-column>
           <el-table-column label="学院" prop="college" width="80" show-overflow-tooltip />
-          <el-table-column label="专业" prop="major" width="80" show-overflow-tooltip />
+          <el-table-column label="专业" align="center" prop="major" width="80" show-overflow-tooltip />
           <el-table-column label="适用年级" prop="grade" width="80" align="center" />
           <el-table-column label="数量" prop="quantity" width="55" align="center" />
           <el-table-column label="单价" prop="unitPrice" width="70" align="center"><template slot-scope="scope">{{ scope.row.unitPrice || '-' }}</template></el-table-column>
@@ -138,7 +139,7 @@
 </template>
 
 <script>
-import { getPurchase, verifyDetail, directInboundDetail, returnDetail, correctDetailInfo, registerShortageDetail, batchVerify } from '@/api/textbook/purchase'
+import { getPurchase, deletePurchase, verifyDetail, directInboundDetail, returnDetail, correctDetailInfo, registerShortageDetail, batchVerify } from '@/api/textbook/purchase'
 
 export default {
   name: 'PurchaseDetail',
@@ -156,6 +157,11 @@ export default {
       shortageForm: { detailId: null, bookName: '', remark: '' }
     }
   },
+  computed: {
+    canDelete() {
+      return this.purchaseInfo.purchaseStatus === '0' || this.purchaseInfo.auditStatus === '0'
+    }
+  },
   created() {
     const purchaseId = this.$route.query.id
     if (purchaseId) { this.getDetail(purchaseId) }
@@ -166,6 +172,14 @@ export default {
         this.purchaseInfo = response.data
         this.purchaseDetails = response.data.details || []
       })
+    },
+    handleDelete() {
+      this.$modal.confirm('确认删除采购单「' + this.purchaseInfo.purchaseNo + '」？删除后无法恢复。').then(() => {
+        return deletePurchase(this.purchaseInfo.buyId)
+      }).then(() => {
+        this.$modal.msgSuccess('采购单已删除')
+        this.$router.push('/textbook/purchase')
+      }).catch(() => {})
     },
     handleVerifyDetail(row) {
       this.verifyForm = { detailId: row.detailId, bookName: row.bookName, verifyStatus: '1', remark: '' }; this.verifyDialogVisible = true
@@ -236,4 +250,5 @@ export default {
 
 <style scoped>
 .detail-card { margin-top: 20px; }
+.app-container { overflow-x: auto; }
 </style>

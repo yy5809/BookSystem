@@ -21,7 +21,7 @@
       <template slot="header">
         <span>采购明细</span>
       </template>
-      <el-table :data="purchaseDetails" border stripe>
+      <el-table :data="purchaseDetails" border stripe style="width: 100%">
         <el-table-column label="教材名称" align="center" prop="bookName" min-width="140" show-overflow-tooltip />
         <el-table-column label="版次" align="center" prop="edition" width="65" />
         <el-table-column label="作者" align="center" prop="author" width="85" show-overflow-tooltip />
@@ -38,7 +38,7 @@
             <span v-else style="color:#c0c4cc">未反馈</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="200" v-if="purchaseInfo.purchaseStatus === '1'">
+        <el-table-column label="操作" align="center" min-width="200" v-if="purchaseInfo.purchaseStatus === '1'">
           <template slot-scope="scope">
             <el-button size="mini" type="success" @click="markFeedback(scope.row, '1')" :disabled="scope.row.supplierFeedback === '1'">可供货</el-button>
             <el-button size="mini" type="danger" @click="markFeedback(scope.row, '2')" :disabled="scope.row.supplierFeedback === '2'">缺货</el-button>
@@ -187,4 +187,5 @@ export default {
 
 <style scoped>
 .mt15 { margin-top: 15px; }
+.app-container { overflow-x: auto; }
 </style>

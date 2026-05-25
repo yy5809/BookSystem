@@ -110,13 +110,31 @@ public class TbBuyServiceImpl implements ITbBuyService {
         TbPurchase purchase = tbPurchaseMapper.selectTbPurchaseById(buyId);
         if (purchase != null) {
             purchase.setDetails(tbPurchaseMapper.selectTbPurchaseDetailListByPurchaseId(buyId));
+            if (StringUtils.isEmpty(purchase.getDeptName()) && purchase.getUserId() != null) {
+                SysUser user = sysUserMapper.selectUserById(purchase.getUserId());
+                if (user != null && user.getDept() != null) {
+                    purchase.setDeptName(user.getDept().getDeptName());
+                }
+            }
         }
         return purchase;
     }
 
     @Override
     public List<TbPurchase> list(TbPurchase tbPurchase) {
-        return tbPurchaseMapper.selectTbPurchaseList(tbPurchase);
+        List<TbPurchase> list = tbPurchaseMapper.selectTbPurchaseList(tbPurchase);
+        for (TbPurchase p : list) {
+            if (p.getReceiveTime() == null && "5".equals(p.getPurchaseStatus()) && p.getVerifyTime() != null) {
+                p.setReceiveTime(p.getVerifyTime());
+            }
+            if (StringUtils.isEmpty(p.getDeptName()) && p.getUserId() != null) {
+                SysUser user = sysUserMapper.selectUserById(p.getUserId());
+                if (user != null && user.getDept() != null) {
+                    p.setDeptName(user.getDept().getDeptName());
+                }
+            }
+        }
+        return list;
     }
 
     @Override
@@ -127,6 +145,12 @@ public class TbBuyServiceImpl implements ITbBuyService {
         purchaseStateService.initAsApprovedWithWaitPurchase(buy);
         buy.setSubmitTime(LocalDateTime.now());
         buy.setCreateTime(DateUtils.getNowDate());
+        if (buy.getDetails() != null) {
+            int totalQty = buy.getDetails().stream()
+                .mapToInt(d -> d.getQuantity() != null ? d.getQuantity() : 0)
+                .sum();
+            buy.setBuyNum(totalQty);
+        }
         int result = tbPurchaseMapper.insertTbPurchase(buy);
 
         if (buy.getDetails() != null) {
@@ -576,6 +600,9 @@ public class TbBuyServiceImpl implements ITbBuyService {
         }
 
         TbPurchase inboundPurchase = purchaseStateService.transitionToInbound(buyId);
+        if (buy.getReceiveTime() == null) {
+            inboundPurchase.setReceiveTime(LocalDateTime.now());
+        }
         int result = tbPurchaseMapper.updateTbPurchase(inboundPurchase);
 
         List<TbShortage> relatedShortages = tbShortageMapper.selectTbShortageListByPurchaseId(buyId);
@@ -1037,6 +1064,18 @@ public class TbBuyServiceImpl implements ITbBuyService {
     public List<TbPurchase> listArchived(TbPurchase query) {
         if (query == null) query = new TbPurchase();
         query.setArchived("1");
-        return tbPurchaseMapper.selectTbPurchaseList(query);
+        List<TbPurchase> list = tbPurchaseMapper.selectTbPurchaseList(query);
+        for (TbPurchase p : list) {
+            if (p.getReceiveTime() == null && "5".equals(p.getPurchaseStatus()) && p.getVerifyTime() != null) {
+                p.setReceiveTime(p.getVerifyTime());
+            }
+            if (StringUtils.isEmpty(p.getDeptName()) && p.getUserId() != null) {
+                SysUser user = sysUserMapper.selectUserById(p.getUserId());
+                if (user != null && user.getDept() != null) {
+                    p.setDeptName(user.getDept().getDeptName());
+                }
+            }
+        }
+        return list;
     }
 }

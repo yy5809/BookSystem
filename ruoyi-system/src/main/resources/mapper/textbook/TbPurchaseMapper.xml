@@ -36,7 +36,8 @@
 
     <sql id="selectTbPurchaseVo">
         SELECT t.buy_id, t.purchase_no, t.user_id, t.user_name, t.user_type, t.dept_name,
-               t.buy_num, t.audit_status, t.audit_user_id, t.audit_time,
+               CASE WHEN t.buy_num > 0 THEN t.buy_num ELSE (SELECT COALESCE(SUM(pd.quantity), 0) FROM textbook_purchase_detail pd WHERE pd.purchase_id = t.buy_id) END AS buy_num,
+               t.audit_status, t.audit_user_id, t.audit_time,
                t.reject_reason, t.audit_opinion, t.receive_time,
                t.submit_time, t.create_time,
                t.del_flag, t.funding_source, t.file_hash,

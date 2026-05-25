@@ -36,7 +36,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="inventoryList" :row-class-name="tableRowClassName" border stripe>
+    <el-table v-loading="loading" :data="inventoryList" :row-class-name="tableRowClassName" border stripe style="width:100%">
       <el-table-column label="ISBN" align="center" prop="isbn" width="130" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="140" />
       <el-table-column label="作者" align="center" prop="author" width="80" show-overflow-tooltip />
@@ -58,7 +58,7 @@
       <el-table-column label="累计出库" align="center" prop="totalIssued" width="80">
         <template slot-scope="scope">{{ scope.row.totalIssued || 0 }}</template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="115">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="115">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
           <el-button size="mini" type="text" icon="el-icon-document" @click="handleViewLog(scope.row)">流水</el-button>
@@ -95,14 +95,14 @@
         <span style="font-weight: bold; font-size: 15px; margin-right: 16px;">{{ logBookName }}</span>
         <span style="color: #909399; font-family: monospace; font-size: 13px;">ISBN: {{ logIsbn }}</span>
       </div>
-      <el-table :data="logList" size="small" border stripe max-height="400" v-loading="logLoading">
+      <el-table :data="logList" size="small" border stripe max-height="400" v-loading="logLoading" style="width:100%">
         <el-table-column type="index" label="#" width="45" align="center" />
         <el-table-column label="业务类型" width="110" align="center">
           <template slot-scope="scope">
             <el-tag :type="getBizTypeTagType(scope.row.bizType)" size="mini">{{ getBizTypeLabel(scope.row.bizType) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="关联单号" prop="refBizId" width="180" show-overflow-tooltip />
+        <el-table-column label="关联单号" align="center" prop="refBizId" width="180" show-overflow-tooltip />
         <el-table-column label="变动数量" align="center" prop="changeNum" width="100">
           <template slot-scope="scope">
             <span :style="{ color: scope.row.changeNum > 0 ? '#67C23A' : '#F56C6C', fontWeight: 'bold' }">
@@ -112,8 +112,8 @@
         </el-table-column>
         <el-table-column label="变动前" prop="beforeStock" width="80" align="center" />
         <el-table-column label="变动后" prop="afterStock" width="80" align="center" />
-        <el-table-column label="操作人" prop="operatorName" width="90" />
-        <el-table-column label="操作时间" prop="createTime" width="160" align="center" />
+        <el-table-column label="操作人" align="center" prop="operatorName" width="90" />
+        <el-table-column label="操作时间" prop="createTime" width="170" align="center" />
       </el-table>
       <div slot="footer" class="dialog-footer">
         <el-button @click="logOpen = false">关 闭</el-button>

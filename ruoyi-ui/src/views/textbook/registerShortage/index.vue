@@ -51,7 +51,7 @@
       </el-table-column>
       <el-table-column label="登记人" align="center" prop="registerName" width="80" />
       <el-table-column label="登记时间" align="center" prop="registerTime" width="145" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="110">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="110">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
           <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="isPending(scope.row)" v-hasPermi="['textbook:shortage:add']">取消</el-button>

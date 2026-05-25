@@ -20,7 +20,7 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="purchaseList" border stripe>
+    <el-table v-loading="loading" :data="purchaseList" border stripe style="width: 100%">
       <el-table-column label="采购单号" align="center" prop="purchaseNo" width="185" show-overflow-tooltip />
       <el-table-column label="申请人" align="center" prop="userName" width="85" />
       <el-table-column label="状态" align="center" width="80">
@@ -28,8 +28,8 @@
           <el-tag :type="statusType(scope.row.purchaseStatus)" size="mini">{{ statusText(scope.row.purchaseStatus) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="创建时间" align="center" prop="createTime" width="145" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="280">
+      <el-table-column label="创建时间" align="center" prop="createTime" width="170" />
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="280">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit-outline" @click="handleDetail(scope.row)" v-if="scope.row.purchaseStatus === '1'" style="color:#E6A23C">核准反馈</el-button>
           <el-button size="mini" type="text" icon="el-icon-close" @click="handleReject(scope.row)" v-if="scope.row.purchaseStatus === '1'" style="color:#F56C6C">拒单</el-button>
@@ -163,3 +163,7 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.app-container { overflow-x: auto; }
+</style>

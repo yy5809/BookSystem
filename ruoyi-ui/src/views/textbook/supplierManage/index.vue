@@ -276,3 +276,7 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.app-container { overflow-x: auto; }
+</style>

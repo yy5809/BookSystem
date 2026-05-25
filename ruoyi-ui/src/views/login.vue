@@ -56,7 +56,7 @@
     </el-form>
     <!--  底部  -->
     <div class="el-login-footer">
-      <span>Copyright © 2025 教材管理系统 All Rights Reserved.</span>
+      <span>教材采购系统</span>
     </div>
   </div>
 </template>

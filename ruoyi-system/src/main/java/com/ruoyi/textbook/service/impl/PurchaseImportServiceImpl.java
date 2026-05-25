@@ -144,6 +144,7 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
 
         log.info("{}开始处理采购明细（单行异常被catch不传播，不触发事务回滚）", logTag);
         int detailSuccessCount = 0;
+        int totalBuyNum = 0;
         for (int i = 0; i < successList.size(); i++) {
             TbPurchaseImportDTO dto = successList.get(i);
             try {
@@ -207,6 +208,7 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
 
                 tbPurchaseMapper.insertTbPurchaseDetail(detail);
                 detailSuccessCount++;
+                totalBuyNum += dto.getQuantity() != null ? dto.getQuantity() : 0;
 
                 TbShortage shortage = findMatchingShortage(dto.getIsbn(), dto.getQuantity());
                 if (shortage != null) {
@@ -233,6 +235,9 @@ public class PurchaseImportServiceImpl implements IPurchaseImportService {
         if (detailSuccessCount == 0) {
             throw new ServiceException("所有明细处理失败，采购单未创建。请修正数据后重新导入");
         }
+
+        purchase.setBuyNum(totalBuyNum);
+        tbPurchaseMapper.updateTbPurchase(purchase);
 
         noticeService.sendPurchaseCreateNotice(purchaseId, purchaseNo, detailSuccessCount);
         log.info("{}采购单创建通知发送成功", logTag);

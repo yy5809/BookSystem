@@ -46,7 +46,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="bookList" @selection-change="handleSelectionChange" border stripe :row-class-name="tableRowClassName">
+    <el-table v-loading="loading" :data="bookList" @selection-change="handleSelectionChange" border stripe :row-class-name="tableRowClassName" style="width:100%">
       <el-table-column type="selection" width="50" align="center" />
       <el-table-column label="ISBN" align="center" prop="isbn" width="130" />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="140" />
@@ -76,7 +76,7 @@
           <el-tag size="mini" :type="scope.row.status === '0' ? 'success' : 'danger'">{{ scope.row.status === '0' ? '正常' : '停用' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="180">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="180">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)" v-hasPermi="['textbook:book:edit']">修改</el-button>
           <el-button v-if="scope.row.infoStatus === '0'" size="mini" type="text" icon="el-icon-finished" @click="handleComplete(scope.row)" v-hasPermi="['textbook:book:edit']" style="color: #E6A23C;">补充完善</el-button>
@@ -320,7 +320,7 @@
         <el-tabs v-model="previewActiveTab">
           <el-tab-pane label="校验通过数据" name="success">
             <span slot="label"><i class="el-icon-check" style="color:#67c23a"></i> 校验通过 ({{ previewData.successCount }})</span>
-            <el-table :data="previewData.successList" border stripe max-height="300" size="small">
+            <el-table :data="previewData.successList" border stripe max-height="300" size="small" style="width:100%">
               <el-table-column label="行号" prop="rowIndex" width="70" align="center">
                 <template slot-scope="scope"><el-tag size="mini">第{{ scope.row.rowIndex }}行</el-tag></template>
               </el-table-column>
@@ -334,7 +334,7 @@
           </el-tab-pane>
           <el-tab-pane label="校验失败数据" name="fail" v-if="previewData.failCount > 0">
             <span slot="label"><i class="el-icon-close" style="color:#f56c6c"></i> 校验失败 ({{ previewData.failCount }})</span>
-            <el-table :data="previewData.failList" border stripe max-height="300" size="small">
+            <el-table :data="previewData.failList" border stripe max-height="300" size="small" style="width:100%">
               <el-table-column label="行号" prop="rowIndex" width="70" align="center">
                 <template slot-scope="scope"><el-tag size="mini" type="danger">第{{ scope.row.rowIndex }}行</el-tag></template>
               </el-table-column>
@@ -663,6 +663,7 @@ export default {
 </script>
 
 <style scoped>
+.app-container { overflow-x: auto; }
 .el-table .warning-row {
   background-color: #fdf6ec;
 }

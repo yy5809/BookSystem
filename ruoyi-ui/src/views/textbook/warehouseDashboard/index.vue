@@ -70,9 +70,9 @@
             <span>库存预警列表</span>
             <el-button style="float: right; padding: 3px 0" type="text" @click="$router.push('/warehouse/inventory')">查看全部</el-button>
           </div>
-          <el-table :data="warningList" size="small" v-loading="loading" max-height="300" border stripe>
-            <el-table-column label="ISBN" prop="isbn" width="140" />
-            <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip />
+          <el-table :data="warningList" size="small" v-loading="loading" max-height="300" border stripe style="width:100%">
+            <el-table-column label="ISBN" align="center" prop="isbn" width="140" />
+            <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip />
             <el-table-column label="当前库存" prop="stockNum" width="90" align="center">
               <template slot-scope="scope">
                 <span style="color: #F56C6C; font-weight: bold;">{{ scope.row.stockNum || 0 }}</span>
@@ -176,6 +176,7 @@ export default {
 </script>
 
 <style scoped>
+.app-container { overflow-x: auto; }
 .dashboard-card {
   display: flex;
   align-items: center;

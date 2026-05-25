@@ -22,7 +22,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="applyList" border stripe>
+    <el-table v-loading="loading" :data="applyList" border stripe style="width: 100%">
       <el-table-column label="申请编号" align="center" prop="applyNo" width="170" show-overflow-tooltip />
       <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip min-width="130" />
       <el-table-column label="ISBN" align="center" prop="isbn" width="130" />
@@ -33,11 +33,12 @@
           <dict-tag :options="dict.type.tb_personal_apply_status" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="审核意见" align="center" prop="auditOpinion" width="130" show-overflow-tooltip />
-      <el-table-column label="申请时间" align="center" prop="createTime" width="145">
+      <el-table-column label="审核意见" align="center" prop="auditOpinion" width="120" show-overflow-tooltip />
+      <el-table-column label="审核时间" align="center" prop="auditTime" width="170" />
+      <el-table-column label="申请时间" align="center" prop="createTime" width="170">
         <template slot-scope="scope">{{ scope.row.createTime }}</template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="160">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="160">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
           <el-button size="mini" type="text" icon="el-icon-close" @click="handleCancel(scope.row)" v-if="scope.row.status === '0'" v-hasPermi="['textbook:myApply:cancel']">取消</el-button>
@@ -342,3 +343,7 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.app-container { overflow-x: auto; }
+</style>

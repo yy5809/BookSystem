@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="app-container">
     <el-tabs v-model="activeTab" type="card" @tab-click="onTabClick">
       <el-tab-pane label="班级领书" name="class">
@@ -25,24 +25,24 @@
           </el-col>
           <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
         </el-row>
-        <el-table v-loading="loading" :data="noticeList" border stripe row-key="noticeId" @expand-change="onNoticeExpand">
+        <el-table v-loading="loading" :data="noticeList" border stripe row-key="noticeId" @expand-change="onNoticeExpand" style="width: 100%">
           <el-table-column type="expand">
             <template slot-scope="scope">
               <div style="padding: 10px 20px;" v-loading="scope.row._loading">
-                <el-table v-if="scope.row._forms && scope.row._forms.length" :data="scope.row._forms" border stripe size="small" style="margin: 0;">
-                  <el-table-column label="领书单号" prop="formNo" width="180" />
-                  <el-table-column label="班级信息" min-width="140">
+                <el-table v-if="scope.row._forms && scope.row._forms.length" :data="scope.row._forms" border stripe size="small" style="margin: 0; width: 100%">
+                  <el-table-column label="领书单号" prop="formNo" width="180" align="center" />
+                  <el-table-column label="班级信息" min-width="140" align="center">
                     <template slot-scope="s">{{ s.row.collegeName }} {{ s.row.majorName }} {{ formatGradeLevel(s.row.gradeLevel) }}{{ s.row.className }}</template>
                   </el-table-column>
-                  <el-table-column label="应发" prop="plannedQty" width="50" />
-                  <el-table-column label="已发" prop="issuedQty" width="50" />
+                  <el-table-column label="应发" prop="plannedQty" width="50" align="center" />
+                  <el-table-column label="已发" prop="issuedQty" width="50" align="center" />
                   <el-table-column label="状态" width="65" align="center">
                     <template slot-scope="s">
                       <el-tag :type="s.row.status==='2'?'success':s.row.status==='1'?'warning':''" size="mini">{{ s.row.status==='2'?'已出库':s.row.status==='1'?'部分':'待领' }}</el-tag>
                     </template>
                   </el-table-column>
                   <el-table-column label="领书人" prop="receiverName" width="60" />
-                  <el-table-column label="操作" class-name="small-padding fixed-width" width="240" align="center">
+                  <el-table-column label="操作" class-name="small-padding fixed-width" min-width="240" align="center">
                     <template slot-scope="s">
                       <el-button size="mini" type="text" icon="el-icon-view" @click.stop="viewFormDetail(s.row)" v-hasPermi="['textbook:noticeManage:query']">明细</el-button>
                       <el-button size="mini" type="text" icon="el-icon-printer" @click.stop="handlePrint(s.row)" v-hasPermi="['textbook:claimForm:query']">打印</el-button>
@@ -83,8 +83,8 @@
           <el-table-column label="班级进度" width="90" align="center">
             <template slot-scope="s">{{ s.row.issuedClasses || 0 }} / {{ s.row.totalClasses || 0 }}</template>
           </el-table-column>
-          <el-table-column label="创建时间" prop="createTime" width="145" />
-          <el-table-column label="操作" class-name="small-padding fixed-width" width="270" align="center" fixed="right">
+          <el-table-column label="创建时间" prop="createTime" width="170" />
+          <el-table-column label="操作" class-name="small-padding fixed-width" min-width="270" align="center" fixed="right">
             <template slot-scope="scope">
               <el-button size="mini" type="text" icon="el-icon-s-promotion" style="color:#409EFF" @click.stop="handlePublish(scope.row)" v-if="scope.row.status==='0'" v-hasPermi="['textbook:noticeManage:publish']">发布</el-button>
               <el-button size="mini" type="text" icon="el-icon-circle-close" style="color:#E6A23C" @click.stop="handleCancel(scope.row)" v-if="scope.row.status==='1' || scope.row.status==='2'" v-hasPermi="['textbook:noticeManage:edit']">作废</el-button>
@@ -112,7 +112,7 @@
             <el-button type="primary" icon="el-icon-search" size="mini" @click="getPaList">搜索</el-button>
           </el-form-item>
         </el-form>
-        <el-table v-loading="paLoading" :data="paList" border stripe>
+        <el-table v-loading="paLoading" :data="paList" border stripe style="width: 100%">
           <el-table-column label="申请编号" prop="applyNo" min-width="170" show-overflow-tooltip />
           <el-table-column label="申请人" prop="teacherName" width="85" />
           <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip min-width="120" />
@@ -134,7 +134,7 @@
           </el-table-column>
           <el-table-column label="审核意见" prop="auditOpinion" show-overflow-tooltip width="100" />
           <el-table-column label="申请时间" prop="createTime" width="140" />
-          <el-table-column label="操作" class-name="small-padding fixed-width" width="170" align="center">
+          <el-table-column label="操作" class-name="small-padding fixed-width" min-width="170" align="center">
             <template slot-scope="s">
               <el-button size="mini" type="text" icon="el-icon-view" @click="paView(s.row)">详情</el-button>
               <el-button size="mini" type="text" icon="el-icon-check" style="color:#67C23A" @click="paAuditOpen=true;paForm=s.row" v-if="s.row.status==='0'" v-hasPermi="['textbook:personalApply:audit']">审核</el-button>
@@ -164,10 +164,10 @@
           <el-date-picker v-model="form.pickupEnd" type="datetime" placeholder="选择结束时间" value-format="yyyy-MM-dd HH:mm:ss" style="width:100%" />
         </el-form-item>
         <el-divider>领书明细</el-divider>
-        <el-table :data="form.details" border stripe size="small" v-if="form.details && form.details.length">
-          <el-table-column label="班级" prop="className" width="100" />
-          <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip min-width="140" />
-          <el-table-column label="ISBN" prop="isbn" width="130" />
+        <el-table :data="form.details" border stripe size="small" v-if="form.details && form.details.length" style="width: 100%">
+          <el-table-column label="班级" prop="className" width="100" align="center" />
+          <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip min-width="140" align="center" />
+          <el-table-column label="ISBN" prop="isbn" width="130" align="center" />
           <el-table-column label="数量" prop="plannedQty" width="70" align="center" />
           <el-table-column label="操作" class-name="small-padding fixed-width" width="140" align="center">
             <template slot-scope="scope">
@@ -215,9 +215,9 @@
 
     <!-- 领书单明细 -->
     <el-dialog title="领书单明细" :visible.sync="formDetailVisible" width="800px" append-to-body>
-      <el-table :data="formDetailList" border stripe size="small">
-        <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip min-width="140" />
-        <el-table-column label="ISBN" prop="isbn" width="130" />
+      <el-table :data="formDetailList" border stripe size="small" style="width: 100%">
+        <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip min-width="140" align="center" />
+        <el-table-column label="ISBN" prop="isbn" width="130" align="center" />
         <el-table-column label="作者" prop="author" width="85" />
         <el-table-column label="出版社" prop="publisher" width="120" show-overflow-tooltip />
         <el-table-column label="应发" prop="plannedQty" width="55" align="center" />
@@ -236,7 +236,7 @@
           <el-descriptions-item label="状态">{{ outboundForm.status === '2' ? '已出库' : outboundForm.status === '1' ? '部分出库' : '待领取' }}</el-descriptions-item>
         </el-descriptions>
         <el-divider content-position="left">教材明细</el-divider>
-        <el-table :data="outboundForm.books" border stripe size="small" max-height="300">
+        <el-table :data="outboundForm.books" border stripe size="small" max-height="300" style="width: 100%">
           <el-table-column label="教材名称" prop="bookName" min-width="130" show-overflow-tooltip />
           <el-table-column label="ISBN" prop="isbn" width="140" />
           <el-table-column label="应发" prop="plannedQty" width="60" align="center" />
@@ -796,3 +796,5 @@ export default {
   }
 }
 </script>
+
+

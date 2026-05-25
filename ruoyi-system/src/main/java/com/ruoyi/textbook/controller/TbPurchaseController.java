@@ -15,7 +15,9 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.SecurityUtils;
+import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.FileUtils;
+import com.ruoyi.common.core.domain.entity.SysUser;
 import com.ruoyi.textbook.domain.TbPurchase;
 import com.ruoyi.textbook.domain.TbPurchaseDetail;
 import com.ruoyi.textbook.constants.TextbookConstants;
@@ -63,8 +65,12 @@ public class TbPurchaseController extends BaseController {
     @Log(title = "购书单", businessType = BusinessType.INSERT)
     @PostMapping("/submit")
     public AjaxResult submit(@Valid @RequestBody TbPurchase buy) {
-        buy.setUserId(SecurityUtils.getUserId());
-        buy.setUserName(SecurityUtils.getLoginUser().getUser().getNickName());
+        SysUser user = SecurityUtils.getLoginUser().getUser();
+        buy.setUserId(user.getUserId());
+        buy.setUserName(user.getNickName());
+        if (StringUtils.isEmpty(buy.getDeptName()) && user.getDept() != null) {
+            buy.setDeptName(user.getDept().getDeptName());
+        }
         buy.setCreateBy(getUsername());
         return toAjax(tbBuyService.submit(buy));
     }

@@ -58,15 +58,15 @@
             <span>我的最近申请</span>
             <el-button style="float: right; padding: 3px 0" type="text" @click="$router.push('/teacher/myApply')">查看全部</el-button>
           </div>
-          <el-table :data="recentApplies" size="small" v-loading="loading" border stripe>
-            <el-table-column label="教材名称" prop="bookName" show-overflow-tooltip />
+          <el-table :data="recentApplies" size="small" v-loading="loading" border stripe style="width:100%">
+            <el-table-column label="教材名称" align="center" prop="bookName" show-overflow-tooltip />
             <el-table-column label="数量" prop="applyQty" width="60" align="center" />
             <el-table-column label="状态" width="90" align="center">
               <template slot-scope="scope">
                 <el-tag :type="getStatusType(scope.row.status)" size="mini">{{ getStatusLabel(scope.row.status) }}</el-tag>
               </template>
             </el-table-column>
-            <el-table-column label="申请时间" prop="createTime" width="160" />
+            <el-table-column label="申请时间" prop="createTime" width="170" />
           </el-table>
         </el-card>
       </el-col>
@@ -151,6 +151,7 @@ export default {
 </script>
 
 <style scoped>
+.app-container { overflow-x: auto; }
 .dashboard-card {
   display: flex;
   align-items: center;

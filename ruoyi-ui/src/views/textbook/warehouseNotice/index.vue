@@ -52,7 +52,7 @@
       </el-form-item>
     </el-form>
 
-    <el-table v-loading="loading" :data="noticeList" border stripe @row-click="handleRowClick" highlight-current-row>
+    <el-table v-loading="loading" :data="noticeList" border stripe @row-click="handleRowClick" highlight-current-row style="width:100%">
       <el-table-column width="50">
         <template slot-scope="scope">
           <el-badge :is-dot="scope.row.readStatus === '0'" />
@@ -69,8 +69,8 @@
         </template>
       </el-table-column>
       <el-table-column label="关联单号" align="center" prop="bizId" width="160" show-overflow-tooltip />
-      <el-table-column label="发送时间" align="center" prop="createTime" width="160" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="80">
+      <el-table-column label="发送时间" align="center" prop="createTime" width="170" />
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="80">
         <template slot-scope="scope">
           <el-button size="mini" type="text" v-if="scope.row.readStatus === '0'" @click.stop="handleMarkRead(scope.row)" v-hasPermi="['textbook:notice:edit']">标记已读</el-button>
         </template>
@@ -165,6 +165,7 @@ export default {
 </script>
 
 <style scoped>
+.app-container { overflow-x: auto; }
 .stat-card { display: flex; align-items: center; padding: 16px; border-radius: 4px; cursor: default; }
 .stat-card-primary { background: #ecf0fe; }
 .stat-card-warning { background: #fdf6ec; }

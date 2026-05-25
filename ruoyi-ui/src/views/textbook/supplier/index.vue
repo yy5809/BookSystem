@@ -34,15 +34,15 @@
       <template slot="header">
         <span>最近采购单</span>
       </template>
-      <el-table :data="recentPurchases" border stripe v-loading="loading">
+      <el-table :data="recentPurchases" border stripe v-loading="loading" style="width: 100%">
         <el-table-column label="采购单号" align="center" prop="purchaseNo" width="200" show-overflow-tooltip />
         <el-table-column label="状态" align="center" width="100">
           <template slot-scope="scope">
             <el-tag :type="statusType(scope.row.purchaseStatus)" size="mini">{{ statusText(scope.row.purchaseStatus) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" align="center" prop="createTime" width="160" />
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="100">
+        <el-table-column label="创建时间" align="center" prop="createTime" width="170" />
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="100">
           <template slot-scope="scope">
             <el-button size="mini" type="text" icon="el-icon-view" @click="viewPurchase(scope.row)">详情</el-button>
           </template>
@@ -109,5 +109,6 @@ export default {
 }
 .dashboard-title { font-size: 14px; color: #606266; }
 .dashboard-num { font-size: 28px; font-weight: bold; color: #303133; }
+.app-container { overflow-x: auto; }
 .mt20 { margin-top: 20px; }
 </style>

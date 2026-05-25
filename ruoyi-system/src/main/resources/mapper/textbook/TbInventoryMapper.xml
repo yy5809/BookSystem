@@ -74,11 +74,11 @@
     </delete>
 
     <select id="selectStockNumByBookId" resultType="int">
-        SELECT COALESCE(stock_num, 0) FROM textbook_stock WHERE book_id = #{bookId} AND del_flag = '0'
+        SELECT COALESCE(MAX(stock_num), 0) FROM textbook_stock WHERE book_id = #{bookId} AND del_flag = '0'
     </select>
 
     <select id="selectVersionByBookId" resultType="int">
-        SELECT COALESCE(version, 0) FROM textbook_stock WHERE book_id = #{bookId} AND del_flag = '0'
+        SELECT COALESCE(MAX(version), 0) FROM textbook_stock WHERE book_id = #{bookId} AND del_flag = '0'
     </select>
 
     <update id="deductStockWithVersion">

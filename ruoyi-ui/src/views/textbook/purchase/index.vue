@@ -13,7 +13,7 @@
         </el-button>
       </div>
 
-      <el-table v-loading="loading" :data="purchaseList" border stripe>
+      <el-table v-loading="loading" :data="purchaseList" border stripe style="width: 100%">
         <el-table-column label="采购单号" prop="purchaseNo" width="170" align="center" show-overflow-tooltip />
         <el-table-column label="申请人" prop="userName" width="90" align="center"/>
         <el-table-column label="部门" prop="deptName" width="105" align="center" show-overflow-tooltip/>
@@ -22,8 +22,8 @@
             <el-tag :type="pStatusTag(scope.row.purchaseStatus)">{{ pStatusText(scope.row.purchaseStatus) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="提交时间" prop="submitTime" width="145" align="center"/>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="380">
+        <el-table-column label="提交时间" prop="submitTime" width="170" align="center"/>
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" min-width="380">
           <template slot-scope="scope">
             <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
             <el-button size="mini" type="text" icon="el-icon-check" style="color:#67C23A" @click="handleAudit(scope.row)" v-if="scope.row.auditStatus === '0'" v-hasRole="['admin','warehouse']">通过</el-button>
@@ -37,6 +37,7 @@
               <el-button size="mini" type="success" icon="el-icon-s-data" @click="handleConfirmInbound(scope.row)" v-if="scope.row.verifyResult" v-hasRole="['admin','warehouse']">确认入库</el-button>
             </template>
             <el-button size="mini" type="text" icon="el-icon-circle-close" style="color:#F56C6C" @click="handleCancel(scope.row)" v-if="scope.row.purchaseStatus === '0'" v-hasRole="['admin','warehouse']">取消</el-button>
+            <el-button size="mini" type="text" icon="el-icon-delete" style="color:#F56C6C" @click="handleDelete(scope.row)" v-if="(scope.row.purchaseStatus === '0' || scope.row.purchaseStatus === 'X')" v-hasPermi="['textbook:purchase:remove']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -335,7 +336,7 @@
 </template>
 
 <script>
-import { listPurchase, auditPurchase, confirmOrder, confirmArrived, confirmInbound, submitVerify, confirmVerify, verifyReject, cancelPurchase, checkVerifyReady, previewPurchaseExcel, confirmPurchaseImport, downloadImportTemplate } from '@/api/textbook/purchase'
+import { listPurchase, auditPurchase, confirmOrder, confirmArrived, confirmInbound, submitVerify, confirmVerify, verifyReject, cancelPurchase, deletePurchase, checkVerifyReady, previewPurchaseExcel, confirmPurchaseImport, downloadImportTemplate } from '@/api/textbook/purchase'
 import { listSupplierOptions } from '@/api/textbook/supplier'
 
 export default {
@@ -449,6 +450,14 @@ export default {
         return cancelPurchase(row.buyId)
       }).then(() => {
         this.$modal.msgSuccess('已取消')
+        this.getList()
+      }).catch(() => {})
+    },
+    handleDelete(row) {
+      this.$modal.confirm('确认删除采购单「' + row.purchaseNo + '」？删除后无法恢复。').then(() => {
+        return deletePurchase(row.buyId)
+      }).then(() => {
+        this.$modal.msgSuccess('采购单已删除')
         this.getList()
       }).catch(() => {})
     },
@@ -679,4 +688,6 @@ export default {
 .stat-auto .stat-number { color: #e6a23c; }
 
 .import-result-area { max-height: 70vh; overflow-y: auto; }
+.app-container { overflow-x: auto; }
+.app-container .el-table { margin: 0; }
 </style>

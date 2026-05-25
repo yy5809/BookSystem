@@ -52,5 +52,5 @@ module.exports = {
   /**
    * 底部版权文本内容
    */
-  footerContent: 'Copyright © 2025 教材管理系统. All Rights Reserved.'
+  footerContent: '教材采购系统'
 }
