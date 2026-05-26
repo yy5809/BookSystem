@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ruoyi-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-12345678}
+      MYSQL_DATABASE: ry-vue
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    networks:
+      - ruoyi-network
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-12345678}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ruoyi-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - ruoyi-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile-backend
+    container_name: ruoyi-backend
+    environment:
+      DB_PASSWORD: ${DB_PASSWORD:-12345678}
+      JWT_SECRET: ${JWT_SECRET:-K8mX2pR7vN4qW9zA5bC6dE1fG3hJ0lMnP8oQ2rS4tU6vW8xY0zA3bC5dE7fG}
+      DRUID_USERNAME: ${DRUID_USERNAME:-admin}
+      DRUID_PASSWORD: ${DRUID_PASSWORD:-Admin@2024}
+      SPRING_REDIS_HOST: redis
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      RUOYI_PROFILE: /home/ruoyi/uploadPath
+    ports:
+      - "8080:8080"
+    volumes:
+      - upload-data:/home/ruoyi/uploadPath
+    networks:
+      - ruoyi-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./ruoyi-ui
+      dockerfile: Dockerfile
+    container_name: ruoyi-frontend
+    ports:
+      - "80:80"
+    networks:
+      - ruoyi-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  redis-data:
+  upload-data:
+
+networks:
+  ruoyi-network:
+    driver: bridge
