@@ -1,0 +1,98 @@
+version: "3.8"
+
+networks:
+  ruoyi-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  ruoyi_upload:
+    driver: local
+
+services:
+
+  mysql:
+    image: mysql:8.0
+    container_name: ruoyi-mysql
+    restart: unless-stopped
+    networks:
+      - ruoyi-network
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/ry-vue.sql:/docker-entrypoint-initdb.d/01-init-ry-vue.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: ry-vue
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --default-time-zone=+8:00
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p12345678"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  redis:
+    image: redis:7-alpine
+    container_name: ruoyi-redis
+    restart: unless-stopped
+    networks:
+      - ruoyi-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command:
+      - redis-server
+      - --save 60 1
+      - --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ruoyi-vue-app:latest
+    container_name: ruoyi-app
+    restart: unless-stopped
+    networks:
+      - ruoyi-network
+    ports:
+      - "8080:8080"
+    volumes:
+      - ruoyi_upload:/home/ruoyi/uploadPath
+    environment:
+      DB_PASSWORD: "12345678"
+      TZ: Asia/Shanghai
+      SPRING_PROFILES_ACTIVE: druid
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    container_name: ruoyi-nginx
+    restart: unless-stopped
+    networks:
+      - ruoyi-network
+    ports:
+      - "8081:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ruoyi-ui/dist:/usr/share/nginx/html:ro
+    depends_on:
+      - app
